@@ -13,7 +13,6 @@ const requiredFiles = [
   "src/pages/projects.astro",
   "src/pages/blog/index.astro",
   "src/pages/blog/[...slug].astro",
-  "public/CNAME",
   "public/ads.txt",
   "public/robots.txt",
   ".github/workflows/deploy.yml",
@@ -30,12 +29,11 @@ test("required site files exist", () => {
 });
 
 test("deployment and ads files contain required values", () => {
-  assert.equal(read("public/CNAME").trim(), "imspring.cn");
   assert.match(
     read("public/ads.txt"),
     /google\.com,\s*pub-3132117537257566,\s*DIRECT,\s*f08c47fec0942fa0/,
   );
-  assert.match(read("public/robots.txt"), /Sitemap:\s*https:\/\/imspring\.cn\/sitemap-index\.xml/);
+  assert.match(read("public/robots.txt"), /Sitemap:\s*https:\/\/cxc3214\.github\.io\/sitemap-index\.xml/);
   assert.match(read(".github/workflows/deploy.yml"), /deploy-pages/);
 });
 
@@ -62,7 +60,7 @@ test("blog contains five complete Chinese Markdown posts", () => {
 });
 
 test("site configuration references the root domain and AdSense publisher", () => {
-  assert.match(read("astro.config.mjs"), /site:\s*["']https:\/\/imspring\.cn["']/);
+  assert.match(read("astro.config.mjs"), /site:\s*["']https:\/\/cxc3214\.github\.io["']/);
   assert.match(read("src/config/site.ts"), /ca-pub-3132117537257566/);
 });
 

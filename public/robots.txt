@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://imspring.cn/sitemap-index.xml
+Sitemap: https://cxc3214.github.io/sitemap-index.xml

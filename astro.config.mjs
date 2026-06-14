@@ -4,6 +4,6 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://imspring.cn',
+  site: 'https://cxc3214.github.io',
   integrations: [sitemap()],
 });
