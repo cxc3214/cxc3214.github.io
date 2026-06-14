@@ -1,0 +1,85 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { siteConfig } from "../config/site";
+
+const posts = (await getCollection("blog"))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: siteConfig.title,
+  url: siteConfig.url,
+  description: siteConfig.description,
+  author: {
+    "@type": "Person",
+    name: siteConfig.author,
+  },
+};
+---
+
+<BaseLayout title={siteConfig.title} description={siteConfig.description} jsonLd={jsonLd}>
+  <section class="hero">
+    <div>
+      <p class="eyebrow">独立开发者 / AI / Web / 数据应用</p>
+      <h1>你好，我是 Spring。</h1>
+      <p class="lead">
+        这里是我的个人主页、技术博客和项目记录。我关注 AI 辅助开发、Web 产品、工具型应用和数据可视化，也会把独立项目从想法到上线的过程写下来。
+      </p>
+      <div class="actions">
+        <a class="button" href="/blog/">阅读文章</a>
+        <a class="button-secondary" href="/projects/">查看项目</a>
+      </div>
+    </div>
+    <aside class="panel">
+      <p class="eyebrow">项目入口</p>
+      <h2>World Cup Live</h2>
+      <p>一个面向世界杯赛事信息、赛程、比分和数据展示的项目入口。</p>
+      <a href={siteConfig.projectLinks.worldCup} target="_blank" rel="noopener">访问 worldcup.imspring.cn</a>
+    </aside>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <div>
+        <p class="eyebrow">Latest Writing</p>
+        <h2>最新文章</h2>
+      </div>
+      <a href="/blog/">查看全部</a>
+    </div>
+    <div class="post-list">
+      {posts.map((post) => (
+        <article class="post-card">
+          <h3><a href={`/blog/${post.id}/`}>{post.data.title}</a></h3>
+          <p>{post.data.description}</p>
+          <div class="meta">
+            <time datetime={post.data.date.toISOString()}>{post.data.date.toLocaleDateString("zh-CN")}</time>
+            {post.data.tags.slice(0, 3).map((tag) => <span class="tag">{tag}</span>)}
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="grid">
+      <div class="project-card">
+        <h3>关于这个网站</h3>
+        <p>用于沉淀长期内容，而不是只发布零散动态。文章会尽量记录背景、选择和复盘。</p>
+        <a href="/about/">了解更多</a>
+      </div>
+      <div class="project-card">
+        <h3>技术方向</h3>
+        <p>主要关注 AI 工具、Web 应用、独立产品、部署运维和数据应用。</p>
+        <a href="/blog/">阅读博客</a>
+      </div>
+      <div class="project-card">
+        <h3>合作与联系</h3>
+        <p>如果你对项目、文章或工具产品有交流想法，可以通过联系页找到我。</p>
+        <a href="/contact/">联系方式</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

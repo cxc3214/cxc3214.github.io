@@ -1,0 +1,29 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const posts = (await getCollection("blog")).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+---
+
+<BaseLayout title="博客" description="Spring 的技术博客，记录 AI、Web、工具产品、部署实践和独立开发过程。">
+  <section class="page">
+    <h1>博客</h1>
+    <p class="page-description">这里记录我在独立开发、AI 辅助工作流、Web 产品和数据应用中的实践与复盘。</p>
+  </section>
+  <section class="section">
+    <div class="post-list">
+      {posts.map((post) => (
+        <article class="post-card">
+          <h2><a href={`/blog/${post.id}/`}>{post.data.title}</a></h2>
+          <p>{post.data.description}</p>
+          <div class="meta">
+            <time datetime={post.data.date.toISOString()}>{post.data.date.toLocaleDateString("zh-CN")}</time>
+            {post.data.tags.map((tag) => <span class="tag">{tag}</span>)}
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

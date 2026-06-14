@@ -1,0 +1,84 @@
+---
+import "../styles/global.css";
+import { siteConfig } from "../config/site";
+
+interface Props {
+  title: string;
+  description: string;
+  canonicalPath?: string;
+  ogType?: "website" | "article";
+  jsonLd?: Record<string, unknown>;
+}
+
+const {
+  title,
+  description,
+  canonicalPath = Astro.url.pathname,
+  ogType = "website",
+  jsonLd,
+} = Astro.props;
+
+const pageTitle = title === siteConfig.title ? title : `${title} | ${siteConfig.name}`;
+const canonical = new URL(canonicalPath, siteConfig.url).toString();
+const navItems = [
+  { href: "/", label: "首页" },
+  { href: "/blog/", label: "博客" },
+  { href: "/projects/", label: "项目" },
+  { href: "/about/", label: "关于" },
+  { href: "/contact/", label: "联系" },
+];
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:locale" content={siteConfig.locale} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={siteConfig.title} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    {siteConfig.adsense.enabled && (
+      <script
+        async
+        src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${siteConfig.adsense.publisherId}`}
+        crossorigin="anonymous"
+      />
+    )}
+    {jsonLd && (
+      <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    )}
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="Spring 首页">Spring</a>
+      <nav aria-label="主导航">
+        {navItems.map((item) => (
+          <a href={item.href}>{item.label}</a>
+        ))}
+      </nav>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <p>© {new Date().getFullYear()} Spring. 记录独立开发、AI 工具、Web 产品和数据应用。</p>
+      <p>
+        <a href="/privacy/">隐私政策</a>
+        <span>/</span>
+        <a href="/terms/">使用条款</a>
+      </p>
+    </footer>
+  </body>
+</html>

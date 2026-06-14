@@ -1,0 +1,54 @@
+---
+import { render, type CollectionEntry } from "astro:content";
+import BaseLayout from "./BaseLayout.astro";
+import { siteConfig } from "../config/site";
+
+interface Props {
+  post: CollectionEntry<"blog">;
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const canonicalPath = `/blog/${post.id}/`;
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: post.data.title,
+  description: post.data.description,
+  datePublished: post.data.date.toISOString(),
+  dateModified: post.data.date.toISOString(),
+  author: {
+    "@type": "Person",
+    name: siteConfig.author,
+    url: siteConfig.url,
+  },
+  publisher: {
+    "@type": "Person",
+    name: siteConfig.author,
+  },
+  mainEntityOfPage: new URL(canonicalPath, siteConfig.url).toString(),
+};
+---
+
+<BaseLayout
+  title={post.data.title}
+  description={post.data.description}
+  canonicalPath={canonicalPath}
+  ogType="article"
+  jsonLd={jsonLd}
+>
+  <article class="article">
+    <header class="article-header">
+      <a class="back-link" href="/blog/">返回博客</a>
+      <h1>{post.data.title}</h1>
+      <p class="article-description">{post.data.description}</p>
+      <div class="meta">
+        <time datetime={post.data.date.toISOString()}>{post.data.date.toLocaleDateString("zh-CN")}</time>
+        <span>{post.data.tags.join(" / ")}</span>
+      </div>
+    </header>
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>
