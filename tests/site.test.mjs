@@ -66,6 +66,12 @@ test("site configuration references the root domain and AdSense publisher", () =
   assert.match(read("src/config/site.ts"), /ca-pub-3132117537257566/);
 });
 
+test("AdSense verification script is enabled in the shared head", () => {
+  assert.match(read("src/config/site.ts"), /enabled:\s*true/);
+  assert.match(read("src/layouts/BaseLayout.astro"), /pagead2\.googlesyndication\.com\/pagead\/js\/adsbygoogle\.js/);
+  assert.match(read("src/layouts/BaseLayout.astro"), /client=\$\{siteConfig\.adsense\.publisherId\}/);
+});
+
 test("post layout uses the Astro content render helper", () => {
   const layout = read("src/layouts/PostLayout.astro");
   assert.match(layout, /import\s+\{[^}]*\brender\b[^}]*\}\s+from\s+["']astro:content["']/);

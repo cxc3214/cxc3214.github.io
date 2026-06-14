@@ -6,7 +6,7 @@ export const siteConfig = {
   author: "Spring",
   locale: "zh_CN",
   adsense: {
-    enabled: false,
+    enabled: true,
     publisherId: "ca-pub-3132117537257566",
   },
   projectLinks: {
