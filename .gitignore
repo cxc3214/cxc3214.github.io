@@ -17,6 +17,9 @@ pnpm-debug.log*
 .env
 .env.production
 
+# publish with GitHub Pages default domain until DNS for imspring.cn is ready
+public/CNAME
+
 # macOS-specific files
 .DS_Store
 
