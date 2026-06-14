@@ -68,6 +68,8 @@ test("site configuration references the root domain and AdSense publisher", () =
 
 test("AdSense verification script is enabled in the shared head", () => {
   assert.match(read("src/config/site.ts"), /enabled:\s*true/);
+  assert.match(read("src/layouts/BaseLayout.astro"), /name="google-adsense-account"/);
+  assert.match(read("src/layouts/BaseLayout.astro"), /content=\{siteConfig\.adsense\.publisherId\}/);
   assert.match(read("src/layouts/BaseLayout.astro"), /pagead2\.googlesyndication\.com\/pagead\/js\/adsbygoogle\.js/);
   assert.match(read("src/layouts/BaseLayout.astro"), /client=\$\{siteConfig\.adsense\.publisherId\}/);
 });
