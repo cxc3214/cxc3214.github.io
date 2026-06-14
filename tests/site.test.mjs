@@ -74,6 +74,38 @@ test("AdSense verification script is enabled in the shared head", () => {
   assert.match(read("src/layouts/BaseLayout.astro"), /client=\$\{siteConfig\.adsense\.publisherId\}/);
 });
 
+test("visual refresh keeps the blog distinctive and readable", () => {
+  const css = read("src/styles/global.css");
+  assert.match(css, /--ink:/, "design tokens should include the editorial ink color");
+  assert.match(css, /--signal:/, "design tokens should include a restrained signal accent");
+  assert.match(css, /\.hero::before/, "homepage hero should have a technical texture layer");
+  assert.match(css, /\.post-card::before/, "post cards should expose numbered editorial markers");
+  assert.match(css, /\.article-header::after/, "article pages should include a reading progress rail");
+  assert.match(css, /prefers-reduced-motion/, "motion should respect reduced-motion preferences");
+
+  assert.match(read("src/pages/index.astro"), /class="hero-kicker"/);
+  assert.match(read("src/pages/blog/index.astro"), /data-index=\{String\(index \+ 1\)\.padStart\(2, "0"\)\}/);
+  assert.match(read("src/layouts/PostLayout.astro"), /class="article-kicker"/);
+});
+
+test("visible source copy does not contain mojibake", () => {
+  const files = [
+    "src/pages/index.astro",
+    "src/pages/blog/index.astro",
+    "src/layouts/BaseLayout.astro",
+    "src/layouts/PostLayout.astro",
+  ];
+  for (const file of files) {
+    const content = read(file);
+    assert.doesNotMatch(content, /鐨|杩|濡|鍏|涓|漏/, `${file} should not contain mojibake copy`);
+  }
+});
+
+test("brand mark is CSS-only and does not duplicate the Spring wordmark", () => {
+  assert.doesNotMatch(read("src/layouts/BaseLayout.astro"), /brand-mark/);
+  assert.match(read("src/styles/global.css"), /\.brand::before/);
+});
+
 test("post layout uses the Astro content render helper", () => {
   const layout = read("src/layouts/PostLayout.astro");
   assert.match(layout, /import\s+\{[^}]*\brender\b[^}]*\}\s+from\s+["']astro:content["']/);

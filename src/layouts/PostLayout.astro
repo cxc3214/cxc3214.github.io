@@ -39,7 +39,8 @@ const jsonLd = {
 >
   <article class="article">
     <header class="article-header">
-      <a class="back-link" href="/blog/">返回博客</a>
+      <a class="back-link" href="/blog/">Back to writing</a>
+      <p class="article-kicker">Field note / {post.data.tags[0]}</p>
       <h1>{post.data.title}</h1>
       <p class="article-description">{post.data.description}</p>
       <div class="meta">
@@ -50,5 +51,11 @@ const jsonLd = {
     <div class="prose">
       <Content />
     </div>
+    <footer class="article-footer">
+      <a class="button-secondary" href="/blog/">More essays</a>
+      <a class="button" href={siteConfig.projectLinks.worldCup} target="_blank" rel="noopener">
+        View World Cup Live
+      </a>
+    </footer>
   </article>
 </BaseLayout>

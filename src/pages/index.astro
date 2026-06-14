@@ -22,36 +22,38 @@ const jsonLd = {
 
 <BaseLayout title={siteConfig.title} description={siteConfig.description} jsonLd={jsonLd}>
   <section class="hero">
-    <div>
-      <p class="eyebrow">独立开发者 / AI / Web / 数据应用</p>
-      <h1>你好，我是 Spring。</h1>
+    <div class="hero-copy">
+      <p class="hero-kicker">Independent developer / AI / Web / Data products</p>
+      <h1>Spring builds small useful things.</h1>
       <p class="lead">
-        这里是我的个人主页、技术博客和项目记录。我关注 AI 辅助开发、Web 产品、工具型应用和数据可视化，也会把独立项目从想法到上线的过程写下来。
+        A quiet personal lab for shipping web tools, writing practical notes, and turning fuzzy product ideas into things people can actually visit.
       </p>
       <div class="actions">
-        <a class="button" href="/blog/">阅读文章</a>
-        <a class="button-secondary" href="/projects/">查看项目</a>
+        <a class="button" href="/blog/">Read the blog</a>
+        <a class="button-secondary" href="/projects/">View projects</a>
       </div>
     </div>
-    <aside class="panel">
-      <p class="eyebrow">项目入口</p>
+    <aside class="panel project-proof" aria-label="Featured project">
+      <p class="eyebrow">Live build</p>
       <h2>World Cup Live</h2>
-      <p>一个面向世界杯赛事信息、赛程、比分和数据展示的项目入口。</p>
-      <a href={siteConfig.projectLinks.worldCup} target="_blank" rel="noopener">访问 worldcup.imspring.cn</a>
+      <p>
+        A multilingual football data site for live scores, schedules, teams, predictions, SEO experiments, and Cloudflare deployment notes.
+      </p>
+      <a href={siteConfig.projectLinks.worldCup} target="_blank" rel="noopener">Open worldcup.imspring.cn</a>
     </aside>
   </section>
 
   <section class="section">
     <div class="section-header">
       <div>
-        <p class="eyebrow">Latest Writing</p>
-        <h2>最新文章</h2>
+        <p class="eyebrow">Latest dispatches</p>
+        <h2>Recent writing</h2>
       </div>
-      <a href="/blog/">查看全部</a>
+      <a class="text-link" href="/blog/">All essays</a>
     </div>
     <div class="post-list">
-      {posts.map((post) => (
-        <article class="post-card">
+      {posts.map((post, index) => (
+        <article class="post-card" data-index={String(index + 1).padStart(2, "0")}>
           <h3><a href={`/blog/${post.id}/`}>{post.data.title}</a></h3>
           <p>{post.data.description}</p>
           <div class="meta">
@@ -63,23 +65,24 @@ const jsonLd = {
     </div>
   </section>
 
-  <section class="section">
-    <div class="grid">
-      <div class="project-card">
-        <h3>关于这个网站</h3>
-        <p>用于沉淀长期内容，而不是只发布零散动态。文章会尽量记录背景、选择和复盘。</p>
-        <a href="/about/">了解更多</a>
-      </div>
-      <div class="project-card">
-        <h3>技术方向</h3>
-        <p>主要关注 AI 工具、Web 应用、独立产品、部署运维和数据应用。</p>
-        <a href="/blog/">阅读博客</a>
-      </div>
-      <div class="project-card">
-        <h3>合作与联系</h3>
-        <p>如果你对项目、文章或工具产品有交流想法，可以通过联系页找到我。</p>
-        <a href="/contact/">联系方式</a>
-      </div>
+  <section class="section manifesto-grid" aria-label="Site principles">
+    <div class="project-card">
+      <p class="eyebrow">01 / Method</p>
+      <h3>Ship, then write clearly.</h3>
+      <p>Every note keeps the real tradeoffs visible: constraints, choices, small failures, and what changed after shipping.</p>
+      <a href="/about/">About this site</a>
+    </div>
+    <div class="project-card">
+      <p class="eyebrow">02 / Stack</p>
+      <h3>Small tools over heavy platforms.</h3>
+      <p>Focused on Astro, Next.js, Cloudflare, AI-assisted development, and data products that can be maintained calmly.</p>
+      <a href="/blog/">Browse writing</a>
+    </div>
+    <div class="project-card">
+      <p class="eyebrow">03 / Contact</p>
+      <h3>Useful conversations welcome.</h3>
+      <p>If you are building tools, content sites, or practical AI products, the contact page is the simplest place to start.</p>
+      <a href="/contact/">Contact Spring</a>
     </div>
   </section>
 </BaseLayout>
