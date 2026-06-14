@@ -212,20 +212,20 @@ nav a:hover {
   box-shadow: var(--shadow);
 }
 
-.proof-panel {
+.project-proof {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
-.proof-panel h2 {
+.project-proof h2 {
   margin: 0;
   color: var(--ink);
   font-size: 34px;
   line-height: 1.05;
 }
 
-.proof-panel p {
+.project-proof p {
   color: var(--muted);
 }
 
