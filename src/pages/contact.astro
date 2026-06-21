@@ -1,19 +1,20 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { siteConfig } from "../config/site";
 ---
 
-<BaseLayout title="联系方式" description="联系 Spring，交流独立开发、AI 工具、Web 项目和数据应用相关话题。">
+<BaseLayout title="联系方式" description="联系 Spring，交流独立开发、AI 工具、Web 项目和数据应用。">
   <section class="page">
     <h1>联系方式</h1>
-    <p class="page-description">如果你想交流项目、文章或合作想法，可以通过以下方式联系我。</p>
+    <p class="page-description">欢迎交流项目、文章或合作想法。</p>
     <p>
       邮箱：<a href="mailto:hello@imspring.cn">hello@imspring.cn</a>
     </p>
     <p>
-      项目入口：<a href="https://worldcup.imspring.cn" target="_blank" rel="noopener">World Cup Live</a>
-    </p>
-    <p>
-      发送邮件时，可以简单说明你来自哪个页面、希望讨论的问题，以及是否需要我回复具体的技术细节。我会尽量在方便的时候处理。
+      项目：
+      <a href={siteConfig.projectLinks.testData} target="_blank" rel="noopener">testdata.imspring.cn</a>
+      <span> / </span>
+      <a href={siteConfig.projectLinks.worldCup} target="_blank" rel="noopener">worldcup.imspring.cn</a>
     </p>
   </section>
 </BaseLayout>

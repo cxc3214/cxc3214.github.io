@@ -61,9 +61,11 @@ test("blog contains five complete Chinese Markdown posts", () => {
   }
 });
 
-test("site configuration references the root domain and AdSense publisher", () => {
+test("site configuration references the root domain, AdSense, and project links", () => {
   assert.match(read("astro.config.mjs"), /site:\s*["']https:\/\/imspring\.cn["']/);
   assert.match(read("src/config/site.ts"), /ca-pub-3132117537257566/);
+  assert.match(read("src/config/site.ts"), /worldCup:\s*"https:\/\/worldcup\.imspring\.cn"/);
+  assert.match(read("src/config/site.ts"), /testData:\s*"https:\/\/testdata\.imspring\.cn"/);
 });
 
 test("AdSense verification script is enabled in the shared head", () => {
@@ -88,17 +90,35 @@ test("visual refresh keeps the blog distinctive and readable", () => {
   assert.match(read("src/layouts/PostLayout.astro"), /class="article-kicker"/);
 });
 
-test("visible source copy does not contain mojibake", () => {
+test("visible source copy stays clean and Chinese-first", () => {
   const files = [
     "src/pages/index.astro",
     "src/pages/blog/index.astro",
+    "src/pages/about.astro",
+    "src/pages/contact.astro",
+    "src/pages/projects.astro",
+    "src/config/site.ts",
     "src/layouts/BaseLayout.astro",
     "src/layouts/PostLayout.astro",
   ];
+
   for (const file of files) {
     const content = read(file);
-    assert.doesNotMatch(content, /鐨|杩|濡|鍏|涓|漏/, `${file} should not contain mojibake copy`);
+    assert.doesNotMatch(content, /鐨|杩|鍗|椤|绔||€/, `${file} should not contain mojibake copy`);
+    assert.doesNotMatch(
+      content,
+      /Home|Writing|Projects|Contact|Read the blog|View projects|Recent writing|Latest dispatches|Back to writing|More essays|View World Cup Live|Spring builds small useful things|Writing archive/,
+      `${file} should not keep old English UI copy`,
+    );
   }
+});
+
+test("visible project copy includes the TestData site", () => {
+  assert.match(read("src/pages/index.astro"), /TestData/);
+  assert.match(read("src/pages/index.astro"), /testdata\.imspring\.cn/);
+  assert.match(read("src/pages/projects.astro"), /TestData/);
+  assert.match(read("src/pages/projects.astro"), /testdata\.imspring\.cn/);
+  assert.match(read("src/pages/contact.astro"), /testdata\.imspring\.cn/);
 });
 
 test("brand mark is CSS-only and does not duplicate the Spring wordmark", () => {

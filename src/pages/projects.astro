@@ -3,22 +3,25 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { siteConfig } from "../config/site";
 ---
 
-<BaseLayout title="项目列表" description="Spring 的独立项目列表，包括 World Cup Live 和后续工具产品记录。">
+<BaseLayout title="项目" description="Spring 的项目列表：TestData、World Cup Live 等。">
   <section class="page">
-    <h1>项目列表</h1>
-    <p class="page-description">这里整理我正在维护或记录中的独立项目。</p>
+    <h1>项目</h1>
+    <p class="page-description">正在维护的站点和工具。</p>
   </section>
-  <section class="section">
+
+  <section class="section project-list">
     <article class="project-card">
-      <p class="eyebrow">Live Project</p>
+      <p class="eyebrow">新站点</p>
+      <h2>TestData</h2>
+      <p>测试数据与接口调试相关站点，用于整理常用测试数据、样例和工具入口。</p>
+      <a href={siteConfig.projectLinks.testData} target="_blank" rel="noopener">访问 testdata.imspring.cn</a>
+    </article>
+
+    <article class="project-card">
+      <p class="eyebrow">数据项目</p>
       <h2>World Cup Live</h2>
-      <p>
-        World Cup Live 是一个世界杯信息项目入口，目标是围绕赛程、比分、球队和数据展示建立清晰、快速、适合移动端访问的体验。
-      </p>
-      <p>
-        我会在博客中持续记录它的产品思路、技术选择、部署方式和后续优化。
-      </p>
-      <a href={siteConfig.projectLinks.worldCup} target="_blank" rel="noopener">访问项目</a>
+      <p>世界杯赛程、比分、球队和数据展示项目，也用于记录内容站的 SEO 与部署实践。</p>
+      <a href={siteConfig.projectLinks.worldCup} target="_blank" rel="noopener">访问 worldcup.imspring.cn</a>
     </article>
   </section>
 </BaseLayout>

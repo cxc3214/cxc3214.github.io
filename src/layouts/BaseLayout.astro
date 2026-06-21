@@ -21,11 +21,11 @@ const {
 const pageTitle = title === siteConfig.title ? title : `${title} | ${siteConfig.name}`;
 const canonical = new URL(canonicalPath, siteConfig.url).toString();
 const navItems = [
-  { href: "/", label: "Home" },
-  { href: "/blog/", label: "Writing" },
-  { href: "/projects/", label: "Projects" },
-  { href: "/about/", label: "About" },
-  { href: "/contact/", label: "Contact" },
+  { href: "/", label: "首页" },
+  { href: "/blog/", label: "博客" },
+  { href: "/projects/", label: "项目" },
+  { href: "/about/", label: "关于" },
+  { href: "/contact/", label: "联系" },
 ];
 ---
 
@@ -62,12 +62,12 @@ const navItems = [
     )}
   </head>
   <body>
-    <a class="skip-link" href="#content">Skip to content</a>
+    <a class="skip-link" href="#content">跳到正文</a>
     <header class="site-header">
-      <a class="brand" href="/" aria-label="Spring home">
+      <a class="brand" href="/" aria-label="Spring 首页">
         <span>Spring</span>
       </a>
-      <nav aria-label="Main navigation">
+      <nav aria-label="主导航">
         {navItems.map((item) => (
           <a href={item.href}>{item.label}</a>
         ))}
@@ -77,11 +77,11 @@ const navItems = [
       <slot />
     </main>
     <footer class="site-footer">
-      <p>(c) {new Date().getFullYear()} Spring. AI, Web tools, data products, and notes from shipping.</p>
+      <p>(c) {new Date().getFullYear()} Spring. 记录 AI、Web 工具和数据应用。</p>
       <p>
-        <a href="/privacy/">Privacy</a>
+        <a href="/privacy/">隐私政策</a>
         <span>/</span>
-        <a href="/terms/">Terms</a>
+        <a href="/terms/">使用条款</a>
       </p>
     </footer>
   </body>

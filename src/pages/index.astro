@@ -23,33 +23,35 @@ const jsonLd = {
 <BaseLayout title={siteConfig.title} description={siteConfig.description} jsonLd={jsonLd}>
   <section class="hero">
     <div class="hero-copy">
-      <p class="hero-kicker">Independent developer / AI / Web / Data products</p>
-      <h1>Spring builds small useful things.</h1>
+      <p class="hero-kicker">独立开发 / AI / Web / 数据应用</p>
+      <h1>Spring 的个人网站</h1>
       <p class="lead">
-        A quiet personal lab for shipping web tools, writing practical notes, and turning fuzzy product ideas into things people can actually visit.
+        我在这里记录项目、技术实践和产品想法。内容围绕 AI、Web 工具、数据应用和独立开发。
       </p>
       <div class="actions">
-        <a class="button" href="/blog/">Read the blog</a>
-        <a class="button-secondary" href="/projects/">View projects</a>
+        <a class="button" href="/blog/">阅读博客</a>
+        <a class="button-secondary" href="/projects/">查看项目</a>
       </div>
     </div>
-    <aside class="panel proof-panel" aria-label="Featured project">
-      <p class="eyebrow">Live build</p>
-      <h2>World Cup Live</h2>
-      <p>
-        A multilingual football data site for live scores, schedules, teams, predictions, SEO experiments, and Cloudflare deployment notes.
-      </p>
-      <a href={siteConfig.projectLinks.worldCup} target="_blank" rel="noopener">Open worldcup.imspring.cn</a>
+    <aside class="panel proof-panel" aria-label="项目入口">
+      <p class="eyebrow">项目入口</p>
+      <h2>TestData</h2>
+      <p>测试数据与接口调试相关站点，整理常用样例、数据和工具入口。</p>
+      <a href={siteConfig.projectLinks.testData} target="_blank" rel="noopener">访问 testdata.imspring.cn</a>
+      <div class="project-mini">
+        <span>World Cup Live</span>
+        <a href={siteConfig.projectLinks.worldCup} target="_blank" rel="noopener">worldcup.imspring.cn</a>
+      </div>
     </aside>
   </section>
 
   <section class="section">
     <div class="section-header">
       <div>
-        <p class="eyebrow">Latest dispatches</p>
-        <h2>Recent writing</h2>
+        <p class="eyebrow">最新更新</p>
+        <h2>最新文章</h2>
       </div>
-      <a class="text-link" href="/blog/">All essays</a>
+      <a class="text-link" href="/blog/">全部文章</a>
     </div>
     <div class="post-list">
       {posts.map((post, index) => (
@@ -65,24 +67,24 @@ const jsonLd = {
     </div>
   </section>
 
-  <section class="section manifesto-grid" aria-label="Site principles">
+  <section class="section manifesto-grid" aria-label="站点内容">
     <div class="project-card">
-      <p class="eyebrow">01 / Method</p>
-      <h3>Ship, then write clearly.</h3>
-      <p>Every note keeps the real tradeoffs visible: constraints, choices, small failures, and what changed after shipping.</p>
-      <a href="/about/">About this site</a>
+      <p class="eyebrow">01 / 项目</p>
+      <h3>先做出来</h3>
+      <p>记录真实项目的需求、取舍、部署和后续优化。</p>
+      <a href="/projects/">看项目</a>
     </div>
     <div class="project-card">
-      <p class="eyebrow">02 / Stack</p>
-      <h3>Small tools over heavy platforms.</h3>
-      <p>Focused on Astro, Next.js, Cloudflare, AI-assisted development, and data products that can be maintained calmly.</p>
-      <a href="/blog/">Browse writing</a>
+      <p class="eyebrow">02 / 文章</p>
+      <h3>少写空话</h3>
+      <p>文章以实践笔记为主，尽量给出背景、过程和结果。</p>
+      <a href="/blog/">看文章</a>
     </div>
     <div class="project-card">
-      <p class="eyebrow">03 / Contact</p>
-      <h3>Useful conversations welcome.</h3>
-      <p>If you are building tools, content sites, or practical AI products, the contact page is the simplest place to start.</p>
-      <a href="/contact/">Contact Spring</a>
+      <p class="eyebrow">03 / 交流</p>
+      <h3>欢迎联系</h3>
+      <p>如果你也在做工具、内容站或 AI 产品，可以从联系页开始。</p>
+      <a href="/contact/">联系 Spring</a>
     </div>
   </section>
 </BaseLayout>

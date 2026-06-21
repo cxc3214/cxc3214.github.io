@@ -229,6 +229,18 @@ nav a:hover {
   color: var(--muted);
 }
 
+.project-mini {
+  display: grid;
+  gap: 4px;
+  border-top: 2px solid var(--line-strong);
+  padding-top: 16px;
+}
+
+.project-mini span {
+  color: var(--ink);
+  font-weight: 900;
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;
@@ -335,6 +347,17 @@ nav a:hover {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
+}
+
+.project-list,
+.manifesto-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.manifesto-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .post-list {
@@ -568,6 +591,8 @@ nav a:hover {
 @media (max-width: 860px) {
   .hero,
   .grid,
+  .project-list,
+  .manifesto-grid,
   .feature-strip {
     grid-template-columns: 1fr;
   }
