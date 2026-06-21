@@ -76,6 +76,13 @@ test("AdSense verification script is enabled in the shared head", () => {
   assert.match(read("src/layouts/BaseLayout.astro"), /client=\$\{siteConfig\.adsense\.publisherId\}/);
 });
 
+test("Cloudflare Web Analytics is enabled in the shared head", () => {
+  assert.match(read("src/config/site.ts"), /0e3d1c5c0b0e4837875eca4b687b9cb8/);
+  assert.match(read("src/layouts/BaseLayout.astro"), /static\.cloudflareinsights\.com\/beacon\.min\.js/);
+  assert.match(read("src/layouts/BaseLayout.astro"), /data-cf-beacon/);
+  assert.match(read("src/pages/privacy.astro"), /Cloudflare Web Analytics/);
+});
+
 test("visual refresh keeps the blog distinctive and readable", () => {
   const css = read("src/styles/global.css");
   assert.match(css, /--ink:/, "design tokens should include the editorial ink color");

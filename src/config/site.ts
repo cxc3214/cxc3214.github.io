@@ -9,6 +9,12 @@ export const siteConfig = {
     enabled: true,
     publisherId: "ca-pub-3132117537257566",
   },
+  analytics: {
+    cloudflare: {
+      enabled: true,
+      token: "0e3d1c5c0b0e4837875eca4b687b9cb8",
+    },
+  },
   projectLinks: {
     worldCup: "https://worldcup.imspring.cn",
     testData: "https://testdata.imspring.cn",

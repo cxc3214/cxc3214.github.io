@@ -57,6 +57,13 @@ const navItems = [
         crossorigin="anonymous"
       />
     )}
+    {siteConfig.analytics.cloudflare.enabled && (
+      <script
+        defer
+        src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon={JSON.stringify({ token: siteConfig.analytics.cloudflare.token })}
+      />
+    )}
     {jsonLd && (
       <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
     )}
