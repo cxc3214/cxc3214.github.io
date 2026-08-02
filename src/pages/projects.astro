@@ -3,7 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { siteConfig } from "../config/site";
 ---
 
-<BaseLayout title="项目" description="Spring 的项目列表：TestData、World Cup Live 等。">
+<BaseLayout title="项目" description="Spring 的项目列表：TestData、World Cup Live、Codex 信号站等。">
   <section class="page">
     <h1>项目</h1>
     <p class="page-description">正在维护的站点和工具。</p>
@@ -22,6 +22,13 @@ import { siteConfig } from "../config/site";
       <h2>World Cup Live</h2>
       <p>世界杯赛程、比分、球队和数据展示项目，也用于记录内容站的 SEO 与部署实践。</p>
       <a href={siteConfig.projectLinks.worldCup} target="_blank" rel="noopener">访问 worldcup.imspring.cn</a>
+    </article>
+
+    <article class="project-card">
+      <p class="eyebrow">Codex 动态</p>
+      <h2>Codex 信号站</h2>
+      <p>追踪 Codex 重置时间、未来 24/48 小时重置概率、官方动态与 OpenAI 服务状态，并比较每日模型 IQ、成本与性价比推荐。</p>
+      <a href={siteConfig.projectLinks.codexSignal} target="_blank" rel="noopener">访问 codex.imspring.cn</a>
     </article>
   </section>
 </BaseLayout>

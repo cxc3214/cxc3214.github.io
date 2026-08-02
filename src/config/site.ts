@@ -18,5 +18,7 @@ export const siteConfig = {
   projectLinks: {
     worldCup: "https://worldcup.imspring.cn",
     testData: "https://testdata.imspring.cn",
+    codexSignal: "https://codex.imspring.cn",
   },
+  ogImage: "/og.png",
 };
