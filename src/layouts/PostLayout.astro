@@ -10,13 +10,14 @@ interface Props {
 const { post } = Astro.props;
 const { Content } = await render(post);
 const canonicalPath = `/blog/${post.id}/`;
+const modifiedDate = post.data.updated ?? post.data.date;
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
   headline: post.data.title,
   description: post.data.description,
   datePublished: post.data.date.toISOString(),
-  dateModified: post.data.date.toISOString(),
+  dateModified: modifiedDate.toISOString(),
   author: {
     "@type": "Person",
     name: siteConfig.author,
@@ -44,7 +45,11 @@ const jsonLd = {
       <h1>{post.data.title}</h1>
       <p class="article-description">{post.data.description}</p>
       <div class="meta">
-        <time datetime={post.data.date.toISOString()}>{post.data.date.toLocaleDateString("zh-CN")}</time>
+        <span>作者 {siteConfig.author}</span>
+        <time datetime={post.data.date.toISOString()}>发布于 {post.data.date.toLocaleDateString("zh-CN")}</time>
+        {post.data.updated && (
+          <time datetime={post.data.updated.toISOString()}>更新于 {post.data.updated.toLocaleDateString("zh-CN")}</time>
+        )}
         <span>{post.data.tags.join(" / ")}</span>
       </div>
     </header>

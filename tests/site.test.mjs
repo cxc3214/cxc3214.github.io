@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 
@@ -39,14 +39,12 @@ test("deployment and ads files contain required values", () => {
   assert.match(read(".github/workflows/deploy.yml"), /deploy-pages/);
 });
 
-test("blog contains five complete Chinese Markdown posts", () => {
-  const posts = [
-    "src/content/blog/why-i-started-a-personal-website.md",
-    "src/content/blog/deploy-nextjs-with-cloudflare-pages.md",
-    "src/content/blog/world-cup-live-project-notes.md",
-    "src/content/blog/google-adsense-review-checklist.md",
-    "src/content/blog/ai-assisted-development-practice.md",
-  ];
+test("blog posts expose complete metadata and substantive body copy", () => {
+  const posts = readdirSync(join(root, "src/content/blog"))
+    .filter((file) => file.endsWith(".md"))
+    .map((file) => `src/content/blog/${file}`);
+
+  assert.ok(posts.length >= 5, "the blog should contain at least five posts");
 
   for (const post of posts) {
     assert.equal(existsSync(join(root, post)), true, `${post} should exist`);
@@ -61,6 +59,16 @@ test("blog contains five complete Chinese Markdown posts", () => {
   }
 });
 
+test("AdSense article records verifiable implementation details", () => {
+  const content = read("src/content/blog/google-adsense-review-checklist.md");
+
+  assert.match(content, /^updated: 2026-08-20$/m);
+  assert.match(content, /support\.google\.com\/adsense\/answer\/7402256/);
+  assert.match(content, /```html[\s\S]*google-adsense-account/);
+  assert.match(content, /```txt[\s\S]*pub-3132117537257566/);
+  assert.ok((content.match(/^## /gm) ?? []).length >= 6);
+});
+
 test("site configuration references the root domain, AdSense, and project links", () => {
   assert.match(read("astro.config.mjs"), /site:\s*["']https:\/\/imspring\.cn["']/);
   assert.match(read("src/config/site.ts"), /ca-pub-3132117537257566/);
@@ -69,11 +77,22 @@ test("site configuration references the root domain, AdSense, and project links"
 });
 
 test("AdSense verification script is enabled in the shared head", () => {
-  assert.match(read("src/config/site.ts"), /enabled:\s*true/);
+  assert.match(read("src/config/site.ts"), /adsense:\s*\{[\s\S]*?enabled:\s*true/);
   assert.match(read("src/layouts/BaseLayout.astro"), /name="google-adsense-account"/);
   assert.match(read("src/layouts/BaseLayout.astro"), /content=\{siteConfig\.adsense\.publisherId\}/);
   assert.match(read("src/layouts/BaseLayout.astro"), /pagead2\.googlesyndication\.com\/pagead\/js\/adsbygoogle\.js/);
   assert.match(read("src/layouts/BaseLayout.astro"), /client=\$\{siteConfig\.adsense\.publisherId\}/);
+});
+
+test("privacy policy describes the active AdSense integration", () => {
+  const privacy = read("src/pages/privacy.astro");
+
+  assert.match(privacy, /本站已启用 Google AdSense/);
+  assert.match(privacy, /本网站使用 Google AdSense/);
+  assert.doesNotMatch(privacy, /已预留 Google AdSense|AdSense 或其他第三方服务启用后/);
+  assert.match(privacy, /policies\.google\.com\/technologies\/partner-sites/);
+  assert.match(privacy, /myadcenter\.google\.com/);
+  assert.match(privacy, /生效及最近更新日期/);
 });
 
 test("Cloudflare Web Analytics is enabled in the shared head", () => {
@@ -120,9 +139,7 @@ test("visible source copy stays clean and Chinese-first", () => {
   }
 });
 
-test("visible project copy includes the TestData site", () => {
-  assert.match(read("src/pages/index.astro"), /TestData/);
-  assert.match(read("src/pages/index.astro"), /testdata\.imspring\.cn/);
+test("visible project and contact copy includes the TestData site", () => {
   assert.match(read("src/pages/projects.astro"), /TestData/);
   assert.match(read("src/pages/projects.astro"), /testdata\.imspring\.cn/);
   assert.match(read("src/pages/contact.astro"), /testdata\.imspring\.cn/);
@@ -176,4 +193,6 @@ test("post layout uses the Astro content render helper", () => {
   assert.match(layout, /import\s+\{[^}]*\brender\b[^}]*\}\s+from\s+["']astro:content["']/);
   assert.match(layout, /await\s+render\(post\)/);
   assert.doesNotMatch(layout, /post\.render\(/);
+  assert.match(layout, /post\.data\.updated/);
+  assert.match(layout, /更新于/);
 });

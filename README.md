@@ -4,6 +4,8 @@
 
 ## 本地启动
 
+需要 Node.js `22.12.0` 或更高版本。
+
 先安装依赖：
 
 ```sh
@@ -49,7 +51,7 @@ tags: ["AI", "Web"]
 
 ## Google AdSense
 
-发布商 ID 已预留为：
+发布商 ID 已配置为：
 
 ```txt
 ca-pub-3132117537257566
@@ -61,7 +63,7 @@ ca-pub-3132117537257566
 google.com, pub-3132117537257566, DIRECT, f08c47fec0942fa0
 ```
 
-全站 AdSense 脚本由 `src/config/site.ts` 控制。审核或正式投放前，将 `adsense.enabled` 从 `false` 改为 `true`。
+全站 AdSense 脚本由 `src/config/site.ts` 控制，目前 `adsense.enabled` 已设为 `true`，并使用 Google 自动广告模式。脚本和 `ads.txt` 正确只代表技术接入完成；广告展示仍取决于 AdSense 账号、网站审核、政策状态和广告库存。
 
 ## 部署到 GitHub Pages
 
