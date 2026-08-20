@@ -4,7 +4,7 @@ export const siteConfig = {
   description: "Spring 的个人主页、技术博客与项目记录，关注 AI、Web 工具和数据应用。",
   url: "https://imspring.cn",
   author: "Spring",
-  email: "hello@imspring.cn",
+  email: "cxc3214@qq.com",
   locale: "zh_CN",
   themeColor: "#f4f1e9",
   adsense: {
