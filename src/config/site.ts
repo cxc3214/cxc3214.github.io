@@ -18,6 +18,7 @@ export const siteConfig = {
     },
   },
   projectLinks: {
+    tools: "https://tools.imspring.cn",
     worldCup: "https://worldcup.imspring.cn",
     testData: "https://testdata.imspring.cn",
     codexSignal: "https://codex.imspring.cn",

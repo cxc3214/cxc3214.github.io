@@ -3,13 +3,20 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { siteConfig } from "../config/site";
 ---
 
-<BaseLayout title="项目" description="Spring 的项目列表：听伴、RouteDeck、TestData、World Cup Live、Codex 信号站等。">
+<BaseLayout title="项目" description="Spring 的项目列表：imspring tools、听伴、RouteDeck、TestData、World Cup Live、Codex 信号站等。">
   <section class="page">
     <h1>项目</h1>
     <p class="page-description">正在维护的站点和工具。</p>
   </section>
 
   <section class="section project-list">
+    <article class="project-card">
+      <p class="eyebrow">浏览器本地工具</p>
+      <h2>imspring tools</h2>
+      <p>70 个免费在线开发者工具，覆盖 JSON、YAML、JWT、二维码、网络、文本与加密。输入和结果默认只在浏览器本地处理，并提供中文、英文和日文界面。</p>
+      <a href={siteConfig.projectLinks.tools} target="_blank" rel="noopener">打开 tools.imspring.cn</a>
+    </article>
+
     <article class="project-card">
       <p class="eyebrow">Android 应用</p>
       <h2>听伴 / RouteDeck</h2>
