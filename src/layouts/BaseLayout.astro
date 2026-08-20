@@ -7,6 +7,8 @@ interface Props {
   description: string;
   canonicalPath?: string;
   ogType?: "website" | "article";
+  ogImage?: string;
+  ogImageAlt?: string;
   jsonLd?: Record<string, unknown>;
 }
 
@@ -15,19 +17,24 @@ const {
   description,
   canonicalPath = Astro.url.pathname,
   ogType = "website",
+  ogImage: ogImagePath = siteConfig.ogImage,
+  ogImageAlt = siteConfig.title,
   jsonLd,
 } = Astro.props;
 
 const pageTitle = title === siteConfig.title ? title : `${title} | ${siteConfig.name}`;
 const canonical = new URL(canonicalPath, siteConfig.url).toString();
-const ogImage = new URL(siteConfig.ogImage, siteConfig.url).toString();
+const ogImage = new URL(ogImagePath, siteConfig.url).toString();
+const currentPath = Astro.url.pathname;
 const navItems = [
   { href: "/", label: "首页" },
   { href: "/blog/", label: "博客" },
+  { href: "/apps/", label: "应用" },
   { href: "/projects/", label: "项目" },
   { href: "/about/", label: "关于" },
   { href: "/contact/", label: "联系" },
 ];
+const isCurrent = (href: string) => href === "/" ? currentPath === href : currentPath.startsWith(href);
 ---
 
 <!doctype html>
@@ -37,9 +44,9 @@ const navItems = [
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" href="/favicon.ico" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
+    <meta name="theme-color" content={siteConfig.themeColor} />
     <link rel="canonical" href={canonical} />
     <meta property="og:locale" content={siteConfig.locale} />
     <meta property="og:type" content={ogType} />
@@ -50,7 +57,7 @@ const navItems = [
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content={siteConfig.title} />
+    <meta property="og:image:alt" content={ogImageAlt} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={description} />
@@ -82,7 +89,7 @@ const navItems = [
       </a>
       <nav aria-label="主导航">
         {navItems.map((item) => (
-          <a href={item.href}>{item.label}</a>
+          <a href={item.href} aria-current={isCurrent(item.href) ? "page" : undefined}>{item.label}</a>
         ))}
       </nav>
     </header>
@@ -95,6 +102,8 @@ const navItems = [
         <a href="/privacy/">隐私政策</a>
         <span>/</span>
         <a href="/terms/">使用条款</a>
+        <span>/</span>
+        <a href="/apps/">应用下载</a>
       </p>
     </footer>
   </body>

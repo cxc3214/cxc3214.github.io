@@ -23,28 +23,28 @@ const jsonLd = {
 <BaseLayout title={siteConfig.title} description={siteConfig.description} jsonLd={jsonLd}>
   <section class="hero">
     <div class="hero-copy">
-      <p class="hero-kicker">独立开发 / AI / Web / 数据应用</p>
+      <p class="hero-kicker">Android 应用 / AI / Web / 独立开发</p>
       <h1>imspring</h1>
       <p class="lead">
-        我在这里记录项目、技术实践和产品想法。内容围绕 AI、Web 工具、数据应用和独立开发。
+        我在这里发布自己做的应用，也记录项目、技术实践和产品想法。
       </p>
       <div class="actions">
-        <a class="button" href="/blog/">阅读博客</a>
-        <a class="button-secondary" href="/projects/">查看项目</a>
+        <a class="button" href="/apps/">查看 Android 应用</a>
+        <a class="button-secondary" href="/blog/">阅读博客</a>
       </div>
     </div>
-   <aside class="panel proof-panel" aria-label="项目入口">
-     <p class="eyebrow">项目入口</p>
-     <h2>TestData</h2>
-     <p>测试数据与接口调试相关站点，整理常用样例、数据和工具入口。</p>
-     <a href={siteConfig.projectLinks.testData} target="_blank" rel="noopener">访问 testdata.imspring.cn</a>
+   <aside class="panel proof-panel" aria-label="Android 应用入口">
+     <p class="eyebrow">Android / 内部测试</p>
+     <h2>听伴与 RouteDeck</h2>
+     <p>查看真实功能、隐私说明、版本校验值，以及可直接扫码的 APK 下载入口。</p>
+     <a href="/apps/">进入应用下载中心</a>
      <div class="project-mini">
-       <span>World Cup Live</span>
-       <a href={siteConfig.projectLinks.worldCup} target="_blank" rel="noopener">worldcup.imspring.cn</a>
+       <span>听伴 TingBan</span>
+       <a href="/apps/tingban/">助听、字幕与对话整理</a>
      </div>
-      <div class="project-mini">
-        <span>Codex 信号站</span>
-        <a href={siteConfig.projectLinks.codexSignal} target="_blank" rel="noopener">codex.imspring.cn</a>
+     <div class="project-mini">
+        <span>RouteDeck</span>
+        <a href="/apps/routedeck/">Android 桌面与网络策略</a>
       </div>
    </aside>
   </section>
@@ -75,8 +75,10 @@ const jsonLd = {
     <div class="project-card">
       <p class="eyebrow">01 / 项目</p>
       <h3>先做出来</h3>
-      <p>记录真实项目的需求、取舍、部署和后续优化。</p>
+      <p>记录听伴、RouteDeck、TestData 等真实项目的需求、取舍、部署和后续优化。</p>
       <a href="/projects/">看项目</a>
+      <span> / </span>
+      <a href={siteConfig.projectLinks.testData} target="_blank" rel="noopener">testdata.imspring.cn</a>
     </div>
     <div class="project-card">
       <p class="eyebrow">02 / 文章</p>

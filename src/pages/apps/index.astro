@@ -1,0 +1,45 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import apps from "../../config/apps.json";
+---
+
+<BaseLayout title="Android 应用" description="Spring 开发的 Android 应用：听伴与 RouteDeck。查看功能、隐私说明、版本校验值并下载内部测试安装包。" canonicalPath="/apps/">
+  <section class="page apps-heading">
+    <p class="eyebrow">Android / 内部测试</p>
+    <h1>应用</h1>
+    <p class="page-description">真实功能、真实限制，以及可以核验来源的安装包。</p>
+    <p class="compliance-callout">
+      这里提供的是个人开发的内部测试版本，不是应用商店正式发行版。安装前请阅读对应隐私说明；如不同意权限用途或测试风险，请勿安装。
+    </p>
+  </section>
+
+  <section class="app-catalog" aria-label="Android 应用列表">
+    {apps.map((app) => (
+      <article class={`app-catalog-item app-${app.id}`}>
+        <div class="app-catalog-copy">
+          <p class="eyebrow">{app.releaseStatus} / {app.versionName}</p>
+          <h2><a href={`/apps/${app.id}/`}>{app.name}</a></h2>
+          <p class="app-subtitle">{app.englishName}</p>
+          <p>{app.description}</p>
+          <div class="app-fact-line">
+            <span>{app.platform}</span>
+            <span>{app.abi}</span>
+          </div>
+          <a class="button-secondary" href={`/apps/${app.id}/`}>查看介绍与下载</a>
+        </div>
+        <figure class="catalog-shot">
+          <img src={app.screenshot} alt={app.screenshotAlt} loading="lazy" />
+        </figure>
+      </article>
+    ))}
+  </section>
+
+  <section class="section release-boundary">
+    <h2>下载前要知道</h2>
+    <div class="feature-strip">
+      <div><span>01</span><strong>来源可核验</strong><p>APK 只从 mdm.imspring.cn 提供，并公布包名、版本与 SHA-256。</p></div>
+      <div><span>02</span><strong>权限按需授予</strong><p>麦克风、通知、VPN 等权限应在理解用途后由你主动决定。</p></div>
+      <div><span>03</span><strong>测试版有风险</strong><p>安装或升级前备份重要数据；出现问题可通过联系页反馈。</p></div>
+    </div>
+  </section>
+</BaseLayout>

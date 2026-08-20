@@ -1,0 +1,45 @@
+---
+interface AppDownload {
+  name: string;
+  downloadUrl: string;
+  qrImage: string;
+  versionName: string;
+  versionCode: number;
+  size: string;
+  abi: string;
+  sha256: string;
+  releaseStatus: string;
+  releaseNote: string;
+  privacyPath: string;
+}
+
+const { app } = Astro.props as { app: AppDownload };
+---
+
+<aside class="download-panel" aria-labelledby="download-title">
+  <div class="download-copy">
+    <p class="eyebrow">Android 安装包 / {app.releaseStatus}</p>
+    <h2 id="download-title">扫码或直接下载</h2>
+    <p class="download-warning">{app.releaseNote} 请先阅读隐私说明和安装提示，再决定是否安装。</p>
+    <dl class="release-facts">
+      <div><dt>版本</dt><dd>{app.versionName} ({app.versionCode})</dd></div>
+      <div><dt>架构</dt><dd>{app.abi}</dd></div>
+      <div><dt>大小</dt><dd>{app.size}</dd></div>
+    </dl>
+    <div class="actions">
+      <a class="button" href={app.downloadUrl}>下载 APK</a>
+      <a class="button-secondary" href={app.privacyPath}>阅读隐私说明</a>
+    </div>
+    <p class="install-note">
+      Android 可能提示“未知来源应用”。仅在确认域名为 <strong>mdm.imspring.cn</strong>、包名和校验值一致时继续。
+    </p>
+  </div>
+  <div class="qr-block">
+    <img src={app.qrImage} width="240" height="240" alt={`下载${app.name} Android 安装包的二维码`} />
+    <span>使用手机相机扫码</span>
+  </div>
+  <details class="checksum">
+    <summary>核对 SHA-256</summary>
+    <code>{app.sha256}</code>
+  </details>
+</aside>

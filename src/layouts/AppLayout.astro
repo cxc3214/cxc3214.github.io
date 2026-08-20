@@ -1,0 +1,78 @@
+---
+import AppDownloadPanel from "../components/AppDownloadPanel.astro";
+import BaseLayout from "./BaseLayout.astro";
+import { siteConfig } from "../config/site";
+
+interface AppInfo {
+  id: string;
+  name: string;
+  englishName: string;
+  tagline: string;
+  description: string;
+  screenshot: string;
+  screenshotAlt: string;
+  ogImage: string;
+  downloadUrl: string;
+  qrImage: string;
+  packageId: string;
+  versionName: string;
+  versionCode: number;
+  platform: string;
+  abi: string;
+  size: string;
+  sha256: string;
+  releaseStatus: string;
+  releaseNote: string;
+  privacyPath: string;
+}
+
+const { app } = Astro.props as { app: AppInfo };
+const canonicalPath = `/apps/${app.id}/`;
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: `${app.name} ${app.englishName}`,
+  description: app.description,
+  applicationCategory: "UtilitiesApplication",
+  operatingSystem: app.platform,
+  softwareVersion: app.versionName,
+  downloadUrl: app.downloadUrl,
+  url: new URL(canonicalPath, siteConfig.url).toString(),
+  author: { "@type": "Person", name: siteConfig.author },
+  offers: { "@type": "Offer", price: "0", priceCurrency: "CNY" },
+};
+---
+
+<BaseLayout
+  title={`${app.name} ${app.englishName}`}
+  description={app.description}
+  canonicalPath={canonicalPath}
+  ogImage={app.ogImage}
+  ogImageAlt={`${app.name} ${app.englishName} Android 应用预览`}
+  jsonLd={jsonLd}
+>
+  <section class={`app-hero app-${app.id}`}>
+    <div class="app-hero-copy">
+      <a class="back-link" href="/apps/">全部应用</a>
+      <p class="eyebrow">{app.releaseStatus} / {app.platform}</p>
+      <h1>{app.name}</h1>
+      <p class="app-english-name">{app.englishName}</p>
+      <p class="lead">{app.tagline}</p>
+      <p>{app.description}</p>
+      <div class="app-fact-line">
+        <span>{app.versionName} ({app.versionCode})</span>
+        <span>{app.packageId}</span>
+      </div>
+    </div>
+    <figure class="app-shot">
+      <img src={app.screenshot} alt={app.screenshotAlt} loading="eager" />
+    </figure>
+  </section>
+
+  <section class="app-content">
+    <div class="app-story prose">
+      <slot />
+    </div>
+    <AppDownloadPanel app={app} />
+  </section>
+</BaseLayout>

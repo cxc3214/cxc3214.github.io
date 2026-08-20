@@ -8,12 +8,16 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "generate:qrs": "node scripts/generate-app-qrs.mjs",
     "test": "node --test tests/site.test.mjs",
     "preview": "astro preview",
     "astro": "astro"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
-    "astro": "^6.4.6"
+    "astro": "^7.2.4"
+  },
+  "devDependencies": {
+    "qrcode": "^1.5.4"
   }
 }

@@ -128,6 +128,44 @@ test("visible project copy includes the TestData site", () => {
   assert.match(read("src/pages/contact.astro"), /testdata\.imspring\.cn/);
 });
 
+test("app downloads use versioned HTTPS artifacts and publish compliance context", () => {
+  const apps = JSON.parse(read("src/config/apps.json"));
+  assert.equal(apps.length, 2);
+
+  for (const app of apps) {
+    assert.match(app.downloadUrl, /^https:\/\/mdm\.imspring\.cn\/files\//);
+    assert.doesNotMatch(app.downloadUrl, /latest|app-debug|app-release/);
+    assert.match(app.packageId, /^com\.imspring\./);
+    assert.match(app.sha256, /^[a-f0-9]{64}$/);
+    assert.ok(app.versionCode > 0);
+    assert.match(app.ogImage, /^\/apps\/[a-z]+-og\.png$/);
+  }
+
+  assert.match(read("src/pages/apps/index.astro"), /内部测试版本/);
+  assert.match(read("src/pages/apps/tingban/index.astro"), /不是医疗器械/);
+  assert.match(read("src/pages/apps/routedeck/index.astro"), /合法授权/);
+  assert.match(read("src/pages/privacy.astro"), /二维码由本站预先生成/);
+});
+
+test("shared metadata exposes theme, active navigation, and centralized owner contact", () => {
+  const layout = read("src/layouts/BaseLayout.astro");
+  const site = read("src/config/site.ts");
+
+  assert.match(layout, /meta name="theme-color"/);
+  assert.match(layout, /aria-current=/);
+  assert.match(layout, /ogImagePath = siteConfig\.ogImage/);
+  assert.match(site, /email: "hello@imspring\.cn"/);
+  assert.match(site, /themeColor: "#f4f1e9"/);
+});
+
+test("each app has a local QR asset and an application privacy page", () => {
+  for (const id of ["tingban", "routedeck"]) {
+    assert.ok(existsSync(join(root, `public/apps/${id}-download-qr.svg`)));
+    assert.ok(existsSync(join(root, `public/apps/${id}-og.png`)));
+    assert.ok(existsSync(join(root, `src/pages/apps/${id}/privacy.astro`)));
+  }
+});
+
 test("brand mark is CSS-only and does not duplicate the Spring wordmark", () => {
   assert.doesNotMatch(read("src/layouts/BaseLayout.astro"), /brand-mark/);
   assert.match(read("src/styles/global.css"), /\.brand::before/);

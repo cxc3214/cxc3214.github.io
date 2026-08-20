@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { siteConfig } from "../config/site";
 ---
 
 <BaseLayout title="隐私政策" description="imspring.cn 的隐私政策，说明 cookies、Google AdSense、第三方广告和统计工具。">
@@ -33,6 +34,14 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       本网站使用 Cloudflare Web Analytics 了解页面访问量、来源、设备类型和访问趋势。该工具用于改进内容和性能，不用于直接识别个人身份。
     </p>
 
+    <h2>应用下载与二维码</h2>
+    <p>
+      应用页面中的二维码由本站预先生成并作为静态图片提供，不调用第三方二维码生成服务。点击或扫码下载 APK 时，请求会发送至 mdm.imspring.cn；服务器和 Cloudflare 可能为安全、缓存和故障排查记录 IP 地址、时间、User-Agent、请求路径等常规日志。
+    </p>
+    <p>
+      听伴和 RouteDeck 各有独立的应用隐私说明，用于解释安装后涉及的权限、设备内数据、第三方模型服务和删除方式。网站隐私政策不能替代应用隐私说明。
+    </p>
+
     <h2>外部链接</h2>
     <p>
       网站可能包含指向第三方网站的链接，例如项目页面、开源仓库或工具文档。访问外部网站时，请阅读对应网站的隐私政策。
@@ -42,5 +51,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     <p>
       随着网站功能变化，本隐私政策可能会更新。重要变更会体现在本页面中。
     </p>
+
+    <h2>联系</h2>
+    <p>隐私、删除或安全问题可发送邮件至 <a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a>。</p>
   </section>
 </BaseLayout>

@@ -1,0 +1,40 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { siteConfig } from "../../../config/site";
+---
+
+<BaseLayout title="RouteDeck 隐私说明" description="RouteDeck Android 应用的桌面数据、网络策略、模型服务、权限、本地保存与删除说明。" canonicalPath="/apps/routedeck/privacy/">
+  <article class="page app-policy">
+    <a class="back-link" href="/apps/routedeck/">返回 RouteDeck</a>
+    <p class="eyebrow">应用隐私说明 / 2026-08-20</p>
+    <h1>RouteDeck 隐私说明</h1>
+    <p class="page-description">本说明适用于 imspring.cn 提供下载的 RouteDeck 内部测试预览版。</p>
+
+    <h2>处理者与联系</h2>
+    <p>开发与发布标识为 {siteConfig.author}。隐私、删除、安全或版权问题可发送邮件至 <a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a>。</p>
+
+    <h2>本地处理的数据</h2>
+    <p>桌面布局、文件夹、应用包名、逐应用策略、模型配置、对话记录和工具结果默认保存在设备本地。模型 API 密钥使用 Android Keystore 加密，应用配置禁止系统备份。</p>
+
+    <h2>联网与第三方服务</h2>
+    <p>只有在你配置并使用模型供应商、订阅地址或版本检查时，应用才向相应地址发起网络请求。在线模型可能收到你主动提交的文本、图片或工具上下文；其处理受对应供应商政策约束。请勿提交无权处理的个人信息、凭据或保密材料。</p>
+
+    <h2>权限清单</h2>
+    <ul>
+      <li>网络与网络状态：模型服务、订阅、网络策略和版本检查。</li>
+      <li>VPN：仅在你主动启用网络策略时，经 Android 系统确认建立本机 VPN。</li>
+      <li>通知访问：仅在你主动授予后用于桌面通知徽标。</li>
+      <li>麦克风与相机：语音或图片输入时使用，均可拒绝。</li>
+      <li>通知与前台服务：显示需要持续运行的功能状态。</li>
+    </ul>
+
+    <h2>删除、重置与卸载</h2>
+    <p>你可以在应用内删除模型配置、对话、订阅和桌面数据。卸载应用会删除其本地数据；将 RouteDeck 设为默认桌面前，请确认系统仍保留可切换的原桌面。重置或覆盖安装前应备份重要布局。</p>
+
+    <h2>合法使用</h2>
+    <p>你应只配置有权访问的网络、订阅和模型服务，并遵守所在地法律、网络运营者规则和第三方服务条款。不得使用本应用实施未经授权的访问、攻击、规避网络管理或传播违法内容。</p>
+
+    <h2>安全与变更</h2>
+    <p>预览版可能存在稳定性或兼容性问题。发现安全问题请停止相关功能并联系开发者。涉及处理目的、方式或范围的重要变更会在本页更新，并在需要时重新征求同意。</p>
+  </article>
+</BaseLayout>
