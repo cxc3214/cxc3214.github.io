@@ -10,6 +10,7 @@
     "build": "astro build",
     "generate:qrs": "node scripts/generate-app-qrs.mjs",
     "test": "node --test tests/site.test.mjs",
+    "test:built": "node scripts/verify-built-site.mjs",
     "preview": "astro preview",
     "astro": "astro"
   },

@@ -9,6 +9,9 @@ const blog = defineCollection({
     date: z.date(),
     updated: z.date().optional(),
     tags: z.array(z.string()),
+    topic: z.enum(["web", "engineering", "data"]),
+    kind: z.enum(["仓库实践", "排查记录", "技术指南", "设计笔记"]),
+    scope: z.string(),
   }),
 });
 

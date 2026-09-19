@@ -1,33 +1,23 @@
 ---
 import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-
-const posts = (await getCollection("blog")).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
-);
+import { topics, formatDate } from "../../config/topics";
+const posts = (await getCollection("blog")).sort((a, b) =>
+  (b.data.updated ?? b.data.date).valueOf() - (a.data.updated ?? a.data.date).valueOf());
 ---
-
-<BaseLayout title="博客" description="Spring 的技术博客，记录 AI、Web 工具、部署和项目复盘。">
+<BaseLayout title="开发笔记" description="按网站构建与发布、开发与交付、数据与产品设计查找 Spring 的技术笔记。包含实际配置、故障排查、设计示例与来源。">
   <section class="page page-hero">
-    <p class="hero-kicker">文章归档</p>
-    <h1>项目笔记</h1>
-    <p class="page-description">少写空话，多记录过程、问题和结果。</p>
+    <p class="hero-kicker">文章归档 / {posts.length} 篇</p><h1>开发笔记</h1>
+    <p class="page-description">围绕一个具体问题展开。仓库实践、排查记录与设计示例分别标注，修订保留原始发布时间。</p>
+    <nav class="topic-nav" aria-label="文章主题">{topics.map((topic) => <a href={`#${topic.id}`}>{topic.name}</a>)}</nav>
+    <p><a href="/editorial/">内容来源与修订方式</a></p>
   </section>
-
-  <section class="section">
-    <div class="post-list archive-list">
-      {posts.map((post, index) => (
-        <article class="post-card" data-index={String(index + 1).padStart(2, "0")}>
-          <div>
-            <h2><a href={`/blog/${post.id}/`}>{post.data.title}</a></h2>
-            <p>{post.data.description}</p>
-          </div>
-          <div class="meta">
-            <time datetime={post.data.date.toISOString()}>{post.data.date.toLocaleDateString("zh-CN")}</time>
-            {post.data.tags.map((tag) => <span class="tag">{tag}</span>)}
-          </div>
-        </article>
-      ))}
-    </div>
-  </section>
+  {topics.map((topic) => <section class="section topic-section" id={topic.id} aria-labelledby={`${topic.id}-title`}>
+    <div class="section-header"><div><h2 id={`${topic.id}-title`}>{topic.name}</h2><p>{topic.description}</p></div></div>
+    <div class="post-list archive-list">{posts.filter((post) => post.data.topic === topic.id).map((post, index) => <article class="post-card" data-index={String(index + 1).padStart(2, "0")}>
+      <div class="meta"><span>{post.data.kind}</span><time datetime={(post.data.updated ?? post.data.date).toISOString()}>{post.data.updated ? "修订" : "发布"} {formatDate(post.data.updated ?? post.data.date)}</time></div>
+      <h3><a href={`/blog/${post.id}/`}>{post.data.title}</a></h3><p>{post.data.description}</p>
+      <div class="meta">{post.data.tags.map((tag) => <span class="tag">{tag}</span>)}</div>
+    </article>)}</div>
+  </section>)}
 </BaseLayout>

@@ -13,6 +13,8 @@ const requiredFiles = [
   "src/pages/projects.astro",
   "src/pages/blog/index.astro",
   "src/pages/blog/[...slug].astro",
+  "src/pages/editorial.astro",
+  "src/pages/404.astro",
   "public/CNAME",
   "public/ads.txt",
   "public/robots.txt",
@@ -53,6 +55,9 @@ test("blog posts expose complete metadata and body content", () => {
     assert.match(content, /^description: .+$/m, `${post} should have description`);
     assert.match(content, /^date: \d{4}-\d{2}-\d{2}$/m, `${post} should have date`);
     assert.match(content, /^tags:\s*\[/m, `${post} should have tags`);
+    assert.match(content, /^topic: (web|engineering|data)$/m, `${post} should have a reading topic`);
+    assert.match(content, /^kind: (仓库实践|排查记录|技术指南|设计笔记)$/m, `${post} should identify its evidence type`);
+    assert.match(content, /^scope: .+$/m, `${post} should explain its scope`);
     const body = content.replace(/^---[\s\S]*?---/, "");
     assert.ok(body.trim().length > 0, `${post} should have body content`);
   }
@@ -61,11 +66,13 @@ test("blog posts expose complete metadata and body content", () => {
 test("AdSense article records verifiable implementation details", () => {
   const content = read("src/content/blog/google-adsense-review-checklist.md");
 
-  assert.match(content, /^updated: 2026-08-20$/m);
+  assert.match(content, /^updated: 2026-09-19$/m);
   assert.match(content, /support\.google\.com\/adsense\/answer\/7402256/);
   assert.match(content, /```html[\s\S]*google-adsense-account/);
   assert.match(content, /```txt[\s\S]*pub-3132117537257566/);
   assert.ok((content.match(/^## /gm) ?? []).length >= 6);
+  assert.match(content, /已授权/);
+  assert.match(content, /低价值内容/);
 });
 
 test("site configuration references the root domain, AdSense, and project links", () => {

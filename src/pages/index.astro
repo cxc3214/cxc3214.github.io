@@ -2,95 +2,60 @@
 import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { siteConfig } from "../config/site";
+import { topics, formatDate } from "../config/topics";
 
-const posts = (await getCollection("blog"))
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, 3);
-
+const posts = (await getCollection("blog")).sort((a, b) =>
+  (b.data.updated ?? b.data.date).valueOf() - (a.data.updated ?? a.data.date).valueOf());
+const featured = posts.find((post) => post.id === "astro-github-pages-release-checks")!;
+const latest = posts.filter((post) => post.id !== featured.id).slice(0, 4);
 const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  name: siteConfig.title,
-  url: siteConfig.url,
-  description: siteConfig.description,
-  author: {
-    "@type": "Person",
-    name: siteConfig.author,
-  },
+  "@context": "https://schema.org", "@type": "WebSite",
+  name: siteConfig.title, url: siteConfig.url, description: siteConfig.description,
+  author: { "@type": "Person", name: siteConfig.author, url: `${siteConfig.url}/about/` },
 };
 ---
 
 <BaseLayout title={siteConfig.title} description={siteConfig.description} jsonLd={jsonLd}>
-  <section class="hero">
+  <section class="hero editorial-hero">
     <div class="hero-copy">
-      <p class="hero-kicker">Android 应用 / AI / Web / 独立开发</p>
-      <h1>imspring</h1>
-      <p class="lead">
-        我在这里发布自己做的应用，也记录项目、技术实践和产品想法。
-      </p>
+      <p class="hero-kicker">Spring / 独立开发笔记</p>
+      <h1>把项目里的问题，<br />写成能用的笔记。</h1>
+      <p class="lead">从一个静态网站的发布，到一个 APK 的校验。这里记录具体的配置、取舍与验证方法，也说明哪些结论还需要继续验证。</p>
       <div class="actions">
-        <a class="button" href="/apps/">查看 Android 应用</a>
-        <a class="button-secondary" href="/blog/">阅读博客</a>
+        <a class="button" href="/blog/">阅读全部文章</a>
+        <a class="button-secondary" href="/about/">关于作者与写作</a>
       </div>
     </div>
-   <aside class="panel proof-panel" aria-label="Android 应用入口">
-     <p class="eyebrow">Android / 内部测试</p>
-     <h2>听伴与 RouteDeck</h2>
-     <p>查看真实功能、隐私说明、版本校验值，以及可直接扫码的 APK 下载入口。</p>
-     <a href="/apps/">进入应用下载中心</a>
-     <div class="project-mini">
-       <span>听伴 TingBan</span>
-       <a href="/apps/tingban/">助听、字幕与对话整理</a>
-     </div>
-     <div class="project-mini">
-        <span>RouteDeck</span>
-        <a href="/apps/routedeck/">Android 桌面与网络策略</a>
-      </div>
-   </aside>
+    <aside class="panel reading-pick" aria-label="推荐阅读">
+      <p class="eyebrow">从这篇开始 / {featured.data.kind}</p>
+      <h2><a href={`/blog/${featured.id}/`}>{featured.data.title}</a></h2>
+      <p>{featured.data.description}</p>
+      <a class="text-link" href={`/blog/${featured.id}/`}>阅读完整笔记 →</a>
+    </aside>
   </section>
-
-  <section class="section">
-    <div class="section-header">
-      <div>
-        <p class="eyebrow">最新更新</p>
-        <h2>最新文章</h2>
-      </div>
-      <a class="text-link" href="/blog/">全部文章</a>
+  <section class="section" aria-labelledby="topics-title">
+    <div class="section-header"><div><p class="eyebrow">按问题找文章</p><h2 id="topics-title">三个阅读方向</h2></div></div>
+    <div class="manifesto-grid">
+      {topics.map((topic) => <article class="project-card topic-card">
+        <p class="eyebrow">{posts.filter((post) => post.data.topic === topic.id).length} 篇笔记</p>
+        <h3><a href={`/blog/#${topic.id}`}>{topic.name}</a></h3>
+        <p>{topic.description}</p><a href={`/blog/#${topic.id}`}>查看这个主题 →</a>
+      </article>)}
     </div>
+  </section>
+  <section class="section" aria-labelledby="recent-title">
+    <div class="section-header"><div><p class="eyebrow">按最近修订排序</p><h2 id="recent-title">最近的笔记</h2></div><a href="/blog/">全部 {posts.length} 篇</a></div>
     <div class="post-list">
-      {posts.map((post, index) => (
-        <article class="post-card" data-index={String(index + 1).padStart(2, "0")}>
-          <h3><a href={`/blog/${post.id}/`}>{post.data.title}</a></h3>
-          <p>{post.data.description}</p>
-          <div class="meta">
-            <time datetime={post.data.date.toISOString()}>{post.data.date.toLocaleDateString("zh-CN")}</time>
-            {post.data.tags.slice(0, 3).map((tag) => <span class="tag">{tag}</span>)}
-          </div>
-        </article>
-      ))}
+      {latest.map((post, index) => <article class="post-card" data-index={String(index + 1).padStart(2, "0")}>
+        <div class="meta"><span>{post.data.kind}</span><time datetime={(post.data.updated ?? post.data.date).toISOString()}>{post.data.updated ? "修订" : "发布"} {formatDate(post.data.updated ?? post.data.date)}</time></div>
+        <h3><a href={`/blog/${post.id}/`}>{post.data.title}</a></h3>
+        <p>{post.data.description}</p>
+        <div class="meta">{post.data.tags.map((tag) => <span class="tag">{tag}</span>)}</div>
+      </article>)}
     </div>
   </section>
-
-  <section class="section manifesto-grid" aria-label="站点内容">
-    <div class="project-card">
-      <p class="eyebrow">01 / 项目</p>
-      <h3>先做出来</h3>
-      <p>记录 imspring tools、听伴、RouteDeck、TestData 等真实项目的需求、取舍、部署和后续优化。</p>
-      <a href="/projects/">看项目</a>
-      <span> / </span>
-      <a href={siteConfig.projectLinks.tools} target="_blank" rel="noopener">tools.imspring.cn</a>
-    </div>
-    <div class="project-card">
-      <p class="eyebrow">02 / 文章</p>
-      <h3>少写空话</h3>
-      <p>文章以实践笔记为主，尽量给出背景、过程和结果。</p>
-      <a href="/blog/">看文章</a>
-    </div>
-    <div class="project-card">
-      <p class="eyebrow">03 / 交流</p>
-      <h3>欢迎联系</h3>
-      <p>如果你也在做工具、内容站或 AI 产品，可以从联系页开始。</p>
-      <a href="/contact/">联系 Spring</a>
-    </div>
+  <section class="section home-projects" aria-labelledby="projects-title">
+    <div><p class="eyebrow">笔记背后的项目</p><h2 id="projects-title">继续动手试试</h2><p>应用有独立的功能介绍、版本信息和隐私说明。外部工具站有各自的使用范围，文章里的示例不等于所有项目的线上实现。</p></div>
+    <div class="project-links"><a href="/apps/tingban/">听伴 · 助听与对话整理 →</a><a href="/apps/routedeck/">RouteDeck · Android 桌面 →</a><a href="/projects/">工具网站与项目说明 →</a></div>
   </section>
 </BaseLayout>

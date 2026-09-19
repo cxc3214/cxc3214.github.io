@@ -22,6 +22,7 @@ import { siteConfig } from "../config/site";
       <h2>听伴 / RouteDeck</h2>
       <p>助听与对话整理、Android 桌面与网络策略工具。查看真实功能、测试边界、隐私说明、二维码和经过校验的 APK。</p>
       <a href="/apps/">查看应用与下载</a>
+      <p class="project-reading"><a href="/blog/android-apk-download-verification/">相关笔记：怎样核对 APK 版本与文件</a></p>
     </article>
 
     <article class="project-card">
@@ -36,6 +37,7 @@ import { siteConfig } from "../config/site";
       <h2>World Cup Live</h2>
       <p>世界杯赛程、比分、球队和数据展示项目，也用于记录内容站的 SEO 与部署实践。</p>
       <a href={siteConfig.projectLinks.worldCup} target="_blank" rel="noopener">访问 worldcup.imspring.cn</a>
+      <p class="project-reading"><a href="/blog/world-cup-live-project-notes/">设计笔记：时间、比分与状态怎样分开</a></p>
     </article>
 
     <article class="project-card">
@@ -44,5 +46,10 @@ import { siteConfig } from "../config/site";
       <p>追踪 Codex 重置时间、未来 24/48 小时重置概率、官方动态与 OpenAI 服务状态，并比较每日模型 IQ、成本与性价比推荐。</p>
       <a href={siteConfig.projectLinks.codexSignal} target="_blank" rel="noopener">访问 codex.imspring.cn</a>
     </article>
+  </section>
+  <section class="page prose">
+    <h2>这些项目与主站的关系</h2>
+    <p>imspring.cn 保存技术笔记和项目背景，独立子站提供工具或数据服务。外部站点的实时数据、服务可用性与隐私说明以其当前页面为准，设计笔记中的示例不代表所有功能已经上线。</p>
+    <p>本站自身的配置和发布流程也作为一个可阅读的案例，见<a href="/blog/astro-github-pages-release-checks/">从 Markdown 到线上页面的检查链</a>。如果入口失效，可通过<a href="/contact/">联系页</a>反馈。</p>
   </section>
 </BaseLayout>

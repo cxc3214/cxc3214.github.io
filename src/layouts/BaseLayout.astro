@@ -10,6 +10,7 @@ interface Props {
   ogImage?: string;
   ogImageAlt?: string;
   jsonLd?: Record<string, unknown>;
+  noindex?: boolean;
 }
 
 const {
@@ -20,6 +21,7 @@ const {
   ogImage: ogImagePath = siteConfig.ogImage,
   ogImageAlt = siteConfig.title,
   jsonLd,
+  noindex = false,
 } = Astro.props;
 
 const pageTitle = title === siteConfig.title ? title : `${title} | ${siteConfig.name}`;
@@ -46,6 +48,7 @@ const isCurrent = (href: string) => href === "/" ? currentPath === href : curren
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex,follow" />}
     <meta name="theme-color" content={siteConfig.themeColor} />
     <link rel="canonical" href={canonical} />
     <meta property="og:locale" content={siteConfig.locale} />
@@ -63,7 +66,7 @@ const isCurrent = (href: string) => href === "/" ? currentPath === href : curren
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
     <meta name="google-adsense-account" content={siteConfig.adsense.publisherId} />
-    {siteConfig.adsense.enabled && (
+    {siteConfig.adsense.enabled && !noindex && (
       <script
         async
         src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${siteConfig.adsense.publisherId}`}
@@ -104,6 +107,8 @@ const isCurrent = (href: string) => href === "/" ? currentPath === href : curren
         <a href="/terms/">使用条款</a>
         <span>/</span>
         <a href="/apps/">应用下载</a>
+        <span>/</span>
+        <a href="/editorial/">内容说明</a>
       </p>
     </footer>
   </body>

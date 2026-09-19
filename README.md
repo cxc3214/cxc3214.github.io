@@ -24,6 +24,7 @@ npm run dev
 
 ```sh
 npm run build
+npm run test:built
 ```
 
 本地预览构建结果：
@@ -42,12 +43,19 @@ title: 新文章标题
 description: 这篇文章的简短描述，用于 SEO 和文章列表。
 date: 2026-06-14
 tags: ["AI", "Web"]
+topic: engineering
+kind: 仓库实践
+scope: 基于哪个项目、版本或示例；说明不适用的场景。
 ---
 
 这里开始写正文。
 ```
 
 文件名会成为文章地址，例如 `src/content/blog/my-note.md` 对应 `/blog/my-note/`。
+
+主题为 `web`、`engineering` 或 `data`；类型为仓库实践、排查记录、技术指南或设计笔记。实质修改时补 `updated`，不要改首次 `date`。示例与实测需明确区分。内容标准见 `/editorial/`，本次问题与验收记录见 `docs/2026-09-19-content-remediation.md`。
+
+`npm run test:built` 在构建后核验实际 HTML 的站内链接、目录锚点、canonical、sitemap、旧文章 URL、结构化数据和 AdSense 声明；检查通过不代表内容审核通过。
 
 ## Google AdSense
 

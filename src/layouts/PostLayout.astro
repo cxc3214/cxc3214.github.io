@@ -1,14 +1,22 @@
 ---
-import { render, type CollectionEntry } from "astro:content";
+import { getCollection, render, type CollectionEntry } from "astro:content";
 import BaseLayout from "./BaseLayout.astro";
 import { siteConfig } from "../config/site";
+import { topics, formatDate } from "../config/topics";
 
 interface Props {
   post: CollectionEntry<"blog">;
 }
 
 const { post } = Astro.props;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
+const toc = headings.filter((heading) => heading.depth === 2);
+const topic = topics.find((topic) => topic.id === post.data.topic)!;
+const related = (await getCollection("blog"))
+  .filter((entry) => entry.id !== post.id)
+  .sort((a, b) => Number(b.data.topic === post.data.topic) - Number(a.data.topic === post.data.topic)
+    || (b.data.updated ?? b.data.date).valueOf() - (a.data.updated ?? a.data.date).valueOf())
+  .slice(0, 2);
 const canonicalPath = `/blog/${post.id}/`;
 const modifiedDate = post.data.updated ?? post.data.date;
 const jsonLd = {
@@ -21,7 +29,7 @@ const jsonLd = {
   author: {
     "@type": "Person",
     name: siteConfig.author,
-    url: siteConfig.url,
+    url: `${siteConfig.url}/about/`,
   },
   publisher: {
     "@type": "Person",
@@ -41,26 +49,24 @@ const jsonLd = {
   <article class="article">
     <header class="article-header">
       <a class="back-link" href="/blog/">返回博客</a>
-      <p class="article-kicker">文章 / {post.data.tags[0]}</p>
+      <p class="article-kicker">{post.data.kind} / <a href={`/blog/#${topic.id}`}>{topic.name}</a></p>
       <h1>{post.data.title}</h1>
       <p class="article-description">{post.data.description}</p>
       <div class="meta">
-        <span>作者 {siteConfig.author}</span>
-        <time datetime={post.data.date.toISOString()}>发布于 {post.data.date.toLocaleDateString("zh-CN")}</time>
+        <a href="/about/">作者 {siteConfig.author}</a>
+        <time datetime={post.data.date.toISOString()}>发布于 {formatDate(post.data.date)}</time>
         {post.data.updated && (
-          <time datetime={post.data.updated.toISOString()}>更新于 {post.data.updated.toLocaleDateString("zh-CN")}</time>
+          <time datetime={post.data.updated.toISOString()}>更新于 {formatDate(post.data.updated)}</time>
         )}
         <span>{post.data.tags.join(" / ")}</span>
       </div>
     </header>
+    <aside class="article-scope" aria-label="阅读范围"><strong>阅读范围</strong><p>{post.data.scope}</p></aside>
+    {toc.length > 0 && <nav class="article-toc" aria-label="本文目录"><h2>本文目录</h2><ol>{toc.map((heading) => <li><a href={`#${heading.slug}`}>{heading.text}</a></li>)}</ol></nav>}
     <div class="prose">
       <Content />
     </div>
-   <footer class="article-footer">
-     <a class="button-secondary" href="/blog/">更多文章</a>
-      <a class="button" href="/projects/">
-        查看项目
-     </a>
-   </footer>
+    <aside class="related-reading" aria-labelledby="related-title"><h2 id="related-title">继续阅读</h2>{related.map((entry) => <p><a href={`/blog/${entry.id}/`}>{entry.data.title}</a><br /><span>{entry.data.description}</span></p>)}</aside>
+    <footer class="article-footer"><p>发现步骤失效或描述不准确？请在<a href="/contact/">联系页</a>提供本文地址、环境和复现步骤。<a href="/editorial/">查看修订说明</a>。</p><a class="button-secondary" href="/blog/">返回全部文章</a></footer>
   </article>
 </BaseLayout>
