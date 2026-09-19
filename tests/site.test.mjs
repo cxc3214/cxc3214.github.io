@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
+import { execFileSync } from "node:child_process";
 
 const root = process.cwd();
 const requiredFiles = [
@@ -24,6 +25,15 @@ const requiredFiles = [
 function read(path) {
   return readFileSync(join(root, path), "utf8");
 }
+
+test("JSON article example is executable and matches its download", () => {
+  const post = read("src/content/blog/json-formatting-data-fidelity.md");
+  const code = post.match(/```js\n(\/\/ json-fidelity-checks\.mjs[\s\S]*?)\n```/)?.[1];
+  assert.equal(code, read("public/examples/json-fidelity-checks.mjs").trim());
+  const output = execFileSync(process.execPath, ["public/examples/json-fidelity-checks.mjs"], { cwd: root, encoding: "utf8" });
+  assert.equal(output.trim(), "12 checks passed");
+  assert.match(post, /本次没有检查工具站内部实现/);
+});
 
 test("required site files exist", () => {
   for (const file of requiredFiles) {
