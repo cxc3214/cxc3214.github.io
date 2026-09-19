@@ -15,10 +15,12 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/markdown-satteri": "^0.3.7",
     "@astrojs/sitemap": "^3.7.3",
-    "astro": "^7.2.4"
+    "astro": "^7.2.8"
   },
   "devDependencies": {
-    "qrcode": "^1.5.4"
+    "qrcode": "^1.5.4",
+    "satteri": "^0.10.5"
   }
 }

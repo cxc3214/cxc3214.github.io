@@ -854,7 +854,9 @@ nav a[aria-current="page"] {
 .prose h2 { font-size: clamp(24px, 3vw, 30px); }
 .prose pre { max-width: 100%; overflow-x: auto; padding: 20px; border: 1px solid var(--line); border-radius: 4px; font-size: 14px; line-height: 1.7; }
 .prose pre code { border: 0; background: transparent; padding: 0; overflow-wrap: normal; }
-.prose table { display: block; width: 100%; max-width: 100%; overflow-x: auto; border-collapse: collapse; font-size: 15px; margin: 24px 0; }
+.prose .table-scroll { max-width: 100%; overflow-x: auto; margin: 24px 0; }
+.prose table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.prose pre:focus-visible, .prose .table-scroll:focus-visible { outline: 3px solid var(--signal); outline-offset: 4px; }
 .prose th, .prose td { border: 1px solid var(--line); padding: 10px 12px; min-width: 130px; vertical-align: top; text-align: left; }
 .prose th { background: var(--accent-soft); color: var(--ink); }
 .prose img { max-width: 100%; height: auto; }

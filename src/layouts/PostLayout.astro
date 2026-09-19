@@ -3,6 +3,7 @@ import { getCollection, render, type CollectionEntry } from "astro:content";
 import BaseLayout from "./BaseLayout.astro";
 import { siteConfig } from "../config/site";
 import { topics, formatDate } from "../config/topics";
+import { comparePosts } from "../lib/posts.mjs";
 
 interface Props {
   post: CollectionEntry<"blog">;
@@ -15,7 +16,7 @@ const topic = topics.find((topic) => topic.id === post.data.topic)!;
 const related = (await getCollection("blog"))
   .filter((entry) => entry.id !== post.id)
   .sort((a, b) => Number(b.data.topic === post.data.topic) - Number(a.data.topic === post.data.topic)
-    || (b.data.updated ?? b.data.date).valueOf() - (a.data.updated ?? a.data.date).valueOf())
+    || comparePosts(a, b))
   .slice(0, 2);
 const canonicalPath = `/blog/${post.id}/`;
 const modifiedDate = post.data.updated ?? post.data.date;

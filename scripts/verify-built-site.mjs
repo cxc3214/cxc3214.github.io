@@ -55,6 +55,19 @@ for (const [file, html] of pages) {
     articles++;
     assert.ok(html.includes('aria-label="本文目录"'), `${url.pathname}: missing TOC`);
     assert.ok(html.includes('aria-label="阅读范围"'), `${url.pathname}: missing scope`);
+    for (const tag of tags(html, "pre")) {
+      assert.equal(attr(tag, "tabindex"), "0", `${url.pathname}: code keyboard access`);
+      assert.equal(attr(tag, "role"), "region");
+      assert.ok(attr(tag, "aria-label"));
+    }
+    const tableRegions = tags(html, "div").filter((tag) => attr(tag, "class").split(/\s+/).includes("table-scroll"));
+    assert.equal(tableRegions.length, tags(html, "table").length, `${url.pathname}: table wrappers`);
+    for (const tag of tableRegions) {
+      assert.equal(attr(tag, "tabindex"), "0", `${url.pathname}: table keyboard access`);
+      assert.equal(attr(tag, "role"), "region");
+      assert.ok(attr(tag, "aria-label"));
+    }
+    for (const tag of tags(html, "th")) assert.equal(attr(tag, "scope"), "col");
     const json = html.match(/<script type="application\/ld\+json">(.*?)<\/script>/s)?.[1];
     const metadata = JSON.parse(json);
     assert.equal(metadata["@type"], "BlogPosting");

@@ -3,9 +3,9 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { siteConfig } from "../config/site";
 import { topics, formatDate } from "../config/topics";
+import { comparePosts } from "../lib/posts.mjs";
 
-const posts = (await getCollection("blog")).sort((a, b) =>
-  (b.data.updated ?? b.data.date).valueOf() - (a.data.updated ?? a.data.date).valueOf());
+const posts = (await getCollection("blog")).sort(comparePosts);
 const featured = posts.find((post) => post.id === "json-formatting-data-fidelity")!;
 const latest = posts.filter((post) => post.id !== featured.id).slice(0, 4);
 const jsonLd = {

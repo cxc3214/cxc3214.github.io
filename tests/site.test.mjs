@@ -3,6 +3,11 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 import { execFileSync } from "node:child_process";
+import QRCode from "qrcode";
+import { comparePosts } from "../src/lib/posts.mjs";
+import { serializeJsonLd } from "../src/lib/structured-data.mjs";
+import readableBlocks from "../src/lib/readable-blocks.mjs";
+import { markdownToHtml } from "satteri";
 
 const root = process.cwd();
 const requiredFiles = [
@@ -25,6 +30,56 @@ const requiredFiles = [
 function read(path) {
   return readFileSync(join(root, path), "utf8");
 }
+
+test("recent posts have deterministic publication and slug tie-breaks", () => {
+  const post = (id, date, updated) => ({ id, data: {
+    date: new Date(date), ...(updated ? { updated: new Date(updated) } : {}),
+  } });
+  const posts = [
+    post("old", "2026-06-10", "2026-09-19"),
+    post("z-new", "2026-09-19"), post("a-new", "2026-09-19"),
+    post("recent-revision", "2026-06-01", "2026-09-20"),
+  ];
+  const expected = ["recent-revision", "a-new", "z-new", "old"];
+  assert.deepEqual([...posts].sort(comparePosts).map(p => p.id), expected);
+  assert.deepEqual([...posts].reverse().sort(comparePosts).map(p => p.id), expected);
+  assert.equal(comparePosts(posts[0], posts[0]), 0);
+});
+
+test("JSON-LD preserves text without permitting HTML script termination", () => {
+  const data = { headline: '</script><script>alert("x")</script>', text: "中文 < & >" };
+  const serialized = serializeJsonLd(data);
+  assert.ok(!serialized.includes("<"));
+  assert.deepEqual(JSON.parse(serialized), data);
+  assert.match(read("src/layouts/BaseLayout.astro"), /set:html=\{serializeJsonLd\(jsonLd\)\}/);
+});
+
+test("Markdown scroll regions retain semantics, content and author properties", async () => {
+  const source = '<pre class="custom" aria-label="自定义说明"><code>hello</code></pre>\n\n```js\nconst x = 1;\n```\n\n| A | B |\n| --- | --- |\n| one | two |';
+  const plugin = readableBlocks();
+  const { html } = await markdownToHtml(source, { hastPlugins: [plugin] });
+  assert.match(html, /aria-label="自定义说明"/);
+  assert.match(html, /class="custom"/);
+  assert.match(html, /代码示例 1，可横向滚动/);
+  assert.match(html, /class="table-scroll" tabindex="0" role="region" aria-label="数据表格 1，可横向滚动"><table>/);
+  assert.equal((html.match(/<th scope="col">/g) ?? []).length, 2);
+  assert.match(html, /<td>one<\/td>/);
+  const rerun = await markdownToHtml(source, { hastPlugins: [plugin, readableBlocks()] });
+  assert.equal(rerun.html, html, "running twice must not double-wrap tables");
+  const nextDocument = await markdownToHtml('```txt\nnext\n```', { hastPlugins: [plugin] });
+  assert.match(nextDocument.html, /代码示例 1，可横向滚动/);
+});
+
+test("download QR assets encode the exact configured APK addresses", async () => {
+  const apps = JSON.parse(read("src/config/apps.json"));
+  for (const app of apps) {
+    const expected = await QRCode.toString(app.downloadUrl, {
+      type: "svg", errorCorrectionLevel: "M", margin: 2,
+      color: { dark: "#11140f", light: "#fffdf6" },
+    });
+    assert.equal(read(`public/apps/${app.id}-download-qr.svg`), expected, app.id);
+  }
+});
 
 test("JSON article example is executable and matches its download", () => {
   const post = read("src/content/blog/json-formatting-data-fidelity.md");

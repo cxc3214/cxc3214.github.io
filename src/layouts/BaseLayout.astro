@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import { siteConfig } from "../config/site";
+import { serializeJsonLd } from "../lib/structured-data.mjs";
 
 interface Props {
   title: string;
@@ -81,7 +82,7 @@ const isCurrent = (href: string) => href === "/" ? currentPath === href : curren
       />
     )}
     {jsonLd && (
-      <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+      <script type="application/ld+json" set:html={serializeJsonLd(jsonLd)} />
     )}
   </head>
   <body>
