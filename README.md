@@ -86,7 +86,7 @@ google.com, pub-3132117537257566, DIRECT, f08c47fec0942fa0
 
 ## 学习资料栏目与 Basic Auth
 
-栏目入口是 `https://imspring.cn/study/`，主站导航中显示为“学习资料”。目录收录论文专题、考前精要、Redis、分布式事务实验室和 ELK/Loki；阅读页顶部提供资料切换、上一份、下一份与返回目录。原页面的交互、动画和本地复习进度保留。
+栏目入口是 `https://imspring.cn/study/`，主站导航中显示为“学习资料”。目录收录论文专题、考前精要、Redis、分布式事务实验室、ELK/Loki 和完整训练营；阅读页顶部提供资料切换、上一份、下一份与返回目录。原页面的交互、动画和本地复习进度保留。完整训练营入口为 `/study/essay-bootcamp/`，包含 7 天论文练习。
 
 GitHub Pages 本身不能执行服务端 Basic Auth，因此主站继续由 GitHub Pages 发布，`/study` 和 `/study/*` 由 `imspring-study` Cloudflare Worker 提供。域名必须经过 Cloudflare 代理。`www` 域名的同一路径也绑定认证 Worker。
 

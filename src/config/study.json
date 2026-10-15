@@ -38,5 +38,13 @@
     "category": "知识",
     "description": "对照日志采集、索引、存储与查询链路，梳理两类日志平台的适用场景。",
     "source": "ELK 与 Loki：架构、流程与取舍.html"
+  },
+  {
+    "id": "essay-bootcamp",
+    "title": "完整训练营",
+    "subtitle": "论文练习室 · 7 天把逻辑写清楚",
+    "category": "论文",
+    "description": "按天练习论文论证，结合阅读、回忆卡片、情境测验、闭卷写作与自检记录。",
+    "source": "完整训练营.html"
   }
 ]
