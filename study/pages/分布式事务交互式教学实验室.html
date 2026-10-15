@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>分布式事务交互式教学实验室</title>
+<style>
+:root{
+  --bg:#edf0f3; --panel:#ffffff; --ink:#18212b; --muted:#55636f; --line:#d6dce3; --line2:#aeb8c3;
+  --accent:#0b5f7a; --accent-bg:#e1f0f4; --accent-ink:#064458;
+  --ok:#1b7443; --warn:#8f5500; --bad:#b3261e; --comp:#6a3da3; --info:#1b5ea8;
+  --changed:#ffefae; --down-bg:#f1f1f1;
+  --font:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC","Source Han Sans SC","WenQuanYi Micro Hei",system-ui,sans-serif;
+  --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.65 var(--font)}
+button,select,input{font:inherit;color:inherit}
+a{color:var(--accent-ink)}
+.skip{position:absolute;left:-999px;top:0;background:#fff;padding:8px 12px;z-index:50}
+.skip:focus{left:8px;top:8px}
+:focus-visible{outline:3px solid #f2a900;outline-offset:2px;border-radius:3px}
+
+.app{display:grid;grid-template-columns:204px minmax(0,1fr);min-height:100vh}
+.nav{background:#16222d;color:#e6edf3;padding:16px 12px;position:sticky;top:0;height:100vh;overflow:auto}
+.brand{font-weight:700;font-size:16px;line-height:1.4;padding:4px 8px 12px;border-bottom:1px solid #2c3b49;margin-bottom:10px}
+.brand small{display:block;font-weight:400;font-size:12px;color:#9db0c0;margin-top:2px}
+.nav ol{list-style:none;margin:0;padding:0}
+.nav button.chbtn{display:flex;gap:8px;width:100%;text-align:left;background:none;border:0;color:#d5dee6;padding:8px 8px;border-radius:5px;cursor:pointer;line-height:1.35;align-items:flex-start}
+.nav button.chbtn .no{flex:0 0 22px;color:#8fb6c6;font-variant-numeric:tabular-nums}
+.nav button.chbtn:hover{background:#223341}
+.nav button.chbtn[aria-current="page"]{background:#0e6a86;color:#fff}
+.legend{margin-top:16px;padding:10px 8px;border-top:1px solid #2c3b49;font-size:12px;color:#aebdca;line-height:1.7}
+.legend b{color:#e6edf3;font-weight:600}
+.legend .ln{display:flex;align-items:center;gap:8px}
+.legend svg{flex:0 0 34px}
+.kbd{font:12px var(--mono);background:#26384a;border-radius:3px;padding:0 5px;color:#e6edf3}
+
+main{padding:20px 22px 40px;min-width:0}
+.mhead h1{font-size:24px;line-height:1.3;margin:0 0 4px}
+.mhead p.intro{margin:0 0 12px;color:var(--muted);max-width:78ch}
+.sctabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.sctabs button{border:1px solid var(--line2);background:#fff;border-radius:6px;padding:6px 12px;cursor:pointer;line-height:1.4;text-align:left}
+.sctabs button:hover{border-color:var(--accent)}
+.sctabs button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.sctabs .kind{font-size:12px;opacity:.85;display:block}
+
+.labgrid{display:grid;grid-template-columns:minmax(0,1fr) 372px;gap:16px;align-items:start}
+.cola,.colb{display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.panel h2{font-size:15px;margin:0 0 8px;line-height:1.4}
+.stage{padding:8px;background:#fbfcfd}
+#svg{display:block;width:100%;height:auto}
+.capbar{padding:9px 12px 7px;border-bottom:1px solid var(--line);margin:-8px -8px 8px;background:#f1f7f9;border-radius:8px 8px 0 0}
+.capmeta{font-size:12.5px;color:var(--muted)}
+.captitle{font-weight:700;font-size:16.5px;line-height:1.4;margin-top:1px}
+.captext{font-size:14px;line-height:1.55;color:#22303c}
+.capprog{height:3px;background:#d9e5ea;margin-top:7px;border-radius:2px;overflow:hidden}
+.capprog i{display:block;height:100%;width:0;background:var(--accent)}
+.analogy{margin:0 0 12px;padding:8px 12px;border-left:4px solid #b0842f;background:#fff9ec;border-radius:0 6px 6px 0;font-size:14px;max-width:100ch}
+.analogy .hint{display:block;margin-top:2px}
+.flowlist{margin:2px 0 0;padding-left:0;list-style:none;display:grid;gap:3px}
+.flowlist li{display:grid;grid-template-columns:auto auto 1fr;gap:6px;align-items:baseline;font-size:13.5px}
+.flowlist .no{display:inline-block;min-width:20px;height:20px;line-height:20px;text-align:center;border-radius:50%;background:#52606d;color:#fff;font-size:12px;font-weight:700}
+.flowlist .fk{font-size:12px;border:1px solid;border-radius:4px;padding:0 6px;white-space:nowrap}
+.fk.k-req{color:var(--info);border-color:#9bbbe0}.fk.k-ok{color:var(--ok);border-color:#98cfae}.fk.k-fail{color:var(--bad);border-color:#e6aaa6}.fk.k-comp{color:var(--comp);border-color:#c5b0e0}.fk.k-lost{color:var(--bad);border-color:#e6aaa6;border-style:dotted}
+.stagecap{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--muted);padding:6px 8px 2px}
+
+.controls{display:grid;gap:10px}
+.crow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{border:1px solid var(--line2);background:#fff;border-radius:6px;padding:7px 14px;cursor:pointer;min-height:38px}
+.btn:hover{border-color:var(--accent);background:var(--accent-bg)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;min-width:84px}
+.btn.primary:hover{background:#094f66}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.crow label{display:flex;gap:6px;align-items:center;font-size:14px}
+.crow select{border:1px solid var(--line2);border-radius:6px;padding:6px 8px;background:#fff;min-height:38px}
+.slider{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center}
+.slider input[type=range]{width:100%;min-height:28px;accent-color:var(--accent)}
+.stepno{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+.hint{font-size:12.5px;color:var(--muted)}
+
+.explain h3{font-size:17px;margin:0 0 6px;line-height:1.4}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 8px}
+.tag{font-size:12px;border-radius:4px;padding:1px 7px;border:1px solid;line-height:1.6;white-space:nowrap}
+.tag.std{color:var(--info);border-color:#9bbbe0;background:#eef5fc}
+.tag.teach{color:var(--warn);border-color:#e0c08a;background:#fdf5e6}
+.tag.eng{color:var(--ok);border-color:#98cfae;background:#edf8f1}
+.explain dl{margin:0}
+.explain dt{font-weight:700;margin-top:10px;font-size:14px}
+.explain dd{margin:2px 0 0;font-size:14.5px}
+.explain dd ul{margin:2px 0 0;padding-left:18px}
+.explain .note{margin-top:10px;border-left:4px solid var(--accent);background:var(--accent-bg);padding:8px 10px;border-radius:0 6px 6px 0;font-size:14px}
+.explain .note b{color:var(--accent-ink)}
+
+.sgrp{margin:0 0 8px}
+.sgrp h4{margin:0 0 2px;font-size:13px;color:var(--muted);font-weight:600}
+.sgrp dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:1px 10px;font-size:13.5px}
+.sgrp dt{color:var(--muted)}
+.sgrp dd{margin:0;text-align:right;overflow-wrap:anywhere}
+.sgrp dd.chg{background:var(--changed);border-radius:3px;padding:0 4px;font-weight:700}
+.sgrp dd .chip{font-size:11px;color:#6a5200;margin-right:6px;font-weight:600}
+.v-ok{color:var(--ok)} .v-warn{color:var(--warn)} .v-bad{color:var(--bad)} .v-comp{color:var(--comp)} .v-mute{color:var(--ink)}
+
+.bound ul{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.bound li{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;font-size:14px}
+.tl ol{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.tl button{display:grid;grid-template-columns:26px 1fr;gap:6px;width:100%;text-align:left;border:0;background:none;padding:5px 6px;border-radius:5px;cursor:pointer;font-size:13.5px;line-height:1.45}
+.tl button:hover{background:#f0f4f7}
+.tl .mark{font-size:13px;text-align:center;color:var(--muted);font-variant-numeric:tabular-nums}
+.tl li.done .mark{color:var(--ok)}
+.tl li.cur button{background:var(--accent-bg);font-weight:700}
+.tl li.cur .mark{color:var(--accent)}
+.tl li.todo{color:#6b7782}
+
+/* SVG theme */
+#svg text{font-family:var(--font)}
+.flow{fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round;stroke-dasharray:4 12;animation:flow .9s linear infinite;opacity:.9;pointer-events:none}
+@keyframes flow{to{stroke-dashoffset:-16}}
+.ripple{fill:none;stroke-width:3;transform-box:fill-box;transform-origin:center;animation:rip .9s ease-out forwards;pointer-events:none}
+@keyframes rip{0%{opacity:.95;transform:scale(1)}100%{opacity:0;transform:scale(1.12)}}
+.val.pop{transform-box:fill-box;transform-origin:100% 50%;animation:pop .7s ease-out}
+@keyframes pop{0%{transform:scale(1.4)}100%{transform:scale(1)}}
+.delta{font-size:14px;font-weight:700;text-anchor:end;paint-order:stroke;stroke:#fff;stroke-width:3.5px;animation:flt 1.6s ease-out forwards;pointer-events:none}
+@keyframes flt{0%{opacity:0;transform:translateY(5px)}15%{opacity:1}100%{opacity:0;transform:translateY(-24px)}}
+.delta.neg{fill:var(--bad)}.delta.pos{fill:var(--ok)}
+.lockbody{fill:#fff3cf;stroke:var(--warn);stroke-width:1.4}
+.lockshk{fill:none;stroke:var(--warn);stroke-width:1.7}
+.badge text{fill:#fff;font-size:11px;font-weight:700;text-anchor:middle}
+.badge circle{stroke:#fff;stroke-width:1.5}
+.zone{fill:#f4f7fa;stroke:#c3ced9;stroke-dasharray:6 4}
+.zonel{font-size:12.5px;fill:#52606d;font-weight:600}
+.edge{stroke:#c0c9d2;stroke-width:2;fill:none}
+.edge.cut{stroke:var(--bad);stroke-dasharray:3 5;stroke-width:2.4}
+.cutx{fill:var(--bad);font-size:20px;font-weight:700;text-anchor:middle}
+.node .box{fill:#fff;stroke:#8795a3;stroke-width:1.4}
+.node.k-db .box{fill:#f2f9fb;stroke:#4f8ba0}
+.node.k-coord .box{fill:#f7f5fc;stroke:#7c62b0}
+.node.k-mq .box{fill:#fff9ec;stroke:#b0842f}
+.node.k-ext .box{stroke-dasharray:6 3;fill:#fafafa}
+.node.hl .box{stroke:var(--accent);stroke-width:3}
+.node.down .box{stroke:var(--bad);stroke-dasharray:5 4;fill:var(--down-bg)}
+.node.down .ttl,.node.down .lab,.node.down .val{opacity:.55}
+.ttl{font-size:14px;font-weight:700;fill:var(--ink)}
+.sub{font-size:11.5px;fill:#55636f}
+.lab{font-size:12px;fill:#55636f}
+.val{font-size:12.5px;font-weight:600;text-anchor:end}
+.val.v-ok{fill:var(--ok)}.val.v-warn{fill:var(--warn)}.val.v-bad{fill:var(--bad)}.val.v-comp{fill:var(--comp)}.val.v-mute{fill:var(--ink)}
+.rowbg{fill:transparent}
+.rowbg.chg{fill:var(--changed)}
+.val.chg{text-decoration:underline}
+.downtag rect{fill:var(--bad)}
+.downtag text{fill:#fff;font-size:11.5px;font-weight:700;text-anchor:middle}
+.icon{fill:none;stroke:#52606d;stroke-width:1.4}
+.mline{fill:none;stroke-width:2.6;stroke-linecap:round}
+.mlabel rect{fill:#fff;stroke-width:1.2}
+.mlabel text{font-size:12px;fill:var(--ink);text-anchor:middle}
+.xmark{font-size:19px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+
+/* summary view */
+#chExtra{margin-top:16px}
+.sumsec{margin:0 0 18px}
+.sumsec h2{font-size:18px;margin:0 0 8px}
+.tblwrap{overflow-x:auto}
+table.cmp{border-collapse:collapse;width:100%;font-size:13.5px;background:#fff}
+table.cmp th,table.cmp td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top;line-height:1.55}
+table.cmp thead th{background:#e9eff4;position:sticky;top:0}
+table.cmp tbody th{background:#f4f7f9;white-space:nowrap}
+.lines{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0;padding:0;list-style:none}
+.lines li{border:1px solid var(--line);border-radius:6px;padding:8px 10px;background:#fbfcfd;font-size:14px}
+.lines b{display:block;margin-bottom:2px}
+.tline{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0;font-size:14px}
+.tline dt{font-weight:700;font-variant-numeric:tabular-nums;color:var(--accent-ink)}
+.tline dd{margin:0}
+.mis{display:grid;gap:10px}
+.mis .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mis .bad,.mis .good{padding:8px 10px;border-radius:6px;font-size:14px}
+.mis .bad{background:#fdeceb;border:1px solid #efb9b5}
+.mis .good{background:#eaf6ef;border:1px solid #a9d6bb}
+.mis b{display:block;font-size:12.5px;margin-bottom:2px}
+dl.gl{display:grid;grid-template-columns:minmax(120px,max-content) 1fr;gap:6px 14px;margin:0}
+dl.gl dt{font-weight:700}
+dl.gl dd{margin:0}
+.q{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0 0 10px;background:#fff}
+.q legend{font-weight:700;padding:0 4px}
+.q label{display:flex;gap:8px;align-items:flex-start;padding:4px 2px;cursor:pointer}
+.q .res{margin-top:6px;padding:8px 10px;border-radius:6px;font-size:14px}
+.q .res.ok{background:#eaf6ef;border:1px solid #a9d6bb}
+.q .res.no{background:#fdeceb;border:1px solid #efb9b5}
+.score{font-weight:700}
+
+footer.refs{margin-top:24px;border-top:1px solid var(--line2);padding-top:14px;font-size:13.5px}
+footer.refs h2{font-size:16px;margin:0 0 6px}
+footer.refs ul{margin:0 0 10px;padding-left:20px}
+footer.refs li{margin:2px 0;overflow-wrap:anywhere}
+
+@media (max-width:1180px){
+  .labgrid{display:flex;flex-direction:column;gap:14px;align-items:stretch}
+  .cola,.colb{display:contents}
+  #p-stage{order:1}#p-ctrl{order:2}#p-explain{order:3}#p-state{order:4}#p-bound{order:5}#p-tl{order:6}
+}
+@media (max-width:760px){
+  body{font-size:15px}
+  .app{display:block}
+  .nav{position:sticky;top:0;height:auto;z-index:20;padding:8px 8px 6px;overflow:visible}
+  .brand{border:0;margin:0;padding:0 4px 6px;font-size:14px}.brand small{display:none}
+  .nav ol{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+  .nav li{flex:0 0 auto}
+  .nav button.chbtn{width:auto;white-space:nowrap;padding:6px 10px;background:#223341;align-items:center}
+  .legend{display:none}
+  main{padding:12px 10px 32px}
+  .mhead h1{font-size:20px}
+  .panel{padding:12px}
+  .sctabs{flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+  .sctabs button{flex:0 0 auto;max-width:78vw;scroll-snap-align:start;font-size:14px;padding:5px 10px}
+  .nav button.chbtn .no{display:none}
+  .mis .row{grid-template-columns:1fr}
+  .lines{grid-template-columns:1fr}
+  dl.gl{grid-template-columns:1fr}
+  .btn{padding:8px 12px}
+  .slider{grid-template-columns:1fr}
+  table.cmp thead{display:none}
+  table.cmp,table.cmp tbody,table.cmp tr,table.cmp th,table.cmp td{display:block;width:100%}
+  table.cmp tr{margin:0 0 10px;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  table.cmp th,table.cmp td{border:0;border-bottom:1px solid var(--line)}
+  table.cmp td::before{content:attr(data-l);display:block;font-weight:700;color:var(--muted);font-size:12px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳到主内容</a>
+<div class="app">
+  <aside class="nav" aria-label="章节导航">
+    <div class="brand">分布式事务<br>教学实验室<small>动画 · 故障 · 选型</small></div>
+    <nav><ol id="chapterList"></ol></nav>
+    <div class="legend" aria-label="图例">
+      <b>消息图例</b>
+      <div class="ln"><svg width="34" height="10"><line x1="1" y1="5" x2="33" y2="5" stroke="#1b5ea8" stroke-width="3"/></svg>请求(实线)</div>
+      <div class="ln"><svg width="34" height="10"><line x1="1" y1="5" x2="33" y2="5" stroke="#1b7443" stroke-width="3"/></svg>成功响应</div>
+      <div class="ln"><svg width="34" height="10"><line x1="1" y1="5" x2="33" y2="5" stroke="#b3261e" stroke-width="3"/></svg>失败响应</div>
+      <div class="ln"><svg width="34" height="10"><line x1="1" y1="5" x2="33" y2="5" stroke="#6a3da3" stroke-width="3" stroke-dasharray="6 3"/></svg>补偿/取消(虚线)</div>
+      <div class="ln"><svg width="34" height="10"><line x1="1" y1="5" x2="26" y2="5" stroke="#b3261e" stroke-width="3" stroke-dasharray="2 4"/><text x="27" y="9" font-size="11" fill="#b3261e">✕</text></svg>丢失/超时(点线+✕)</div>
+      <div style="margin-top:8px">圆圈编号 = 消息先后<br>白点流动 = 流向<br>挂锁图标 = 持有锁</div>
+      <div style="margin-top:8px"><span class="kbd">空格</span> 播放/暂停<br><span class="kbd">←</span><span class="kbd">→</span> 上/下一步<br><span class="kbd">R</span> 重播</div>
+    </div>
+  </aside>
+  <main id="main" tabindex="-1">
+    <div class="mhead">
+      <h1 id="chTitle"></h1>
+      <p class="intro" id="chIntro"></p>
+      <p class="analogy" id="chAnalogy" hidden></p>
+      <div class="sctabs" id="scTabs" role="group" aria-label="场景选择"></div>
+    </div>
+    <div id="labView" class="labgrid">
+      <div class="cola">
+        <section class="panel stage" id="p-stage" aria-label="流程图">
+          <div class="capbar" id="capbar" aria-hidden="true"></div>
+          <svg id="svg" role="img" aria-labelledby="svgTitle"><title id="svgTitle">流程图</title></svg>
+          <div class="stagecap" id="stageCap"></div>
+        </section>
+        <section class="panel controls" id="p-ctrl" aria-label="播放控制">
+          <div class="crow">
+            <button class="btn primary" id="bPlay" type="button">播放</button>
+            <button class="btn" id="bPrev" type="button">上一步</button>
+            <button class="btn" id="bNext" type="button">下一步</button>
+            <button class="btn" id="bReplay" type="button">重播</button>
+            <label>速度
+              <select id="selSpeed" aria-label="播放速度">
+                <option value="0.5">0.5×(慢)</option><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×(快)</option>
+              </select>
+            </label>
+            <label><input type="checkbox" id="chkReduce"> 减少动态效果</label>
+          </div>
+          <div class="slider">
+            <span class="stepno" id="stepNo">步骤 1/1</span>
+            <input type="range" id="rngStep" min="0" max="0" value="0" step="1" aria-label="步骤拖动">
+          </div>
+          <div class="hint">拖动滑块或点击右侧时间线可跳转到任意步骤,状态由该步骤的快照重新生成,不会残留其他步骤或场景的数据。</div>
+        </section>
+        <section class="panel bound" id="p-bound" aria-label="关键机制与边界"><h2>关键机制与边界</h2><ul id="boundList"></ul></section>
+      </div>
+      <div class="colb">
+        <section class="panel explain" id="p-explain" aria-live="polite" aria-label="当前步骤说明"></section>
+        <section class="panel" id="p-state" aria-label="状态面板"><h2>当前状态<span class="hint" style="font-weight:400"> (黄底 = 本步变化)</span></h2><div id="statePanel"></div></section>
+        <section class="panel tl" id="p-tl" aria-label="事务时间线"><h2>事务时间线</h2><ol id="timeline"></ol></section>
+      </div>
+    </div>
+    <div id="chExtra" hidden></div>
+    <div id="sumView" hidden></div>
+    <footer class="refs" id="refs"></footer>
+  </main>
+</div>
+<script>
+(function(){
+'use strict';
+/* ========== 基础工具 ========== */
+const NS='http://www.w3.org/2000/svg';
+const $=(s,r)=>(r||document).querySelector(s);
+const clone=o=>JSON.parse(JSON.stringify(o));
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function mk(tag,attrs,parent,text){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;if(parent)parent.appendChild(e);return e;}
+function h(tag,attrs,html){const e=document.createElement(tag);if(attrs)for(const k in attrs)e.setAttribute(k,attrs[k]);if(html!=null)e.innerHTML=html;return e;}
+
+/* ========== 数据定义助手 ========== */
+const TOPO={}, CH=[], REFS=[];
+const M=(f,t,l,k,w,lp)=>({f,t,l,k:k||'req',w:w||0,lp:lp==null?0.5:lp});
+const St=(t,a,b,r,o)=>({t,a,b,r,o:o||{}});
+const Sc=(id,title,topo,init,steps,kind)=>({id,title,topo,init:init||{},steps,kind:kind||'正常路径'});
+const N=(id,kind,title,rows,w,t,opt)=>Object.assign({id,kind,title,rows:rows||[],w,t},opt||{});
+window.DT={TOPO,CH,REFS,M,St,Sc,N};
+
+/* ========== 状态格式与着色 ========== */
+function fmt(v){if(typeof v==='number')return v.toLocaleString('zh-CN');return v==null?'—':String(v);}
+function vcls(v){const s=String(v);
+  if(/失败|FAIL|拒绝|宕机|不可达|死信|DEAD|超限|丢失|悬挂|中断|分歧|不一致|重复提交|多扣|错误/.test(s))return 'bad';
+  if(/ING|待|PENDING|UNKNOWN|未知|PROCESSING|PREPARED|PRECOMMIT|TRIED|WAIT|READY|重试|等待|阻塞|持有|人工|占用|冻结|ACTIVE|IDLE|TRYING|未提交|未生效|中间态|RECOVER|未确认|未报送|缺/.test(s))return 'warn';
+  if(/补偿|冲正|CANCEL|COMPENSAT|作废|ROLL|回滚|ABORT|已取消|空回滚|追回|追款/.test(s))return 'comp';
+  if(/成功|SUCCESS|COMMIT|CONFIRM|已生效|已完成|已入账|DONE|SENT|已投递|已报送|已受理|已对平|已关闭|已确认|ACK|已处理|COMPLETED|已闭环|已释放|已留痕|已记录|已修复/.test(s))return 'ok';
+  return 'mute';}
+const MCOL={req:'#1b5ea8',ok:'#1b7443',fail:'#b3261e',comp:'#6a3da3',lost:'#b3261e'};
+
+/* ========== 全局状态 ========== */
+const reduceMQ=window.matchMedia('(prefers-reduced-motion: reduce)');
+const narrowMQ=window.matchMedia('(max-width: 760px)');
+const S={once:false,ch:0,sc:0,step:0,p:1,playing:false,speed:1,reduce:reduceMQ.matches,mode:narrowMQ.matches?'tall':'wide',last:0,applied:''};
+const G={nodes:{},boxes:{},msgs:[],edges:{},topo:null,sc:null};
+const DUR=4200;
+
+function curCh(){return CH[S.ch];}
+function curSc(){const c=curCh();return c.scenarios?c.scenarios[S.sc]:null;}
+
+function compile(sc){
+  if(sc._c)return;
+  const T=TOPO[sc.topo];
+  let cur=Object.assign({down:[],cut:[]},clone(T.init||{}),clone(sc.init||{}));
+  sc.snaps=[clone(cur)];
+  sc.steps.forEach(st=>{cur=Object.assign({},cur,clone(st.o.s||{}));sc.snaps.push(clone(cur));});
+  const lm={};T.nodes.forEach(n=>n.rows.forEach(([k,l])=>{lm[k]={n:n.title,l};}));
+  const tt={};T.nodes.forEach(n=>tt[n.id]=n.title);
+  sc.lm=lm;sc.tt=tt;sc._c=true;
+}
+function diffList(sc,i){
+  const a=sc.snaps[i],b=sc.snaps[i+1],out=[];
+  Object.keys(sc.lm).forEach(k=>{
+    if(JSON.stringify(a[k])!==JSON.stringify(b[k])){out.push(`${sc.lm[k].n} · ${sc.lm[k].l}:${fmt(a[k])} → ${fmt(b[k])}`);}
+  });
+  (b.down||[]).filter(x=>!(a.down||[]).includes(x)).forEach(x=>out.push(`${sc.tt[x]}:宕机/不可达`));
+  (a.down||[]).filter(x=>!(b.down||[]).includes(x)).forEach(x=>out.push(`${sc.tt[x]}:恢复可用`));
+  const nm=c=>{const [p,q]=c.split('|');return `${sc.tt[p]}–${sc.tt[q]}`;};
+  (b.cut||[]).filter(x=>!(a.cut||[]).includes(x)).forEach(x=>out.push(`链路 ${nm(x)}:网络分区(中断)`));
+  (a.cut||[]).filter(x=>!(b.cut||[]).includes(x)).forEach(x=>out.push(`链路 ${nm(x)}:恢复连通`));
+  return out;
+}
+
+/* ========== 版面与 SVG ========== */
+function layout(T){
+  const wide=S.mode==='wide';
+  const W=wide?860:420,H=wide?Math.round((T.h||520)*0.94):(T.th||780),boxes={};
+  T.nodes.forEach(n=>{
+    const wd=n.wd?n.wd[wide?0:1]:(wide?188:186);
+    const nr=n.rows.length,hh=(n.sub?46:34)+nr*21+(nr?6:0);
+    const p=wide?n.w:n.t;
+    let x=p[0]*W/100-wd/2,y=p[1]*H/100-hh/2;
+    x=clamp(x,4,W-4-wd);y=clamp(y,4,H-4-hh);
+    boxes[n.id]={x,y,w:wd,h:hh,cx:x+wd/2,cy:y+hh/2,n};
+  });
+  return {W,H,boxes};
+}
+function anchor(b,tx,ty,gap){
+  const dx=tx-b.cx,dy=ty-b.cy;if(!dx&&!dy)return {x:b.cx,y:b.cy};
+  const sx=(b.w/2+gap)/Math.max(Math.abs(dx),1e-9),sy=(b.h/2+gap)/Math.max(Math.abs(dy),1e-9);
+  const t=Math.min(sx,sy);return {x:b.cx+dx*t,y:b.cy+dy*t};
+}
+function fit(el,maxW,base,min){
+  let fs=base;el.style.fontSize=fs+'px';el.setAttribute('data-fs',fs);
+  if(!el.getComputedTextLength)return;
+  let guard=0;
+  while(el.getComputedTextLength()>maxW&&fs>(min||9.5)&&guard++<30){fs-=0.5;el.style.fontSize=fs+'px';}
+  el.setAttribute('data-fs',fs);
+}
+function icon(kind,x,y,g){
+  if(kind==='db'){mk('ellipse',{class:'icon',cx:x+7,cy:y+3,rx:7,ry:3},g);mk('path',{class:'icon',d:`M${x} ${y+3}v9c0 1.8 3.1 3 7 3s7-1.2 7-3v-9M${x} ${y+7.5}c0 1.8 3.1 3 7 3s7-1.2 7-3`},g);}
+  else if(kind==='mq'){[0,5.5,11].forEach(o=>mk('rect',{class:'icon',x:x+o,y:y,width:4,height:14,rx:1},g));}
+  else if(kind==='coord'){mk('circle',{class:'icon',cx:x+7,cy:y+7,r:6.5},g);mk('path',{class:'icon',d:`M${x+7} ${y+2}v5l3 2`},g);}
+  else if(kind==='ext'){mk('rect',{class:'icon',x:x,y:y+1,width:12,height:12,rx:2,'stroke-dasharray':'3 2'},g);mk('path',{class:'icon',d:`M${x+6} ${y+8}l7-7m-4 0h4v4`},g);}
+  else{mk('rect',{class:'icon',x:x,y:y+1,width:14,height:12,rx:2},g);mk('path',{class:'icon',d:`M${x+3} ${y+5}h8M${x+3} ${y+9}h5`},g);}
+}
+
+function buildTopology(){
+  const sc=curSc(),T=TOPO[sc.topo],svg=$('#svg');
+  G.topo=T;G.sc=sc;
+  const L=layout(T);G.L=L;G.boxes=L.boxes;
+  svg.setAttribute('viewBox',`0 0 ${L.W} ${L.H}`);
+  while(svg.childNodes.length>1)svg.removeChild(svg.lastChild);
+  const gz=mk('g',{},svg),ge=mk('g',{},svg),gt=mk('g',{},svg),gn=mk('g',{},svg),gm=mk('g',{},svg);
+  G.gm=gm;G.gt=gt;G.gfx=mk('g',{},svg);
+  (T.zones||[]).forEach(z=>{const p=S.mode==='wide'?z.w:z.t;const x=p[0]*L.W/100,y=p[1]*L.H/100,w=p[2]*L.W/100,hh=p[3]*L.H/100;
+    mk('rect',{class:'zone',x,y,width:w,height:hh,rx:10},gz);mk('text',{class:'zonel',x:x+10,y:y+17},gz,z.l);});
+  G.edges={};
+  T.edges.forEach(([a,b])=>{
+    const A=L.boxes[a],B=L.boxes[b];
+    const pa=anchor(A,B.cx,B.cy,2),pb=anchor(B,A.cx,A.cy,2);
+    const g=mk('g',{},ge);
+    const ln=mk('line',{class:'edge',x1:pa.x,y1:pa.y,x2:pb.x,y2:pb.y},g);
+    const xm=mk('text',{class:'cutx',x:(pa.x+pb.x)/2,y:(pa.y+pb.y)/2+7},g,'✕');xm.style.display='none';
+    G.edges[a+'|'+b]={ln,xm};G.edges[b+'|'+a]=G.edges[a+'|'+b];
+  });
+  G.nodes={};
+  T.nodes.forEach(n=>{
+    const b=L.boxes[n.id];
+    const g=mk('g',{class:'node k-'+n.kind,'data-id':n.id},gn);
+    mk('rect',{class:'box',x:b.x,y:b.y,width:b.w,height:b.h,rx:n.kind==='db'?10:6},g);
+    const hasIcon=!n.noIcon;
+    if(hasIcon)icon(n.kind,b.x+10,b.y+9,g);
+    const ttl=mk('text',{class:'ttl',x:b.x+(hasIcon?32:12),y:b.y+22},g,n.title);
+    fit(ttl,b.w-(hasIcon?44:24)-22,14,10.5);
+    if(n.sub){mk('text',{class:'sub',x:b.x+(hasIcon?32:12),y:b.y+38},g,n.sub);}
+    const y0=b.y+(n.sub?46:34),rows={};
+    n.rows.forEach(([k,l],i)=>{
+      const ry=y0+i*21;
+      const bg=mk('rect',{class:'rowbg',x:b.x+4,y:ry,width:b.w-8,height:19,rx:3},g);
+      const lab=mk('text',{class:'lab',x:b.x+10,y:ry+14},g,l);
+      const val=mk('text',{class:'val',x:b.x+b.w-10,y:ry+14},g,'');
+      let lw=0;try{lw=lab.getComputedTextLength();}catch(e){}
+      rows[k]={bg,lab,val,maxW:b.w-20-lw-8,ax:b.x+b.w-10,ay:ry+14};
+    });
+    const tag=mk('g',{class:'downtag'},g);tag.style.display='none';
+    mk('rect',{x:b.x+b.w-58,y:b.y-9,width:56,height:18,rx:9},tag);mk('text',{x:b.x+b.w-30,y:b.y+4},tag,'不可达');
+    const lock=mk('g',{class:'lockb'},g);lock.style.display='none';
+    mk('rect',{class:'lockbody',x:b.x+b.w-25,y:b.y+15,width:12,height:9,rx:2},lock);
+    mk('path',{class:'lockshk',d:`M${b.x+b.w-22} ${b.y+15}v-3a3 3 0 0 1 6 0v3`},lock);
+    G.nodes[n.id]={g,rows,tag,lock};
+  });
+  G.applied='';
+}
+
+function applyState(snap,prev,showChange,fx){
+  const T=G.topo;
+  T.nodes.forEach(n=>{
+    const e=G.nodes[n.id];
+    n.rows.forEach(([k,,cls])=>{
+      const r=e.rows[k],v=fmt(snap[k]);
+      const ch=showChange&&JSON.stringify(snap[k])!==JSON.stringify(prev[k]);
+      r.val.textContent=v;
+      r.val.setAttribute('class','val v-'+(cls||vcls(v))+(ch?' chg':'')+(ch&&fx?' pop':''));
+      fit(r.val,r.maxW,12.5,9.5);
+      r.bg.setAttribute('class','rowbg'+(ch?' chg':''));
+      if(ch&&fx&&typeof snap[k]==='number'&&typeof prev[k]==='number'){
+        const d=snap[k]-prev[k];let w=0;try{w=r.val.getComputedTextLength();}catch(_){}
+        const t=mk('text',{class:'delta '+(d<0?'neg':'pos'),x:r.ax-w-8,y:r.ay},G.gfx,(d<0?'−':'+')+Math.abs(d).toLocaleString('zh-CN'));
+        setTimeout(()=>{if(t.parentNode)t.parentNode.removeChild(t);},1700);
+      }
+    });
+    const down=(snap.down||[]).includes(n.id);
+    e.g.classList.toggle('down',down);e.tag.style.display=down?'':'none';
+    e.lock.style.display=n.rows.some(([k])=>/^持有/.test(String(snap[k])))?'':'none';
+  });
+  const cutset={};(snap.cut||[]).forEach(c=>{cutset[c]=1;const [a,b]=c.split('|');cutset[b+'|'+a]=1;});
+  Object.keys(G.edges).forEach(k=>{const e=G.edges[k],cut=!!cutset[k];e.ln.classList.toggle('cut',cut);e.xm.style.display=cut?'':'none';});
+  renderStatePanel(snap,prev,showChange);
+}
+function renderStatePanel(snap,prev,showChange){
+  const T=G.topo,box=$('#statePanel');let html='';
+  T.nodes.forEach(n=>{
+    if(!n.rows.length&&!(snap.down||[]).includes(n.id))return;
+    html+=`<div class="sgrp"><h4>${esc(n.title)}${(snap.down||[]).includes(n.id)?'(不可达)':''}</h4><dl>`;
+    n.rows.forEach(([k,l,cls])=>{
+      const v=fmt(snap[k]),ch=showChange&&JSON.stringify(snap[k])!==JSON.stringify(prev[k]);
+      html+=`<dt>${esc(l)}</dt><dd class="v-${cls||vcls(v)}${ch?' chg':''}">${ch?'<span class="chip">变化</span>':''}${esc(v)}</dd>`;
+    });
+    html+='</dl></div>';
+  });
+  box.innerHTML=html;
+}
+
+/* ========== 消息粒子 ========== */
+function rectOverlap(a,b,pad){
+  const w=Math.min(a.x+a.w,b.x+b.w)-Math.max(a.x,b.x)+pad,h=Math.min(a.y+a.h,b.y+b.h)-Math.max(a.y,b.y)+pad;
+  return (w>0&&h>0)?w*h:0;
+}
+function buildMsgs(st){
+  const gm=G.gm;while(gm.firstChild)gm.removeChild(gm.firstChild);G.msgs=[];
+  const LANE=11,W=G.L.W,H=G.L.H;
+  const list=(st.o.m||[]).filter(m=>G.boxes[m.f]&&G.boxes[m.t]);
+  const WV=list.length?Math.max.apply(null,list.map(m=>m.w+1)):1;
+  const grp={};list.forEach(m=>{const k=m.f+'>'+m.t;(grp[k]=grp[k]||[]).push(m);});
+  const obst=Object.keys(G.boxes).map(id=>{const b=G.boxes[id];return {x:b.x,y:b.y,w:b.w,h:b.h};});
+  const placed=[];
+  list.forEach(m=>{
+    const g0=grp[m.f+'>'+m.t];
+    let lp0=m.lp;
+    if(g0.length>1&&m.lp===0.5){lp0=0.3+0.4*g0.indexOf(m)/(g0.length-1);}
+    const ca=m.f<m.t?m.f:m.t,cb=m.f<m.t?m.t:m.f;
+    const CA=G.boxes[ca],CB=G.boxes[cb];
+    const P=anchor(CA,CB.cx,CB.cy,3),Q=anchor(CB,CA.cx,CA.cy,3);
+    const dx=Q.x-P.x,dy=Q.y-P.y,len0=Math.hypot(dx,dy)||1;
+    const nx=-dy/len0,ny=dx/len0,sgn=(m.f===ca?1:-1);
+    const s=m.f===ca?P:Q,e=m.f===ca?Q:P;
+    const sx=s.x+nx*sgn*LANE,sy=s.y+ny*sgn*LANE,ex=e.x+nx*sgn*LANE,ey=e.y+ny*sgn*LANE;
+    const L=Math.hypot(ex-sx,ey-sy),ux=(ex-sx)/L,uy=(ey-sy)/L;
+    const col=MCOL[m.k]||MCOL.req;
+    const g=mk('g',{},gm);
+    const dash=m.k==='comp'?'8 4':(m.k==='lost'?'2 6':'none');
+    const line=mk('line',{class:'mline',stroke:col,'stroke-dasharray':dash,x1:sx,y1:sy,x2:sx,y2:sy},g);
+    const flow=mk('line',{class:'flow',x1:sx,y1:sy,x2:sx,y2:sy},g);flow.style.display='none';
+    const t2=mk('circle',{r:3,fill:col,opacity:.28},g),t1=mk('circle',{r:4.2,fill:col,opacity:.5},g);
+    t1.style.display=t2.style.display='none';
+    const dot=mk('circle',{r:5.5,fill:col,stroke:'#fff','stroke-width':2},g);
+    const tri=mk('path',{d:'M9 0L-3 -6L-3 6Z',fill:col},g);
+    const xm=mk('text',{class:'xmark',fill:col},g,'✕');xm.style.display='none';
+    const numbered=WV>1,NW=numbered?21:0;
+    const lg=mk('g',{class:'mlabel'},g);
+    const rect=mk('rect',{height:20,rx:5,stroke:col},lg);
+    const tx=mk('text',{},lg,m.l);
+    let tw=60;try{tw=tx.getComputedTextLength();}catch(_){}
+    const pw=tw+14+NW;rect.setAttribute('width',pw);
+    const ext=Math.abs(nx)*pw/2+Math.abs(ny)*10,side=sgn*(ext+4);
+    const lps=[0],offs=[0,side];
+    for(let k=1;k<=8;k++){lps.push(0.07*k,-0.07*k);}
+    let best=null;
+    for(const dlp of lps){
+      const lp=clamp(lp0+dlp,0.1,0.9);
+      for(const off of offs){
+        const cx=sx+(ex-sx)*lp+nx*off,cy=sy+(ey-sy)*lp+ny*off;
+        const r={x:cx-pw/2,y:cy-10,w:pw,h:20};
+        let cost=Math.abs(dlp)*12+Math.abs(off)*0.15;
+        obst.forEach(o=>{cost+=rectOverlap(r,o,1)>0?2000+rectOverlap(r,o,1):0;});
+        placed.forEach(o=>{cost+=rectOverlap(r,o,3)>0?2000+rectOverlap(r,o,3):0;});
+        if(r.x<2||r.y<2||r.x+r.w>W-2||r.y+r.h>H-2)cost+=1500;
+        if(!best||cost<best.cost)best={cost,r};
+      }
+      if(best&&best.cost<20)break;
+    }
+    const r=best.r;
+    const px=clamp(r.x,3,W-3-pw),py=clamp(r.y,3,H-23);
+    rect.setAttribute('x',px);rect.setAttribute('y',py);tx.setAttribute('x',px+NW+(pw-NW)/2);tx.setAttribute('y',py+14.5);
+    let badge=null;
+    if(numbered){badge=mk('g',{class:'badge'},lg);mk('circle',{cx:px+12,cy:py+10,r:8,fill:col},badge);mk('text',{x:px+12,y:py+13.9},badge,String(m.w+1));}
+    placed.push({x:px,y:py,w:pw,h:20});
+    G.msgs.push({m,g,line,flow,t1,t2,dot,tri,xm,lg,badge,sx,sy,ex,ey,L,ux,uy,col,arrived:false});
+  });
+}
+function drawTrail(){
+  const gt=G.gt;if(!gt)return;while(gt.firstChild)gt.removeChild(gt.firstChild);
+  const sc=G.sc;if(!sc.trail)return;
+  for(let j=0;j<S.step;j++){
+    (sc.steps[j].o.m||[]).forEach(m=>{
+      const A=G.boxes[m.f],B=G.boxes[m.t];if(!A||!B)return;
+      const P=anchor(A,B.cx,B.cy,3),Q=anchor(B,A.cx,A.cy,3);
+      const col=MCOL[m.k]||MCOL.req,L=Math.hypot(Q.x-P.x,Q.y-P.y)||1,ux=(Q.x-P.x)/L,uy=(Q.y-P.y)/L;
+      mk('line',{x1:P.x,y1:P.y,x2:Q.x-ux*6,y2:Q.y-uy*6,stroke:col,'stroke-width':3,opacity:.5,'stroke-dasharray':m.k==='fail'?'6 5':'none','stroke-linecap':'round'},gt);
+      mk('path',{d:'M9 0L-3 -6L-3 6Z',fill:col,opacity:.6,transform:`translate(${Q.x-ux*2} ${Q.y-uy*2}) rotate(${Math.atan2(uy,ux)*180/Math.PI})`},gt);
+    });
+  }
+}
+function ripple(id,col){
+  const b=G.boxes[id];if(!b||!G.gfx)return;
+  const r=mk('rect',{class:'ripple',x:b.x-4,y:b.y-4,width:b.w+8,height:b.h+8,rx:12,stroke:col},G.gfx);
+  setTimeout(()=>{if(r.parentNode)r.parentNode.removeChild(r);},950);
+}
+function paintMsgs(p){
+  const ms=G.msgs;if(!ms.length)return;
+  const W=Math.max.apply(null,ms.map(o=>o.m.w+1)),MS=0.72;
+  ms.forEach(o=>{
+    const a=MS*o.m.w/W,b=MS*(o.m.w+1)/W;
+    const q=(p>=1||S.reduce)?1:clamp((p-a)/(b-a),0,1);
+    if(q<=0){o.g.style.display='none';return;}
+    o.g.style.display='';
+    const lost=o.m.k==='lost',f=q*(lost?0.55:1);
+    const TIP=9,dist=lost?f*o.L:f*Math.max(0,o.L-TIP);
+    const cx=o.sx+o.ux*dist,cy=o.sy+o.uy*dist;
+    o.line.setAttribute('x2',cx);o.line.setAttribute('y2',cy);
+    o.dot.setAttribute('cx',cx);o.dot.setAttribute('cy',cy);
+    const ang=Math.atan2(o.uy,o.ux)*180/Math.PI;
+    o.tri.setAttribute('transform',`translate(${cx+o.ux*5} ${cy+o.uy*5}) rotate(${ang})`);
+    if(lost){o.tri.style.display=q>=1?'none':'';o.dot.style.display=q>=1?'none':'';o.xm.style.display=q>=1?'':'none';o.xm.setAttribute('x',cx);o.xm.setAttribute('y',cy);}
+    else{o.xm.style.display='none';o.dot.style.display=q>=1?'none':'';}
+    const tr=q<1&&!S.reduce;
+    o.t1.style.display=o.t2.style.display=tr?'':'none';
+    if(tr){const d1=Math.max(0,dist-13),d2=Math.max(0,dist-26);
+      o.t1.setAttribute('cx',o.sx+o.ux*d1);o.t1.setAttribute('cy',o.sy+o.uy*d1);
+      o.t2.setAttribute('cx',o.sx+o.ux*d2);o.t2.setAttribute('cy',o.sy+o.uy*d2);}
+    const fl=!lost&&q>=0.12&&!S.reduce;
+    o.flow.style.display=fl?'':'none';o.flow.setAttribute('x2',cx);o.flow.setAttribute('y2',cy);
+    o.lg.style.display=q>0.2?'':'none';
+    if(q>=1&&!o.arrived){o.arrived=true;if(!lost&&!S.reduce&&S.p<1)ripple(o.m.t,o.col);}
+  });
+}
+
+/* ========== 步骤渲染 ========== */
+const TAGN={std:'标准/官方文档',teach:'教学假设',eng:'工程补充'};
+const KN={req:'请求',ok:'成功响应',fail:'失败响应',comp:'补偿/取消指令',lost:'丢失或超时,未送达'};
+function plain(x){return String(x).replace(/<[^>]+>/g,'');}
+function firstSent(x){const t=plain(x),m=t.match(/^[^。]+。?/);return m?m[0]:t;}
+function renderCaption(){
+  const sc=G.sc,i=S.step,st=sc.steps[i],nx=sc.steps[i+1];
+  $('#capbar').innerHTML=`<div class="capmeta">步骤 ${i+1}/${sc.steps.length} · ${nx?'下一步:'+esc(nx.t):'这是最后一步'}</div><div class="captitle">${esc(st.t)}</div><div class="captext">${esc(firstSent(st.a))}</div><div class="capprog"><i id="capprog"></i></div>`;
+}
+function renderExplain(){
+  const sc=G.sc,i=S.step,st=sc.steps[i],box=$('#p-explain');
+  const tg=(st.o.tg||['teach']).map(t=>`<span class="tag ${t}">${TAGN[t]}</span>`).join('');
+  const df=diffList(sc,i);
+  const lb=Object.assign({a:'发生了什么',flow:'消息流向(图中编号对应)',b:'为什么这样做',c:'改变了哪些状态',r:'存在什么风险 / 下一步',noflow:'本步没有消息流动,发生的是内部处理、判断或状态变化。',nochg:'本步没有改变持久状态(只有消息、判断或决策)。'},sc.lb||{});
+  const chg=df.length?`<ul>${df.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:lb.nochg;
+  const ms=st.o.m||[],WV=ms.length?Math.max.apply(null,ms.map(m=>m.w+1)):1;
+  const flow=ms.length?'<ol class="flowlist">'+ms.map(m=>`<li><span class="no" title="${WV>1?'第 '+(m.w+1)+' 批':'同时发出'}">${WV>1?m.w+1:'·'}</span><span class="fk k-${m.k}">${KN[m.k]}</span><span>${esc(sc.tt[m.f])} → ${esc(sc.tt[m.t])}:${esc(m.l)}</span></li>`).join('')+'</ol>':lb.noflow;
+  box.innerHTML=`<h3>步骤 ${i+1}/${sc.steps.length}:${esc(st.t)}</h3><div class="tags">${tg}</div><dl>
+    <dt>${lb.a}</dt><dd>${st.a}</dd>
+    <dt>${lb.flow}</dt><dd>${flow}</dd>
+    <dt>${lb.b}</dt><dd>${st.b}</dd>
+    <dt>${lb.c}</dt><dd>${chg}</dd>
+    <dt>${lb.r}</dt><dd>${st.r}</dd></dl>${st.o.n?`<div class="note"><b>边界辨析:</b>${st.o.n}</div>`:''}`;
+}
+function renderTimeline(){
+  const sc=G.sc,ol=$('#timeline');
+  if(ol.dataset.sc!==sc.id){
+    ol.dataset.sc=sc.id;ol.innerHTML='';
+    sc.steps.forEach((st,i)=>{const li=h('li',{'data-i':i});const b=h('button',{type:'button'},`<span class="mark"></span><span>${esc(st.t)}</span>`);b.addEventListener('click',()=>{pause();go(i,true);});li.appendChild(b);ol.appendChild(li);});
+  }
+  [].forEach.call(ol.children,(li,i)=>{
+    li.className=i<S.step?'done':(i===S.step?'cur':'todo');
+    li.querySelector('.mark').textContent=i<S.step?'✓':(i===S.step?'●':(i+1));
+    const b=li.querySelector('button');if(i===S.step)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current');
+  });
+}
+function renderControls(){
+  if(!G.sc)return;
+  const sc=G.sc,n=sc.steps.length,r=$('#rngStep');
+  r.max=n-1;r.value=S.step;
+  r.setAttribute('aria-valuetext',`第 ${S.step+1} 步:${sc.steps[S.step].t}`);
+  $('#stepNo').textContent=`步骤 ${S.step+1}/${n}`;
+  $('#bPlay').textContent=S.playing?'暂停':(S.step>=n-1&&S.p>=1?'重新播放':'播放');
+  $('#bPrev').disabled=S.step<=0&&S.p>=1;
+  $('#bNext').disabled=S.step>=n-1;
+}
+function showStep(){
+  const sc=G.sc,st=sc.steps[S.step];
+  if(G.gfx)while(G.gfx.firstChild)G.gfx.removeChild(G.gfx.firstChild);
+  drawTrail();buildMsgs(st);renderExplain();renderCaption();renderTimeline();renderControls();
+  const hl={};(st.o.m||[]).forEach(m=>{hl[m.f]=1;hl[m.t]=1;});(st.o.hl||[]).forEach(x=>hl[x]=1);
+  Object.keys(G.nodes).forEach(id=>G.nodes[id].g.classList.toggle('hl',!!hl[id]));
+  const sn=sc.snaps[S.step+1];
+  $('#svgTitle').textContent=`${sc.title} — 步骤 ${S.step+1}:${st.t}`;
+  G.applied='';paint();
+}
+function paint(){
+  const sc=G.sc,i=S.step,dp=S.reduce?1:S.p;
+  const useAfter=dp>=0.72;
+  const key=sc.id+'|'+i+'|'+useAfter+'|'+S.mode;
+  if(key!==G.applied){G.applied=key;applyState(useAfter?sc.snaps[i+1]:sc.snaps[i],sc.snaps[i],useAfter,useAfter&&S.p<1&&!S.reduce);}
+  paintMsgs(dp);
+  const cp=$('#capprog');if(cp)cp.style.width=(dp>=1?100:dp*100)+'%';
+}
+function go(i,settled){
+  const n=G.sc.steps.length;S.once=false;S.step=clamp(i,0,n-1);S.p=settled?1:0;showStep();syncHash();
+}
+/* ========== 播放循环 ========== */
+let raf=0;
+function tick(ts){
+  if(!S.playing&&!S.once){raf=0;return;}
+  const dt=Math.min(100,ts-S.last);S.last=ts;
+  const d=(S.reduce?3200:DUR)/S.speed;
+  S.p+=dt/d;
+  if(S.p>=1){
+    if(S.once){S.once=false;S.p=1;paint();renderControls();raf=0;return;}
+    if(S.step<G.sc.steps.length-1){S.step++;S.p=0;showStep();}
+    else{S.p=1;S.playing=false;paint();renderControls();raf=0;return;}
+  }else paint();
+  raf=requestAnimationFrame(tick);
+}
+function play(){
+  const n=G.sc.steps.length;
+  if(S.step>=n-1&&S.p>=1){S.step=0;S.p=0;showStep();}
+  else if(S.p>=1&&S.step<n-1){S.step++;S.p=0;showStep();}
+  S.playing=true;S.last=performance.now();renderControls();
+  if(!raf)raf=requestAnimationFrame(tick);
+}
+function stepOnce(i){
+  pause();
+  if(S.reduce){go(i,true);return;}
+  go(i,false);S.once=true;S.last=performance.now();if(!raf)raf=requestAnimationFrame(tick);
+}
+function pause(){S.once=false;S.playing=false;if(raf){cancelAnimationFrame(raf);raf=0;}renderControls();}
+function replay(){S.playing=false;S.step=0;S.p=0;showStep();play();}
+
+/* ========== 章节、场景与导航 ========== */
+function syncHash(){try{history.replaceState(null,'',`#c=${S.ch}&s=${S.sc}&i=${S.step}`);}catch(e){}}
+function renderNav(){
+  const ol=$('#chapterList');ol.innerHTML='';
+  CH.forEach((c,i)=>{const li=h('li');const b=h('button',{type:'button',class:'chbtn'},`<span class="no">${i+1}</span><span>${esc(c.nav||c.title)}</span>`);
+    if(i===S.ch)b.setAttribute('aria-current','page');b.addEventListener('click',()=>selectChapter(i));li.appendChild(b);ol.appendChild(li);});
+}
+function renderHead(){
+  const c=curCh();$('#chTitle').textContent=`${S.ch+1}. ${c.title}`;$('#chIntro').textContent=c.intro||'';
+  const an=$('#chAnalogy');if(c.analogy){an.hidden=false;an.innerHTML='<b>形象类比:</b>'+c.analogy+'<span class="hint">类比只帮助建立直觉;它的缺口和真实边界以每步的“边界辨析”为准。</span>';}else an.hidden=true;
+}
+function renderTabs(){
+  const box=$('#scTabs');box.innerHTML='';const c=curCh();
+  if(!c.scenarios){box.style.display='none';return;}box.style.display='';
+  c.scenarios.forEach((s,i)=>{const b=h('button',{type:'button','aria-pressed':String(i===S.sc)},`<span class="kind">${esc(s.kind)}</span>${esc(s.title)}`);b.addEventListener('click',()=>selectScenario(i));box.appendChild(b);});
+}
+function renderBounds(){
+  const c=curCh(),ul=$('#boundList');ul.innerHTML='';
+  (c.bounds||[]).forEach(b=>{ul.appendChild(h('li',null,`<span class="tag ${b[0]}">${TAGN[b[0]]}</span><span>${b[1]}</span>`));});
+}
+function selectChapter(i,sc,step){
+  pause();S.ch=i;S.sc=sc||0;S.step=0;
+  const c=curCh();
+  renderNav();renderHead();renderTabs();
+  const ex=$('#chExtra');
+  if(c.render){$('#labView').hidden=true;$('#sumView').hidden=false;ex.hidden=true;ex.innerHTML='';c.render($('#sumView'));syncHash();window.scrollTo(0,0);return;}
+  $('#labView').hidden=false;$('#sumView').hidden=true;
+  if(c.extra){ex.hidden=false;c.extra(ex);}else{ex.hidden=true;ex.innerHTML='';}
+  renderBounds();loadScenario(step||0);
+}
+function loadScenario(step){
+  const sc=curSc();compile(sc);$('#timeline').dataset.sc='';
+  G.sc=sc;buildTopology();
+  $('#stageCap').innerHTML=`<span>${esc(sc.title)}</span>`+(sc.topo==='evo'?'<span>实线箭头 = 遗留问题推动出下一个方案;虚线 = 走不通的路</span>':'<span>金额示例:本金 100 元,账户初始余额 1,000 元(教学数据)</span>');
+  S.step=clamp(step||0,0,sc.steps.length-1);S.p=1;showStep();syncHash();
+}
+function selectScenario(i){pause();S.sc=i;renderTabs();loadScenario(0);}
+function parseHash(){
+  const m=/c=(\d+)&s=(\d+)&i=(\d+)/.exec(location.hash||'');
+  if(m){const c=+m[1],s=+m[2],i=+m[3];if(CH[c]&&(!CH[c].scenarios||CH[c].scenarios[s]))return [c,s,i];}
+  return [0,0,0];
+}
+window.DT.selectChapter=selectChapter;
+
+/* ========== 事件 ========== */
+function wire(){
+  $('#bPlay').addEventListener('click',()=>{S.playing?pause():play();});
+  $('#bPrev').addEventListener('click',()=>{pause();if(S.step<=0)go(0,true);else stepOnce(S.step-1);});
+  $('#bNext').addEventListener('click',()=>{pause();if(S.step>=G.sc.steps.length-1)return;stepOnce(S.step+1);});
+  $('#bReplay').addEventListener('click',replay);
+  $('#selSpeed').addEventListener('change',e=>{S.speed=parseFloat(e.target.value);});
+  $('#rngStep').addEventListener('input',e=>{const v=parseInt(e.target.value,10);pause();go(v,true);});
+  const chk=$('#chkReduce');chk.checked=S.reduce;
+  chk.addEventListener('change',()=>{S.reduce=chk.checked;G.applied='';paint();});
+  document.addEventListener('keydown',e=>{
+    const t=e.target,tag=t&&t.tagName;
+    if(e.ctrlKey||e.metaKey||e.altKey)return;
+    if(curCh().render)return;
+    if(tag==='INPUT'&&t.type==='range')return;
+    if(tag==='INPUT'||tag==='SELECT'||tag==='TEXTAREA')return;
+    if(e.key==='ArrowRight'){e.preventDefault();$('#bNext').click();}
+    else if(e.key==='ArrowLeft'){e.preventDefault();$('#bPrev').click();}
+    else if((e.key===' '||e.key==='k')&&tag!=='BUTTON'){e.preventDefault();$('#bPlay').click();}
+    else if(e.key==='r'||e.key==='R'){$('#bReplay').click();}
+  });
+  const onMode=()=>{const m=narrowMQ.matches?'tall':'wide';if(m!==S.mode){S.mode=m;if(!curCh().render){const st=S.step,p=S.p;buildTopology();S.step=st;S.p=p;showStep();}}};
+  if(narrowMQ.addEventListener)narrowMQ.addEventListener('change',onMode);else narrowMQ.addListener(onMode);
+  if(reduceMQ.addEventListener)reduceMQ.addEventListener('change',e=>{S.reduce=e.matches;chk.checked=e.matches;G.applied='';paint();});
+}
+window.DT.boot=function(){
+  const r=$('#refs');
+  r.innerHTML='<h2>参考资料与核实说明</h2>'+window.DT.REFS_HTML;
+  wire();
+  const [c,s,i]=parseHash();
+  selectChapter(c,s,i);
+};
+window.DT._S=S;window.DT._G=G;window.DT.go=go;window.DT.selectScenario=selectScenario;window.DT.pause=pause;window.DT.curSc=curSc;window.DT.compile=compile;window.DT.diffList=diffList;window.DT.buildTopology=buildTopology;window.DT.showStep=showStep;window.DT.layout=layout;
+})();
+</script>
+<script>
+(function(){
+const {TOPO,N}=window.DT;
+TOPO.local={h:520,th:700,
+ nodes:[N('app','coord','放款服务',[['app','状态']],[14,50],[50,9],{sub:'业务发起方'}),
+  N('acct','db','账户库',[['led','账面'],['av','可用'],['fz','冻结'],['atx','本地事务']],[72,24],[28,38],{sub:'账户服务'}),
+  N('loan','db','借据库',[['loan','借据'],['ltx','本地事务']],[72,76],[72,73],{sub:'借据服务'})],
+ edges:[['app','acct'],['app','loan']],
+ init:{app:'空闲',led:1000,av:1000,fz:0,atx:'—',loan:'无',ltx:'—'}};
+
+const LW=[440,360];
+TOPO.layers={h:520,th:640,
+ nodes:[N('l4','svc','业务方案层',[['r4','职责'],['e4','代表']],[50,14],[50,12],{wd:LW,noIcon:true}),
+  N('l3','svc','接口规范与框架层',[['r3','职责'],['e3','代表']],[50,38],[50,37],{wd:LW,noIcon:true}),
+  N('l2','svc','协议层',[['r2','职责'],['e2','代表']],[50,62],[50,62],{wd:LW,noIcon:true}),
+  N('l1','db','资源层',[['r1','职责'],['e1','代表']],[50,86],[50,87],{wd:LW,noIcon:true})],
+ edges:[['l4','l3'],['l3','l2'],['l2','l1']],
+ init:{r4:'—',e4:'—',r3:'—',e3:'—',r2:'—',e2:'—',r1:'—',e1:'—'}};
+
+TOPO.xa={h:560,th:860,
+ nodes:[N('app','svc','放款服务',[['app','状态']],[13,50],[30,7],{sub:'应用 AP'}),
+  N('tm','coord','事务管理器 TM',[['gtx','全局事务'],['dlog','决策日志']],[47,50],[70,25],{sub:'协调者'}),
+  N('rm1','db','账户库',[['b1','分支'],['bal','余额'],['pd1','未提交修改'],['lk1','行锁']],[85,22],[30,50],{sub:'资源管理器 RM1'}),
+  N('rm2','db','借据库',[['b2','分支'],['loan','借据'],['pd2','未提交修改'],['lk2','行锁']],[85,78],[70,77],{sub:'资源管理器 RM2'})],
+ edges:[['app','tm'],['app','rm1'],['app','rm2'],['tm','rm1'],['tm','rm2']],
+ init:{app:'空闲',gtx:'无',dlog:'无',b1:'—',bal:1000,pd1:'无',lk1:'无',b2:'—',loan:'无',pd2:'无',lk2:'无'}};
+
+TOPO.p3={h:520,th:760,
+ nodes:[N('co','coord','协调者',[['ph','阶段'],['dec','决策']],[12,50],[30,8],{sub:'发起者'}),
+  N('pa','db','账户库 A',[['sa','状态'],['bal','余额']],[50,17],[72,28]),
+  N('pb','db','借据库 B',[['sb','状态'],['loan','借据']],[50,83],[28,52]),
+  N('pc','db','风控记录 C',[['sc','状态'],['risk','风控']],[88,50],[72,76])],
+ edges:[['co','pa'],['co','pb'],['co','pc'],['pa','pb'],['pa','pc'],['pb','pc']],
+ init:{ph:'—',dec:'无',sa:'INIT',bal:1000,sb:'INIT',loan:'无',sc:'INIT',risk:'无'}};
+
+TOPO.tcc={h:520,th:770,
+ nodes:[N('tm','coord','放款服务 TM',[['gtx','全局事务'],['ph','阶段']],[13,50],[27,6],{sub:'TCC 发起方'}),
+  N('acc','svc','账户服务',[],[46,20],[73,22],{sub:'TCC 参与者'}),
+  N('adb','db','账户库',[['led','账面'],['av','可用'],['fz','冻结'],['abr','分支记录']],[85,20],[27,40],{sub:'含防悬挂记录'}),
+  N('loan','svc','借据服务',[],[46,80],[73,59],{sub:'TCC 参与者'}),
+  N('ldb','db','借据库',[['loan','借据'],['lbr','分支记录']],[85,80],[27,80],{sub:'含防悬挂记录'})],
+ edges:[['tm','acc'],['acc','adb'],['tm','loan'],['loan','ldb']],
+ init:{gtx:'无',ph:'—',led:1000,av:1000,fz:0,abr:'无记录',loan:'无',lbr:'无记录'}};
+
+TOPO.tcc2={h:520,th:700,
+ nodes:[N('ta','svc','放款 A(100 元)',[['sa','状态']],[14,20],[27,8]),
+  N('tb','svc','放款 B(950 元)',[['sb','状态'],['res','Try 结果']],[14,80],[27,56]),
+  N('db','db','账户库',[['led','账面'],['av','可用'],['fz','冻结']],[50,50],[73,32],{sub:'TCC 预留'}),
+  N('rpt','svc','报表查询',[['r1','读到账面'],['r2','读到可用']],[86,50],[73,80])],
+ edges:[['ta','db'],['tb','db'],['rpt','db']],
+ init:{sa:'未开始',sb:'未开始',res:'—',led:1000,av:1000,fz:0,r1:'—',r2:'—'}};
+
+TOPO.saga={h:520,th:780,
+ nodes:[N('orc','coord','Saga 编排器',[['gs','全局状态'],['lg','步骤日志']],[13,50],[27,6],{sub:'持久化流程状态'}),
+  N('acc','db','账户库',[['led','账面'],['ent','记账流水']],[72,20],[73,24],{sub:'T1 扣款 / C1 冲正'}),
+  N('loan','db','借据库',[['loan','借据']],[72,50],[27,44],{sub:'T2 建借据 / C2 作废'}),
+  N('chan','ext','放款渠道',[['pay','出款']],[72,80],[73,66],{sub:'T3 出款(外部)'})],
+ edges:[['orc','acc'],['orc','loan'],['orc','chan']],
+ init:{gs:'无',lg:'—',led:1000,ent:'无',loan:'无',pay:'未发起'}};
+
+TOPO.sagac={h:520,th:760,
+ nodes:[N('acc','db','账户库',[['led','账面'],['ent','记账流水']],[14,50],[27,6],{sub:'账户服务'}),
+  N('bus','mq','事件总线',[['ev','最近事件']],[50,50],[73,26],{sub:'MQ'}),
+  N('loan','db','借据库',[['loan','借据']],[86,22],[27,46],{sub:'借据服务'}),
+  N('chan','ext','放款渠道',[['pay','出款']],[86,78],[73,70],{sub:'渠道服务'})],
+ edges:[['acc','bus'],['loan','bus'],['chan','bus']],
+ init:{led:1000,ent:'无',loan:'无',pay:'未发起',ev:'无'}};
+
+TOPO.outbox={h:520,th:880,
+ nodes:[N('loan','db','借据库',[['loan','借据'],['ob','待发消息'],['rt','投递重试']],[13,22],[24,5],{sub:'放款服务 + Outbox'}),
+  N('relay','svc','投递器 Relay',[['rl','状态']],[50,22],[24,30]),
+  N('mq','mq','消息队列',[['q','队列'],['dlq','死信队列']],[87,22],[76,46]),
+  N('cons','svc','征信报送服务',[['dd','去重记录'],['ack','消费确认']],[50,78],[24,63],{sub:'消费者'}),
+  N('ext','ext','外部征信接口',[['ext','受理结果']],[13,78],[76,80],{sub:'不在本库事务内'}),
+  N('rec','coord','对账任务',[['diff','差异']],[87,78],[76,16])],
+ edges:[['loan','relay'],['relay','mq'],['mq','cons'],['cons','ext'],['rec','loan'],['rec','cons']],
+ init:{loan:'无',ob:'无',rt:0,rl:'空闲',q:'空',dlq:'空',dd:'无',ack:'—',ext:'未收到',diff:'—'}};
+
+TOPO.bank={h:520,th:1000,
+ nodes:[N('tm','coord','放款服务 TM',[['gtx','全局事务'],['ph','阶段']],[12,50],[27,8],{sub:'TCC 发起方'}),
+  N('acc','db','账户库',[['led','账面'],['av','可用'],['fz','冻结']],[46,20],[73,24],{sub:'TCC 参与者'}),
+  N('loan','db','借据库',[['loan','借据'],['ob','报送消息']],[46,76],[27,40],{sub:'TCC + Outbox'}),
+  N('mq','mq','消息队列',[['q','队列']],[86,18],[73,58]),
+  N('cr','svc','征信报送服务',[['dd','去重记录']],[86,50],[27,72],{sub:'消费者'}),
+  N('ext','ext','外部征信',[['ext','受理结果']],[86,82],[73,88],{sub:'不入全局事务'})],
+ edges:[['tm','acc'],['tm','loan'],['loan','mq'],['mq','cr'],['cr','ext']],
+ zones:[{l:'核心资金域:TCC 强约束',w:[0.5,3,62,94],t:[0.5,1.5,99,47]},{l:'异步报送域:Outbox + MQ 最终一致',w:[66,3,33.5,94],t:[0.5,49,99,50.5]}],
+ init:{gtx:'无',ph:'—',led:1000,av:1000,fz:0,loan:'无',ob:'无',q:'空',dd:'无',ext:'未收到'}};
+
+TOPO.gov={h:520,th:760,
+ nodes:[N('biz','svc','业务服务集群',[['br','分支状态']],[14,22],[27,6]),
+  N('txlog','db','事务日志库',[['gtx','全局事务'],['sm','状态机'],['bl','分支日志']],[50,22],[73,20],{sub:'全局号 + 分支日志'}),
+  N('mon','svc','监控告警',[['al','告警']],[86,22],[73,52]),
+  N('rec','coord','恢复任务',[['ra','动作']],[14,78],[27,38]),
+  N('ops','svc','人工处置台',[['tk','工单'],['au','审计']],[86,78],[27,68])],
+ edges:[['biz','txlog'],['txlog','mon'],['txlog','rec'],['rec','biz'],['mon','ops'],['rec','ops']],
+ init:{br:'—',gtx:'G-1001',sm:'—',bl:'—',al:'无',ra:'空闲',tk:'无',au:'—'}};
+
+TOPO.recon={h:520,th:620,
+ nodes:[N('acc','db','账户系统',[['n1','扣款流水']],[14,20],[27,7],{wd:[196,176]}),
+  N('loan','db','借据系统',[['n2','借据状态']],[14,80],[73,7],{wd:[196,176]}),
+  N('cr','svc','征信报送',[['n3','报送状态']],[86,20],[27,56],{wd:[196,176]}),
+  N('rc','coord','对账服务',[['diff','差异'],['fx','修复']],[50,50],[50,32]),
+  N('ops','svc','人工处置台',[['tk','工单'],['au','审计']],[86,80],[73,56],{wd:[196,176]})],
+ edges:[['rc','acc'],['rc','loan'],['rc','cr'],['rc','ops']],
+ init:{n1:'—',n2:'—',n3:'—',diff:'—',fx:'—',tk:'无',au:'—'}};
+
+const EW=[150,186];
+TOPO.evo={h:600,th:1060,
+ nodes:[N('loc','db','本地事务',[['s0','解决','ok'],['n0','遗留','bad']],[9,14],[30,5.5],{wd:EW,sub:'单库 ACID'}),
+  N('xa','coord','2PC / XA',[['s1','解决','ok'],['n1','遗留','bad']],[35,14],[70,18.5],{wd:EW,sub:'同步原子提交'}),
+  N('p3','coord','3PC',[['s2','解决','ok'],['n2','遗留','bad']],[65,14],[30,31.5],{wd:EW,sub:'路线一:去阻塞'}),
+  N('tcc','svc','TCC',[['s3','解决','ok'],['n3','遗留','bad']],[35,50],[70,44.5],{wd:EW,sub:'路线二:业务层预留'}),
+  N('saga','svc','Saga',[['s4','解决','ok'],['n4','遗留','bad']],[65,50],[30,57.5],{wd:EW,sub:'长流程补偿'}),
+  N('ob','mq','Outbox + MQ',[['s5','解决','ok'],['n5','遗留','bad']],[91,50],[70,70.5],{wd:EW,sub:'可靠通知'}),
+  N('gov','ext','组合 + 治理',[['s6','解决','ok'],['n6','遗留','bad']],[91,86],[30,83.5],{wd:EW,sub:'兜底与运维',noIcon:false})],
+ edges:[['loc','xa'],['xa','p3'],['xa','tcc'],['p3','tcc'],['tcc','saga'],['saga','ob'],['ob','gov']],
+ init:{s0:'—',n0:'—',s1:'—',n1:'—',s2:'—',n2:'—',s3:'—',n3:'—',s4:'—',n4:'—',s5:'—',n5:'—',s6:'—',n6:'—'}};
+})();
+</script>
+<script>
+(function(){
+const {CH,M,St,Sc}=window.DT;
+
+/* ---------- 第 1 章 ---------- */
+CH.push({nav:'问题由来',title:'问题由来:本地事务只保护本库',
+intro:'放款要同时改账户库和借据库。每个库的本地事务各自提交,互相不知道对方的结果——部分成功和“超时不知结果”就从这里产生。各方案为何一环扣一环、各解决了什么又带来什么,见第 10 章《演化脉络》。',
+bounds:[
+['teach','本地事务(ACID)只覆盖单个数据库内的修改;跨库调用时,每个库的 COMMIT 与 ROLLBACK 互不感知。'],
+['eng','调用超时只表示“没有收到响应”,不能推出对端“没有执行”。这是后续所有方案都要面对的不确定性。'],
+['teach','本页所有金额(100 元、1,000 元)、状态名和表结构都是教学假设,不代表任何真实银行系统的实现。']],
+scenarios:[
+Sc('1a','部分成功:扣款成功、创建借据失败','local',{},[
+ St('初始状态','客户申请 100 元放款。账户库余额 1,000 元,借据库没有该借据。放款服务需要依次完成“扣减账户”和“创建借据”两件事,它们分别落在两个数据库里。','先固定初始数值,后面每一步都可以和它对照。','此时还没有任何风险,但两件事分属两个库,没有任何机制把它们绑在一起。',{s:{app:'开始放款'}}),
+ St('账户库本地事务提交','放款服务调用账户服务扣减 100 元。账户库在自己的本地事务里 UPDATE 并 COMMIT,账面与可用都变为 900。','本地事务保证“账户库内部”原子、持久,这一点没有问题。','COMMIT 之后这笔修改已经对外可见并持久化,不再是可以随手撤销的未提交事务。',{m:[M('app','acct','扣款 100'),M('acct','app','成功','ok',1)],s:{led:900,av:900,atx:'已提交',app:'扣款成功'}}),
+ St('调用借据服务失败','放款服务调用借据服务创建借据,请求没有到达(借据服务宕机或网络中断),调用方只看到超时。','分布式调用随时可能失败;调用方只能知道“没收到响应”。','超时既可能是“没执行”,也可能是“执行了但响应丢了”。此处恰好是没执行,但调用方事先无法确定。',{m:[M('app','loan','创建借据','lost')],s:{app:'借据调用超时',ltx:'不可达'}}),
+ St('想“回滚”却回滚不了','放款服务想撤销前面的扣款,向账户库发 ROLLBACK。但账户库的本地事务已经 COMMIT,没有可回滚的事务了。','ROLLBACK 只对未提交的事务有效。已提交的修改要撤销,只能由业务发起一笔新的反向业务操作。','如果代码写成“出错就 rollback”,只对当前连接里未提交的事务有效,对其他服务已提交的结果无能为力。',{m:[M('app','acct','想回滚?'),M('acct','app','无事务可回滚','fail',1)],s:{app:'回滚无效'}}),
+ St('结果:部分成功','最终账户少了 100 元,却没有对应借据:钱和债权对不上。','这就是分布式事务要解决的问题:跨多个资源的一组操作,要么都生效,要么有办法恢复到一致。','这种不一致不会自己消失;如果没有日志、监控与对账,可能很久才被发现。',{s:{app:'部分成功(不一致)'},n:'本地事务只保护本库;跨库一致需要额外机制,这正是后面各章要比较的内容。'})
+]),
+Sc('1b','超时重试:账户被扣了两次','local',{},[
+ St('初始状态','账户库余额 1,000 元,借据库为空。放款服务准备扣款 100 元并创建借据。','固定起点。','风险在下一步出现:网络响应是不可靠的。',{s:{app:'开始放款'}}),
+ St('扣款提交,响应丢失','账户库已成功扣款并提交(余额 900),但“成功”响应在网络中丢失,放款服务什么也没收到。','账户库的本地事务已经正确完成;丢失的只是响应。','调用方无法区分“请求没到”和“请求执行了但响应丢了”。',{m:[M('app','acct','扣款 100'),M('acct','app','成功','lost',1)],s:{led:900,av:900,atx:'已提交',app:'等待响应…'}}),
+ St('调用方超时,按失败处理','放款服务等不到响应,认为扣款失败,决定重试。','许多代码把“超时”直接当作“失败”并重试。','超时 ≠ 失败。若被调用方没有幂等保护,重试会被当成一笔全新的请求。',{s:{app:'超时,按失败重试'}}),
+ St('重试被当成新请求','放款服务再发一次“扣款 100”。账户服务没有幂等键,无法识别这是同一笔业务,再次扣款:余额变成 800。','没有稳定的业务流水号和去重逻辑,服务只能把每个请求都当新请求。','客户被多扣 100 元,而且两次扣款都是“合法提交”,数据库层面看不出任何错误。',{m:[M('app','acct','扣款 100(重试)'),M('acct','app','成功','ok',1)],s:{led:800,av:800,atx:'重复提交',app:'重试成功'}}),
+ St('借据创建完成,问题被固化','放款服务继续创建借据,借据库正常提交。','此时每个服务看自己的日志都是“成功”。','账户少了 200 元,借据只有 100 元:差额 100 元需要对账才能发现。',{m:[M('app','loan','创建借据'),M('loan','app','成功','ok',1)],s:{loan:'已生效 100',ltx:'已提交',app:'完成(多扣 100)'}}),
+ St('问题归纳','两类根本问题:一是多个本地事务无法一起提交或一起回滚;二是超时让调用方无法确定对端是否已执行。','后面的 2PC/XA、TCC、Saga、Outbox 本质上是在不同代价下回答这两个问题。','没有银弹:强一致方案占用锁、依赖协调者;最终一致方案要接受中间态并设计补偿、幂等和对账。',{n:'稳定的幂等键(例如业务流水号)是后面几乎每一章都会反复出现的基础设施。'})
+])]});
+
+/* ---------- 第 2 章 ---------- */
+CH.push({nav:'技术分层',title:'技术分层:协议、接口规范与业务方案',
+intro:'把“分布式事务”拆成四层来看:谁定义规则、谁定义接口、谁在业务里落地、谁真正保存数据。这样才能解释“XA 不等于 2PC”。',
+bounds:[
+['std','XA 是 X/Open DTP 模型里事务管理器(TM)与资源管理器(RM)之间的接口规范;2PC 是原子提交协议。XA 的 prepare/commit 接口支持 2PC,并允许单资源一阶段提交优化,但它们不是同一个东西。'],
+['std','数据库自身的准备态能力(如 PostgreSQL 的 PREPARE TRANSACTION)是给外部事务管理器使用的原语,不建议应用代码直接使用。'],
+['eng','TCC、Saga、Outbox 属于业务方案层:它们依赖各库的本地事务,但并不使用 XA 接口,也不依赖数据库级 prepare。']],
+scenarios:[
+Sc('2a','一次 XA 全局事务穿过四层','layers',{},[
+ St('四层总览','自上而下:业务方案层(要解决什么业务问题)→ 接口规范与框架层(TM 与 RM 如何对话)→ 协议层(怎样投票和决策)→ 资源层(数据库真正保存数据)。','分层的目的是把“规则”“接口”“落地”区分开,否则容易把 XA、2PC、TCC 当成同一类东西。','混层理解的后果:以为“用了 XA 就一定占锁”或“用了 TCC 就能完全避免锁”,这两种说法都不准确。',{hl:['l4','l3','l2','l1']}),
+ St('业务方案层提出需求','放款业务要求“扣减账户”和“创建借据”一起成败,于是选择用 XA 全局事务。','业务方案层决定“要不要跨库原子”以及“选哪种方案承担”。','选了强一致方案,就要接受它的锁占用与协调者依赖。',{m:[],s:{r4:'声明需要跨库原子的业务',e4:'放款=扣款+借据'},hl:['l4']}),
+ St('框架层:调用 XA 接口','框架(如 JTA 事务管理器、Seata XA 模式)创建全局事务号,并通过 XA 接口 xa_start / xa_end / xa_prepare / xa_commit / xa_recover 与各数据库对话。','XA 把“TM 怎样驱动 RM”标准化,不同厂商的数据库与事务管理器才能互通。','XA 只规定接口,不替你实现决策日志、恢复和监控。',{m:[M('l4','l3','全局事务请求')],s:{r3:'约定 TM 与 RM 如何交互',e3:'XA 接口 + JTA / Seata XA'},tg:['std'],hl:['l3']}),
+ St('协议层:两阶段提交','XA 接口背后通常运行 2PC:所有参与者先投票(prepare),协调者持久化全局决策后,再通知提交或回滚。','协议规定了“什么条件下才能提交”“崩溃后怎样恢复”。','协议正确不代表实现正确;决策日志是否持久、超时规则是否合理,仍取决于实现。',{m:[M('l3','l2','prepare / commit')],s:{r2:'规定投票、决策与恢复规则',e2:'两阶段提交 2PC'},tg:['std'],hl:['l2']}),
+ St('资源层:数据库保存准备态','数据库把分支修改和“已准备”状态持久化,并保留锁。PostgreSQL 的 PREPARE TRANSACTION / COMMIT PREPARED 就是这一层对外的原语。','只有资源层真正持有数据和锁;上层的接口与协议最终都要落到这里。','准备态事务持有锁,必须由外部事务管理器及时收尾,否则会长期占用资源。',{m:[M('l2','l1','PREPARE / COMMIT PREPARED')],s:{r1:'本地事务、日志、锁与准备态',e1:'MySQL / Oracle / PostgreSQL'},tg:['std'],hl:['l1']}),
+ St('结果逐层返回','数据库返回“已准备/已提交”,协议层汇总投票,框架层返回全局结果,业务层得到“放款成功”。','结果沿原路返回,每层只关心自己负责的那一段。','任何一层的超时都不能被上层误解释成“失败并可自行回滚”。',{m:[M('l1','l2','已提交','ok'),M('l2','l3','全局提交','ok',1),M('l3','l4','业务成功','ok',2)],s:{e4:'放款完成'}}),
+ St('辨析:XA ≠ 2PC','XA 是接口规范(TM–RM 之间的函数/命令),2PC 是协议(投票与决策规则)。XA 还允许单个 RM 时走一阶段优化;反过来,2PC 也可由数据库内部或自研组件实现而不经 XA。','把两者混同,会误以为“关闭 XA 就没有 2PC”或“用了 2PC 就等于 XA”。','选型时应分别问:接口是否标准(能否与现有数据库互通)?协议是否满足可用性和延迟要求?',{n:'错误说法:“XA 就是两阶段提交。”准确说法:XA 是支持两阶段提交的接口规范,2PC 是被它调用的协议之一。',tg:['std']})
+]),
+Sc('2b','TCC、Saga、Outbox 在哪一层','layers',{},[
+ St('它们都属于业务方案层','TCC、Saga、Outbox 都由业务代码或业务框架定义“怎样恢复一致”:Try/Confirm/Cancel、补偿动作、待发消息表。','这些方案不要求数据库支持 prepare,因此对数据库类型更宽容。','代价是恢复逻辑要由业务实现并测试,出错面更大。',{s:{r4:'由业务定义怎样恢复一致',e4:'TCC / Saga / Outbox'},hl:['l4']}),
+ St('框架层负责调度与重试','Seata 等框架负责登记分支、调用 Confirm/Cancel、重试和日志;但这是业务层框架,不是 XA 接口。','把重复的调度、重试逻辑沉淀到框架,业务只实现动作本身。','框架提供机制,不替你保证业务动作幂等。',{m:[M('l4','l3','注册 Try/Confirm/Cancel')],s:{r3:'调度、重试与日志',e3:'Seata TCC / Saga 引擎'},tg:['std'],hl:['l3']}),
+ St('协议层:由业务状态机承担','这些方案没有数据库级的“准备态等待”,而是用业务状态(TRYING、已冻结、已补偿、待发送)加重试来驱动一致。','业务状态可以随本地事务立即提交,避免长时间持锁。','没有 2PC 的原子保证,中间态会被其他事务看到(见 TCC、Saga 章节)。',{m:[M('l3','l2','状态推进 + 重试')],s:{r2:'业务状态 + 重试 + 日志',e2:'(无数据库 prepare)'},hl:['l2']}),
+ St('资源层仍依赖本地事务','每个业务动作最终仍落在某个库的本地事务里:冻结、创建借据、写 outbox 都是普通本地事务,提交后立即释放行锁。','所有这些方案的基石依然是“单库内的 ACID”。','本地事务以外的部分(跨服务、跨库)才是它们要额外设计的。',{m:[M('l2','l1','本地事务提交')],s:{r1:'各库本地事务',e1:'各自独立的数据库'},hl:['l1']}),
+ St('代价上移到业务','相比 XA,锁占用更短、吞吐更高,但隔离性、幂等、悬挂、补偿失败和对账都需要业务自己负责。','没有免费的午餐:XA 把复杂度放在基础设施里,业务方案把复杂度放在业务里。','在资金类场景里,业务实现错误的后果可能比慢更严重。',{n:'不要把“业务方案层”理解成“自动一致”。它们只是提供了可以恢复一致的结构。'})
+],'分层辨析')]});
+
+/* ---------- 第 3 章 ---------- */
+const PREP={app:'等待提交结果',gtx:'已收齐 YES',b1:'PREPARED',b2:'PREPARED',pd1:'扣减 100',pd2:'新增借据',lk1:'持有行锁',lk2:'持有行锁'};
+const COMMITTED={b1:'已提交',b2:'已提交',bal:900,pd1:'无',lk1:'已释放',loan:'已生效 100',pd2:'无',lk2:'已释放'};
+const ROLLED={b1:'已回滚',b2:'已回滚',bal:1000,pd1:'无',pd2:'无',lk1:'已释放',lk2:'已释放',loan:'无'};
+const head=()=>[
+ St('初始状态','账户库余额 1,000 元,借据库没有借据。放款服务要把“账户扣减 100 元”和“创建借据”放进同一个全局事务。事务管理器(TM)是协调者,两个数据库是资源管理器(RM)。','先固定起点数值,后面每一步都和它对照。','没有风险,但两个库各自独立,必须有人统一决定“一起提交”还是“一起回滚”。',{s:{app:'空闲'},tg:['teach','std']}),
+ St('创建全局事务','放款服务向 TM 申请开启全局事务,TM 生成全局事务号 xid = G-1001,并登记为 ACTIVE。','xid 是后续分支、恢复和对账的“主键”。没有它,崩溃后无法知道哪些分支属于同一个业务。','xid 若在调用链上丢失,分支就成了孤儿,需要强制透传并记录。',{m:[M('app','tm','开启事务'),M('tm','app','xid=G-1001','ok',1)],s:{app:'已获 xid',gtx:'ACTIVE'},tg:['std']}),
+ St('各库执行分支并持锁','放款服务通过 XA START 在两个库各开一个分支(都挂在 G-1001 下),分别执行“扣减 100”和“插入借据”。修改还没提交,其他事务看不到。','XA 让 RM 把分支与 xid 关联;分支内的修改受数据库本地隔离保护。','未提交修改持有行锁,直到全局事务结束才释放,持锁时间 = 整个两阶段耗时。',{m:[M('app','rm1','XA START + 扣款'),M('app','rm2','XA START + 建借据')],s:{b1:'ACTIVE',pd1:'扣减 100',lk1:'持有行锁',b2:'ACTIVE',pd2:'新增借据',lk2:'持有行锁'},tg:['std']}),
+ St('请求提交,TM 结束分支','放款服务通知 TM 提交。TM 先对两个分支发 XA END,分支从 ACTIVE 进入 IDLE(业务工作已结束,尚未准备)。','XA 要求先 END 再 PREPARE,确认分支内不再有业务操作。','END 之后锁仍在;若此时应用崩溃,TM 要靠 xid 清理。',{m:[M('app','tm','提交 G-1001'),M('tm','rm1','XA END','req',1),M('tm','rm2','XA END','req',1)],s:{app:'等待提交结果',gtx:'PREPARING',b1:'IDLE',b2:'IDLE'},tg:['std']})
+];
+CH.push({nav:'2PC / XA',title:'2PC / XA:准备、持久化决策、提交与恢复',
+intro:'两阶段提交先让所有参与者“准备并承诺”,再由协调者做出全局决策。承诺换来了原子性,代价是锁占用和协调者依赖。',
+bounds:[
+['std','XA 是 TM 与 RM 之间的接口规范(xa_start/end/prepare/commit/rollback/recover/forget);2PC 是它所支持的协议。XA 不等于 2PC。'],
+['std','PREPARED 的事务继续持有锁,应由外部事务管理器尽快提交或回滚(PostgreSQL 文档)。2PC 的锁占用时间包括整个两阶段与故障恢复时间。'],
+['std','准备态不能仅凭超时自行回滚:RM 投 YES 后已经承诺,恢复要依据 TM 持久化的全局决策与 xa_recover 的结果。RM 的“启发式”提交/回滚可能与全局决策冲突,需要 xa_forget 和对账善后。'],
+['eng','一旦已持久化 COMMIT 决策,恢复只能继续重试提交,不能为了处理超时改成回滚。'],
+['eng','2PC 保证的前提:TM 决策日志与各 RM 的 prepared 记录都是持久的;这两项失效,原子性就无从谈起。']],
+scenarios:[
+Sc('3a','正常提交','xa',{},head().concat([
+ St('第一阶段:Prepare 与投票','TM 向两个 RM 发 xa_prepare。每个 RM 把分支修改和“已准备”状态持久化(写日志),保留行锁,回复 YES。','投 YES 的含义是承诺:之后只要 TM 说提交,我一定能提交成功。为兑现承诺,RM 必须先持久化并保住锁。','投出 YES 后,RM 失去单方面回滚的权利,进入“不确定期”,必须等 TM 的最终决定。',{m:[M('tm','rm1','xa_prepare'),M('tm','rm2','xa_prepare'),M('rm1','tm','YES','ok',1),M('rm2','tm','YES','ok',1)],s:{b1:'PREPARED',b2:'PREPARED',gtx:'已收齐 YES'},n:'PostgreSQL 文档:已准备事务继续持有锁,应由外部事务管理器尽快提交或回滚。',tg:['std']}),
+ St('TM 先持久化全局决策','两个 RM 全部 YES,TM 决定“提交”,并先把这个决策写入自己的持久化日志,然后才通知 RM。','决策日志是恢复的依据:TM 崩溃重启后,读到 COMMIT 就知道要继续提交。','若先通知再写日志,崩溃后 TM 不知道自己已经决定过什么。',{s:{dlog:'COMMIT 已持久化',gtx:'COMMITTING'},tg:['std','eng']}),
+ St('第二阶段:Commit 并释放锁','TM 向两个 RM 发 xa_commit。RM 把已准备的修改变为已提交,释放行锁,回复 ACK。','提交是确定性动作:已 PREPARED 的分支,只要收到 commit 就应能完成。','提交消息可能丢失或重复,RM 的 commit 必须可以重复执行并返回结果(幂等)。',{m:[M('tm','rm1','xa_commit'),M('tm','rm2','xa_commit'),M('rm1','tm','ACK','ok',1),M('rm2','tm','ACK','ok',1)],s:COMMITTED,tg:['std']}),
+ St('全局事务结束','收齐 ACK 后,TM 把全局事务标记为 COMMITTED 并通知应用;决策日志在确认全部 ACK 后可清理。','收齐 ACK 才能确认没有分支遗落在不确定状态。','2PC 的代价:至少两轮往返、全程持锁、TM 成为关键依赖,吞吐与可用性受限。',{m:[M('tm','app','提交成功','ok')],s:{gtx:'COMMITTED',app:'放款完成',dlog:'COMMIT 已完成'}})
+])),
+Sc('3b','准备失败:借据库投 NO','xa',{},head().concat([
+ St('准备阶段:借据库投 NO','账户库准备成功并投 YES;借据库因约束冲突(例如借据号重复)无法准备,投 NO。投 NO 的 RM 会回滚自己的分支并释放锁。','prepare 之前 RM 仍保有单方面中止的权利;一旦投 NO,这个分支就不可能再提交,可以立即清理。','账户库此时已是 PREPARED,锁还在,必须等 TM 通知回滚,不能因为“听说有人失败”就自行放弃。',{m:[M('tm','rm1','xa_prepare'),M('tm','rm2','xa_prepare'),M('rm1','tm','YES','ok',1),M('rm2','tm','NO:约束冲突','fail',1)],s:{b1:'PREPARED',b2:'已回滚',pd2:'无',lk2:'已释放',loan:'无',gtx:'收到 NO 票'},tg:['std']}),
+ St('TM 持久化 ABORT 决策','只要有一票 NO,全局决策就是回滚。TM 先把 ABORT 决策写入日志。','与提交一样,回滚决策也要先落盘再通知,才能在崩溃后恢复。','账户库仍持锁等待;TM 要尽快发出 rollback,缩短阻塞窗口。',{s:{dlog:'ABORT 已持久化',gtx:'ROLLING BACK'},tg:['std','eng']}),
+ St('第二阶段:Rollback','TM 向已准备的账户库发 xa_rollback。账户库丢弃未提交的扣减,余额保持 1,000,释放行锁,回复 ACK。','只有已 PREPARED 的分支才需要 TM 通知;借据库已自行清理。','rollback 消息同样可能丢失或重复,RM 必须幂等。',{m:[M('tm','rm1','xa_rollback','comp'),M('rm1','tm','ACK','ok',1)],s:{b1:'已回滚',pd1:'无',lk1:'已释放',bal:1000},tg:['std']}),
+ St('全局回滚完成','TM 把全局事务标记为 ROLLED BACK,通知应用放款失败。两个库都回到初始状态,数据一致。','失败也要有确定的终态,不能留在中间。','应用要把这次失败映射为明确的业务结果(例如“放款申请失败,可重试”)。',{m:[M('tm','app','放款失败','fail')],s:{gtx:'ROLLED BACK',app:'放款失败,数据一致'},n:'2PC 的回滚是数据库级的:分支内未提交的修改被丢弃。这与 Saga 的“业务补偿”有本质区别。'})
+])),
+Sc('3c','协调者失联:决策已持久化,Commit 未送达','xa',{},[
+ St('初始状态','账户库余额 1,000 元,借据库为空。全局事务 G-1001 将要提交(开启、分支执行、END 的过程与“正常提交”相同)。','为了聚焦故障,本场景从两个分支即将准备开始。','故障总是出现在最不方便的时刻:决策已定、通知未到。',{s:{app:'空闲'}}),
+ St('两库均已 PREPARED','两个分支已执行并准备完成,均回复 YES,各自持有行锁。','这就是 2PC 的“不确定期”起点。','从此刻起,两个 RM 都不能单方面决定结果。',{m:[M('tm','rm1','xa_prepare'),M('tm','rm2','xa_prepare'),M('rm1','tm','YES','ok',1),M('rm2','tm','YES','ok',1)],s:PREP}),
+ St('TM 持久化 COMMIT 决策','TM 收齐 YES,决定提交,并把 COMMIT 决策写入持久化日志。','先落盘,才能在崩溃后恢复。','全局结果其实已经确定:提交。',{s:{dlog:'COMMIT 已持久化',gtx:'COMMITTING'},tg:['std','eng']}),
+ St('TM 宕机,Commit 未送达','TM 在发出 Commit 的瞬间崩溃(或网络中断),两个 RM 都没有收到。应用只看到超时。','故障在最坏的时点:事实上已决定提交,但 RM 还不知道。','应用侧不能把超时当作失败重试放款,否则可能产生重复业务。',{m:[M('tm','rm1','xa_commit','lost'),M('tm','rm2','xa_commit','lost')],s:{down:['tm'],app:'等待超时'}}),
+ St('准备态阻塞:RM 不能自作主张','RM 处于 PREPARED。它已承诺 YES:既不能自行回滚(TM 可能已决定提交),也不能自行提交(也许另有分支投了 NO)。行锁继续占用,别的事务访问这些行会排队。','这就是 2PC 的“阻塞”:唯一安全的出路是拿到全局决策。','锁占用时间不可控,会放大成热点账户排队、连接池耗尽。XA 允许 RM 做“启发式”提交/回滚,但可能与全局决策不一致,要靠 xa_forget 和人工对账善后,只能作为最后手段。',{s:{lk1:'持有·有人等待',lk2:'持有·有人等待'},n:'错误说法:“准备态超时后可以自行回滚。”准确说法:准备态超时只应告警、继续查询,并依据持久化的全局决策恢复。',tg:['std','eng']}),
+ St('TM 重启并读取决策日志','TM 重启,从持久化日志读到 G-1001 的决策是 COMMIT,状态为“提交中”。','决策日志让“提交”这个决定不依赖内存。','日志本身必须可靠(多副本或强刷盘),它是整个方案的单点。',{s:{down:[],gtx:'RECOVERING'},tg:['std','eng']}),
+ St('xa_recover:找回待决分支','TM 向各 RM 调用 xa_recover,拿到仍处于 PREPARED 的分支清单(包含 G-1001),与日志对照。','XA 的恢复接口就是为这种崩溃场景设计的。','若某个 RM 的 prepared 记录没有持久化,它就无法兑现承诺,属于严重故障。',{m:[M('tm','rm1','xa_recover'),M('tm','rm2','xa_recover'),M('rm1','tm','G-1001 PREPARED','ok',1),M('rm2','tm','G-1001 PREPARED','ok',1)],tg:['std']}),
+ St('重发 Commit,恢复完成','TM 按日志重发 xa_commit,RM 提交并释放锁,回复 ACK。全局事务最终 COMMITTED,放款完成(延迟)。','恢复的方向由已持久化的决策决定:继续提交。','已持久化 COMMIT 之后,不能因为恢复慢就改成回滚,否则会与已提交的分支冲突。',{m:[M('tm','rm1','xa_commit'),M('tm','rm2','xa_commit'),M('rm1','tm','ACK','ok',1),M('rm2','tm','ACK','ok',1)],s:Object.assign({},COMMITTED,{gtx:'COMMITTED',app:'放款完成(延迟)',dlog:'COMMIT 已完成'}),n:'错误说法:“提交遇到超时就可以改成取消。”准确说法:提交决策一旦形成,只能继续重试直到完成。'})
+],'故障路径'),
+Sc('3d','协调者失联:决策尚未落盘','xa',{},[
+ St('初始状态','账户库余额 1,000 元,借据库为空。全局事务 G-1001 将要提交。','与 3c 对照:这次宕机发生在写决策日志之前。','不同的宕机时点,恢复方向可能相反。',{s:{app:'空闲'}}),
+ St('两库均已 PREPARED','两个分支都已准备并回复 YES,持有行锁。','与 3c 相同的起点。','RM 同样进入不确定期。',{m:[M('tm','rm1','xa_prepare'),M('tm','rm2','xa_prepare'),M('rm1','tm','YES','ok',1),M('rm2','tm','YES','ok',1)],s:PREP}),
+ St('TM 在写决策日志前宕机','TM 刚收齐 YES,还没来得及持久化任何决策就宕机。日志里没有 COMMIT。','这是与 3c 的关键差别:没有已形成的提交决策。','RM 仍然阻塞,锁继续占用。',{s:{down:['tm'],app:'等待超时'}}),
+ St('TM 重启:日志里没有 COMMIT','TM 重启后查日志,G-1001 没有提交记录。按所用协议的恢复规则(例如 presumed abort:没有提交记录就视为中止),TM 决定回滚。','这个“回滚”是 TM 依据持久化日志和协议规则作出的全局决策,再通知 RM 执行;不是 RM 因为等不到消息而自行超时回滚。','不同 TM 实现的默认规则不同,必须按所用产品的文档确认并做故障演练。',{s:{down:[],gtx:'RECOVERING',dlog:'ABORT 已持久化'},n:'区分:RM 超时后自行回滚(危险,可能与全局决策冲突) 与 TM 按日志规则作出决策后通知回滚(安全)。',tg:['std','eng']}),
+ St('第二阶段:Rollback 并释放锁','TM 向两个 RM 发 xa_rollback,两个分支丢弃未提交修改,释放锁,回复 ACK。余额保持 1,000,借据不存在。','全局决策为回滚,所有分支必须一致回滚。','应用要得到明确的失败结果,并允许用同一业务号安全重试。',{m:[M('tm','rm1','xa_rollback','comp'),M('tm','rm2','xa_rollback','comp'),M('rm1','tm','ACK','ok',1),M('rm2','tm','ACK','ok',1)],s:Object.assign({},ROLLED,{gtx:'ROLLED BACK',app:'放款失败,数据一致'})})
+],'故障路径')
+]});
+})();
+</script>
+<script>
+(function(){
+const {CH,M,St,Sc}=window.DT;
+
+/* ---------- 第 4 章:3PC ---------- */
+const W3={ph:'CanCommit',sa:'WAIT',sb:'WAIT',sc:'WAIT'};
+const P3={ph:'PreCommit',dec:'COMMIT(已决定)',sa:'PRECOMMIT',sb:'PRECOMMIT',sc:'PRECOMMIT'};
+const D3={ph:'DoCommit',dec:'COMMIT 已完成',sa:'COMMITTED',sb:'COMMITTED',sc:'COMMITTED',bal:900,loan:'已生效 100',risk:'已记录'};
+const can=()=>St('第一阶段:CanCommit','协调者向 A、B、C 询问“能否提交”。参与者只做检查(额度、约束、资源是否可用),并回答 Yes;此时通常不做不可回退的动作。','把“询问能否”与“真正准备”拆开,是 3PC 比 2PC 多出的第一步:避免参与者过早进入准备并占用资源。','Yes 只是“目前看起来可以”,不是承诺。检查与后续真正执行之间,条件可能变化。',{m:[M('co','pa','CanCommit?'),M('co','pb','CanCommit?'),M('co','pc','CanCommit?'),M('pa','co','Yes','ok',1),M('pb','co','Yes','ok',1),M('pc','co','Yes','ok',1)],s:W3,tg:['std']});
+CH.push({nav:'3PC',title:'3PC:CanCommit、PreCommit、DoCommit',
+intro:'3PC 在 2PC 的“投票”和“提交”之间插入 PreCommit,让存活参与者在协调者失效后有机会通过状态推断全局决策。它的改进是有前提的。',
+bounds:[
+['std','3PC 由 Skeen 提出,目标是在特定故障模型下避免 2PC 的阻塞。它假设网络延迟有界、故障可被可靠检测;一旦出现网络分区或不可靠超时,两侧可能做出相反决定。'],
+['std','Skeen 同期的“基于法定人数”的提交协议用于处理分区,说明 3PC 本身并不是分区下的答案。'],
+['eng','非阻塞不等于更安全:3PC 多一轮消息、更多延迟,而生产系统的真实网络恰好常违反其前提,所以单独使用 3PC 并不常见。'],
+['teach','本章用 A(账户库)、B(借据库)、C(风控记录)三个参与者演示;重点是状态差异而不是数据细节。']],
+scenarios:[
+Sc('4a','正常三阶段','p3',{},[
+ St('初始状态','账户库 A 余额 1,000 元,借据库 B 无借据,风控库 C 无记录。协调者要在三处完成放款相关写入。','先固定起点。','三个参与者独立,仍需统一决定。',{s:{ph:'—'}}),
+ can(),
+ St('第二阶段:PreCommit','全部 Yes,协调者形成“提交”的决定,向所有参与者发 PreCommit。参与者进入 PRECOMMIT 状态(通常此时预留资源并写日志),并回复 ACK。','PreCommit 的意义:让每个存活参与者都知道“全局决定是提交”。看到 PRECOMMIT 的节点知道决定已定;看到 WAIT 的节点知道决定可能还没定。','PreCommit 消息若只到达一部分参与者,不同节点就处于不同阶段,这是后面分区场景的起点。',{m:[M('co','pa','PreCommit'),M('co','pb','PreCommit'),M('co','pc','PreCommit'),M('pa','co','ACK','ok',1),M('pb','co','ACK','ok',1),M('pc','co','ACK','ok',1)],s:P3,tg:['std']}),
+ St('第三阶段:DoCommit','收齐 ACK 后,协调者发 DoCommit。三个参与者提交各自的数据:账户余额变 900、借据生效、风控记录写入。','最终提交动作放在最后,提交前所有参与者都已处于“可提交”状态。','DoCommit 消息可能丢失;参与者需要依据“已 PRECOMMIT”的状态在超时后自行提交(见后续场景)。',{m:[M('co','pa','DoCommit'),M('co','pb','DoCommit'),M('co','pc','DoCommit'),M('pa','co','ACK','ok',1),M('pb','co','ACK','ok',1),M('pc','co','ACK','ok',1)],s:D3,tg:['std']}),
+ St('相对 2PC 的改进与代价','改进:在前提成立时,协调者宕机后,存活参与者可以通过互相交换状态推断出结果,不必无限阻塞。代价:多一轮往返,延迟更高;协议更复杂。','把“已决定提交”和“真正提交”分成两个可观察的状态。','非阻塞结论依赖同步模型(延迟有界、故障检测可靠)。在丢包、延迟抖动、分区的真实网络里,这些前提不一定成立。',{n:'错误说法:“3PC 彻底解决了 2PC 的阻塞问题。”准确说法:在延迟有界且无分区等前提下可避免阻塞;前提被破坏时可能出现不一致。',tg:['std']})
+]),
+Sc('4b','网络分区:各节点处于不同阶段','p3',{},[
+ St('初始状态','账户库 A、借据库 B、风控库 C 的初始状态与 4a 相同。','与 4a 同起点,便于对照。','故障会让三者看到不同的消息序列。',{s:{ph:'—'}}),
+ can(),
+ St('PreCommit 只送达账户库 A','协调者形成“提交”决定,发出 PreCommit。A 收到并进入 PRECOMMIT;发往 B、C 的消息在网络中丢失,它们仍停在 WAIT。','网络并不保证对所有节点同时可达。','此时三个参与者处于不同阶段:A=PRECOMMIT,B=WAIT,C=WAIT。',{m:[M('co','pa','PreCommit'),M('pa','co','ACK','ok',1),M('co','pb','PreCommit','lost'),M('co','pc','PreCommit','lost')],s:{ph:'PreCommit',dec:'COMMIT(已决定)',sa:'PRECOMMIT'}}),
+ St('网络分区形成','网络分裂为两部分:一侧是协调者和 A,另一侧是 B 和 C。两侧之间的链路全部中断。','分区是真实网络里的正常故障形态,不是极端假设。','两侧都无法确认对方是“宕机”还是“只是联系不上”。',{s:{cut:['co|pb','co|pc','pa|pb','pa|pc'],ph:'分区中'}}),
+ St('两侧各按超时规则行动','A 在 PRECOMMIT 状态超时:规则是“决定已是提交”,于是自行提交,余额变 900。B、C 在 WAIT 状态超时且联系不上协调者:规则是“尚未决定,可安全中止”,于是自行中止。','这两条规则在“无分区、故障可准确检测”的前提下是安全的。','分区破坏了前提:A 看到的是“已决定”,B、C 却无从知道这一点。',{s:{sa:'COMMITTED',bal:900,sb:'ABORTED',sc:'ABORTED'},tg:['std']}),
+ St('结果:原子性被破坏','账户已扣 100 元,借据与风控记录都没有生成。分区恢复后,没有任何一方知道谁“对”,协议本身没有办法自动合并。','这就是 3PC 在分区下的核心风险:为了避免阻塞,换来了可能的不一致。','只能依赖日志、对账或人工修复(补建借据、冲正扣款);资金场景代价很高。',{s:{dec:'结果分歧'},n:'错误说法:“3PC 在任意网络分区下都不会阻塞也不会出错。”准确说法:非阻塞是有前提的,前提被破坏时可能出现提交/中止分歧。',tg:['std']}),
+ St('边界与替代思路','Skeen 的基于法定人数的提交协议、Paxos Commit 等通过多数派避免分裂决策;工程上更常见的是 2PC + 可靠决策日志,或放弃强一致改用 TCC / Saga / Outbox。','把“协调者是否可靠”交给复制与共识,而不是靠超时猜测。','这些方案各自有复杂度和性能代价;选型要结合业务对一致性和可用性的真实要求。',{tg:['std','eng']})
+],'故障路径'),
+Sc('4c','协调者宕机:前提成立时的非阻塞恢复','p3',{},[
+ St('初始状态','三个参与者初始状态与 4a 相同。','对照 2PC 阻塞场景。','此场景假设网络可靠、延迟有界、故障可准确检测。',{s:{ph:'—'}}),
+ St('PreCommit 已送达全部参与者','协调者已决定提交,PreCommit 送达 A、B、C,三者都回 ACK,处于 PRECOMMIT。','此时任何存活节点只要看到 PRECOMMIT,就知道决定是提交。','DoCommit 还没发出,数据尚未真正提交。',{m:[M('co','pa','PreCommit'),M('co','pb','PreCommit'),M('co','pc','PreCommit'),M('pa','co','ACK','ok',1),M('pb','co','ACK','ok',1),M('pc','co','ACK','ok',1)],s:P3}),
+ St('协调者宕机','协调者在发出 DoCommit 之前宕机。三个参与者都停在 PRECOMMIT。','2PC 中同样的时点会让参与者无法判断;3PC 因为多了 PRECOMMIT 状态而能推断。','需要有选出新协调者(恢复者)的机制。',{s:{down:['co'],ph:'协调者宕机'}}),
+ St('参与者互相查询状态','A 接任恢复者,向 B、C 查询状态,得到回答:都是 PRECOMMIT。','存活参与者的状态集合足以推断全局决定。','此推断依赖“网络可靠且故障可检测”;若 B 其实只是慢而没宕机,推断规则要更小心。',{m:[M('pa','pb','你的状态?'),M('pa','pc','你的状态?'),M('pb','pa','PRECOMMIT','ok',1),M('pc','pa','PRECOMMIT','ok',1)],s:{sa:'PRECOMMIT·选主'},tg:['std']}),
+ St('全体 PRECOMMIT → 继续提交','恢复者发现所有存活参与者都是 PRECOMMIT,于是推进到 DoCommit,三者提交。','决定已是提交,继续提交是唯一与已形成决定一致的做法。','若查询到有人是 WAIT、没人是 PRECOMMIT,则应中止;混合情形需要完整的终止协议。',{m:[M('pa','pb','DoCommit'),M('pa','pc','DoCommit'),M('pb','pa','ACK','ok',1),M('pc','pa','ACK','ok',1)],s:{sa:'COMMITTED',sb:'COMMITTED',sc:'COMMITTED',bal:900,loan:'已生效 100',risk:'已记录',dec:'COMMIT 已完成'},tg:['std']}),
+ St('与 2PC 对照','2PC 里,协调者在已决定提交、参与者还没收到时宕机,参与者处于 PREPARED 只能等待恢复。3PC 在前提成立时由存活参与者完成提交,不必等协调者回来。','这是 3PC 要解决的核心问题,也是它的价值所在。','把本场景与 4b 并排看:同一个协议,前提成立与不成立,结果截然不同。',{n:'选型提示:能保证分区、延迟与故障检测前提的场景极少,所以 3PC 更多是教学与理论价值,而不是通用生产方案。',tg:['std','eng']})
+],'前提成立路径')
+]});
+
+/* ---------- 第 5 章:TCC ---------- */
+const TRIED0={gtx:'COMMITTING',ph:'Confirm 阶段',av:900,fz:100,abr:'TRIED',loan:'TRYING(未生效)',lbr:'TRIED'};
+CH.push({nav:'TCC',title:'TCC:Try、Confirm、Cancel',
+intro:'TCC 不用数据库的长事务锁,而是在业务层“先预留,再确认或取消”。预留是真实提交的本地事务,所以占用短;幂等、空回滚、防悬挂要由业务和框架保证。',
+bounds:[
+['std','Seata 文档:TCC 的 Try 是真实的本地事务提交,把资源预留为中间状态,并不是持续到全局事务结束的数据库锁;因此锁占用时间短、吞吐较高。'],
+['std','Seata 对三个典型问题的处理:幂等(重复 Confirm/Cancel 返回成功且无副作用);空回滚(未收到 Try 就收到 Cancel,应返回成功);防悬挂(空回滚之后再收到 Try,必须拒绝)。Seata 1.5.1 起提供 tcc_fence_log 表来支撑这些逻辑。'],
+['eng','TCC 预留不等于全局隔离:账面与可用等中间态对其他事务可见;并发控制、对外口径与重试策略要由业务设计。'],
+['eng','Confirm、Cancel 必须可重试、幂等、最终成功。全局事务一旦决定 Confirm,就不能因 Confirm 暂时失败而改成 Cancel。'],
+['teach','资金示例:初始 账面 1,000 / 可用 1,000 / 冻结 0 → Try 后 1,000 / 900 / 100 → Confirm 后 900 / 900 / 0;若 Cancel,则回到 1,000 / 1,000 / 0。']],
+scenarios:[
+Sc('5a','正常:Try → Confirm','tcc',{},[
+ St('初始状态','账户:账面 1,000、可用 1,000、冻结 0。借据库没有借据。放款服务作为 TCC 发起方,要让账户和借据两个参与者“一起预留、一起确认”。','先固定起点数值,和后面三个状态对照。','没有风险;但要先想清楚每个参与者的 Try/Confirm/Cancel 各做什么。',{}),
+ St('开启全局事务','TM 创建全局事务并登记,进入 Try 阶段。','全局事务号让后续的 Confirm/Cancel 能找到对应的预留。','TM 本身的状态要持久化,否则崩溃后无人驱动第二阶段。',{s:{gtx:'ACTIVE',ph:'Try 阶段'}}),
+ St('Try:账户冻结 100','账户服务在一个本地事务里完成:可用 1,000→900,冻结 0→100,并写入分支记录(状态 TRIED)。账面仍是 1,000。','Try 是“预留”:先把资源占住,但不做最终扣减。','该本地事务立即提交,行锁很快释放;预留状态对外可见(可用 900,账面 1,000)。',{m:[M('tm','acc','Try 冻结 100'),M('acc','adb','UPDATE 冻结','req',1),M('acc','tm','Try 成功','ok',2)],s:{av:900,fz:100,abr:'TRIED'},n:'TCC 的“锁”是业务字段上的预留,不是数据库长事务锁;但这不等于自动具备全局隔离。',tg:['std']}),
+ St('Try:借据预创建','借据服务插入借据,状态 TRYING(未生效),并写入分支记录。','借据在 Confirm 之前不能被当作有效债权使用。','TRYING 的借据仍是可见数据;其他模块必须按状态过滤。',{m:[M('tm','loan','Try 预创建借据'),M('loan','ldb','INSERT TRYING','req',1),M('loan','tm','Try 成功','ok',2)],s:{loan:'TRYING(未生效)',lbr:'TRIED'}}),
+ St('TM 决定 Confirm 并持久化','所有 Try 成功,TM 决定进入 Confirm,并先把这个决定落盘。','决定落盘后,恢复任务才有依据继续驱动 Confirm。','从此只能“向前”:Confirm 失败要重试,不能改成 Cancel。',{s:{gtx:'COMMITTING',ph:'Confirm 阶段'},tg:['eng']}),
+ St('Confirm:账户确认扣减','账户服务把冻结转为真实扣减:账面 1,000→900,冻结 100→0,可用保持 900,分支记录改为 CONFIRMED。','Confirm 只消耗 Try 预留的资源,不再做新的资源检查,因此应当总能成功。','Confirm 必须幂等:重复调用不能再次扣款。',{m:[M('tm','acc','Confirm'),M('acc','adb','UPDATE 冻结→扣减','req',1),M('acc','tm','Confirm 成功','ok',2)],s:{led:900,fz:0,abr:'CONFIRMED'}}),
+ St('Confirm:借据生效','借据服务把借据由 TRYING 改为已生效,分支记录改为 CONFIRMED。','最后一个参与者确认后,全局业务才算完成。','若此处失败,必须重试直到成功。',{m:[M('tm','loan','Confirm'),M('loan','ldb','UPDATE 生效','req',1),M('loan','tm','Confirm 成功','ok',2)],s:{loan:'已生效 100',lbr:'CONFIRMED'}}),
+ St('全局事务完成','TM 把全局事务标记为 COMMITTED。账户:账面 900、可用 900、冻结 0;借据已生效 100。','两个参与者都已确认,最终状态一致。','整个过程中,中间态(可用 900/账面 1,000)曾对外可见。',{s:{gtx:'COMMITTED',ph:'完成'}})
+]),
+Sc('5b','Try 失败 → Cancel(含空回滚)','tcc',{},[
+ St('初始状态','账户:账面 1,000、可用 1,000、冻结 0。借据库为空。','固定起点。','——',{}),
+ St('开启事务,账户 Try 成功','TM 开启全局事务;账户 Try 成功:可用 900、冻结 100,分支记录 TRIED。','先预留的参与者已经占用了资源。','此时若后续失败,必须把这 100 元释放,否则冻结会一直存在。',{m:[M('tm','acc','Try 冻结 100'),M('acc','adb','UPDATE 冻结','req',1),M('acc','tm','Try 成功','ok',2)],s:{gtx:'ACTIVE',ph:'Try 阶段',av:900,fz:100,abr:'TRIED'}}),
+ St('借据 Try 失败','借据服务的 Try 因风控拒绝而失败,本地事务回滚,没有留下任何借据或分支记录。','Try 失败时,该参与者自己的本地事务已回滚,不需要额外清理。','TM 此时不知道其他参与者的细节,只知道有一个 Try 失败。',{m:[M('tm','loan','Try 预创建借据'),M('loan','tm','Try 失败:风控拒绝','fail',1)],s:{ph:'Try 失败'}}),
+ St('TM 决定 Cancel','TM 决定整体取消,先持久化 Cancel 决定。','只要有一个 Try 失败,就必须让已经 Try 成功的参与者释放预留。','Cancel 要发送给所有参与者,包括没有成功 Try 的那个。',{s:{gtx:'CANCELLING',ph:'Cancel 阶段'}}),
+ St('Cancel:账户释放冻结','账户服务把冻结 100 释放回可用:可用 900→1,000,冻结 100→0,账面始终 1,000;分支记录 CANCELLED。','Cancel 是业务层的“撤销预留”,不是数据库回滚。','Cancel 必须幂等,重复调用不能让可用余额多出 100。',{m:[M('tm','acc','Cancel','comp'),M('acc','adb','UPDATE 释放冻结','comp',1),M('acc','tm','Cancel 成功','ok',2)],s:{av:1000,fz:0,abr:'CANCELLED'}}),
+ St('Cancel:借据空回滚','借据服务收到 Cancel,但从未成功执行过 Try:这是“空回滚”。它直接返回成功,并写入一条 CANCELLED 记录。','TM 无法区分“Try 没到”和“Try 失败”,所以 Cancel 要允许空回滚;写入记录是为了日后拦截迟到的 Try(防悬挂)。','如果空回滚时报错“找不到 Try 记录”,TM 会无限重试 Cancel。',{m:[M('tm','loan','Cancel','comp'),M('loan','ldb','写入 CANCELLED','comp',1),M('loan','tm','Cancel 成功(空回滚)','ok',2)],s:{lbr:'CANCELLED·空回滚'},tg:['std']}),
+ St('全局事务结束','TM 把全局事务标记为 CANCELLED。账户回到 账面 1,000 / 可用 1,000 / 冻结 0;借据不存在。','所有预留都被释放,系统回到事务前的业务状态。','与 2PC 的数据库回滚不同:这里历史上存在过“冻结”的中间状态。',{s:{gtx:'CANCELLED',ph:'完成'}})
+],'故障路径'),
+Sc('5c','Confirm 重复:幂等','tcc',TRIED0,[
+ St('起点:Try 已成功,TM 已决定 Confirm','账户:账面 1,000、可用 900、冻结 100(Try 之后)。借据 TRYING。TM 已持久化 Confirm 决定,开始驱动第二阶段。','直接从 Confirm 阶段开始,聚焦重复问题。','——',{}),
+ St('第一次 Confirm 执行,响应丢失','账户服务执行 Confirm:账面 900、冻结 0、分支记录 CONFIRMED。但“成功”响应在网络中丢失。','业务动作已经正确完成,只是 TM 不知道。','TM 只能认为 Confirm 超时。',{m:[M('tm','acc','Confirm'),M('acc','adb','UPDATE 冻结→扣减','req',1),M('acc','tm','Confirm 成功','lost',2)],s:{led:900,fz:0,abr:'CONFIRMED'}}),
+ St('TM 超时,重发 Confirm','TM 按“Confirm 必须最终成功”的原则重发 Confirm。','第二阶段本来就设计成可重试,所以重复请求是预期内的。','如果服务不识别重复,就会重复扣款。',{m:[M('tm','acc','Confirm(重发)')],s:{ph:'重发 Confirm'}}),
+ St('幂等:已 CONFIRMED,直接返回成功','账户服务先查分支记录,发现已是 CONFIRMED,不再执行扣减,直接返回成功。账面仍是 900,冻结仍是 0。','用分支记录(例如 Seata 的 fence 表)作为幂等依据:同一 xid/分支只生效一次。','幂等检查和业务更新要在同一个本地事务里,否则并发重试仍可能重复生效。',{m:[M('acc','adb','查记录=CONFIRMED'),M('acc','tm','Confirm 成功(无副作用)','ok',1)],s:{ph:'重复已忽略'},tg:['std']}),
+ St('反例:没有幂等会怎样','若 Confirm 不检查状态,第二次执行同样的“冻结→扣减”:账面会变成 800,冻结变成 -100,客户被多扣一次。','这就是为什么幂等不是“锦上添花”,而是 TCC 的硬要求。','金额类字段出现负数或重复扣减时,监控应能立刻报警。',{n:'错误说法:“Confirm 只会被调用一次。”准确说法:网络与恢复机制决定了 Confirm/Cancel 可能被调用多次,必须幂等。',tg:['std','eng']}),
+ St('借据确认并完成','TM 继续对借据服务 Confirm,借据生效。全局事务 COMMITTED。','所有参与者最终一致。','——',{m:[M('tm','loan','Confirm'),M('loan','ldb','UPDATE 生效','req',1),M('loan','tm','Confirm 成功','ok',2)],s:{loan:'已生效 100',lbr:'CONFIRMED',gtx:'COMMITTED',ph:'完成'}})
+],'故障路径'),
+Sc('5d','Cancel 先到、Try 迟到:空回滚与防悬挂','tcc',{},[
+ St('初始状态','账户:账面 1,000、可用 1,000、冻结 0。','固定起点。','——',{}),
+ St('Try 在网络中延迟','TM 发出账户 Try,但消息在网络中被延迟(尚未到达)。','网络可以任意延迟、重排消息。','TM 只看到“没收到响应”。',{m:[M('tm','acc','Try(延迟中)','lost')],s:{gtx:'ACTIVE',ph:'Try 阶段'}}),
+ St('TM 超时,决定 Cancel','TM 等不到 Try 响应,决定整体取消,并向账户服务发 Cancel。','TM 无法确认 Try 是否执行,保守地走取消路径。','Cancel 抵达时,Try 可能还没到,也可能已经执行。',{s:{gtx:'CANCELLING',ph:'Cancel 阶段'}}),
+ St('Cancel 先到:空回滚','账户服务收到 Cancel,但没有 Try 记录:这是“空回滚”。它不改动余额,写入一条 CANCELLED 记录,返回成功。','空回滚必须返回成功,否则 TM 会一直重试;记录 CANCELLED 是为了拦截之后的 Try。','如果不留记录,迟到的 Try 就无法被识别。',{m:[M('tm','acc','Cancel','comp'),M('acc','adb','写入 CANCELLED','comp',1),M('acc','tm','Cancel 成功(空回滚)','ok',2)],s:{abr:'CANCELLED·空回滚'},tg:['std']}),
+ St('迟到的 Try 被拦截','被延迟的 Try 终于到达。账户服务先检查分支记录,发现该 xid 已是 CANCELLED,拒绝执行 Try,冻结仍是 0。','这就是防悬挂:空回滚之后到达的 Try 必须被拒绝。','拒绝要返回明确结果,避免调用方误以为 Try 成功。',{m:[M('tm','acc','迟到的 Try'),M('acc','adb','发现已 CANCELLED','req',1),M('acc','tm','Try 被拒绝','fail',2)],s:{ph:'Try 迟到被拒'},tg:['std']}),
+ St('反例:没有防悬挂','若迟到的 Try 被直接执行:冻结 100 元,但全局事务已 Cancel,再也不会有人来 Confirm 或 Cancel。这 100 元被永久“悬挂”冻结。','悬挂会让客户的可用余额无故减少,而且难以自动发现。','需要“冻结时长”监控和对账;防悬挂检查要和业务更新在同一个本地事务内。',{n:'防悬挂 = 空回滚时留下记录 + Try 时先查记录。两者缺一不可。',tg:['std','eng']}),
+ St('借据侧空回滚并完成','借据服务同样没有收到 Try,Cancel 到达后空回滚并写记录。全局事务 CANCELLED,账户 1,000 / 1,000 / 0。','所有参与者都进入一致的终态。','——',{m:[M('tm','loan','Cancel','comp'),M('loan','ldb','写入 CANCELLED','comp',1),M('loan','tm','Cancel 成功(空回滚)','ok',2)],s:{lbr:'CANCELLED·空回滚',gtx:'CANCELLED',ph:'完成'}})
+],'故障路径'),
+Sc('5e','Confirm 暂时失败后恢复','tcc',TRIED0,[
+ St('起点:Try 已成功,TM 已决定 Confirm','账户 账面 1,000 / 可用 900 / 冻结 100;借据 TRYING;TM 已持久化 Confirm 决定。','直接聚焦 Confirm 阶段的故障。','——',{}),
+ St('Confirm 到达,账户库暂不可用','账户服务收到 Confirm,但账户库暂时不可用,本地事务没能完成。账户服务返回失败,冻结仍是 100。','基础设施故障是暂时性的,业务语义并没有变。','TM 看到的是“Confirm 失败”,并不意味着应该取消。',{m:[M('tm','acc','Confirm'),M('acc','adb','UPDATE 冻结→扣减','lost',1),M('acc','tm','Confirm 失败','fail',2)],s:{down:['adb'],ph:'Confirm 失败'}}),
+ St('不能改成 Cancel','TM 已持久化 Confirm 决定,借据侧也可能已经确认。因此不能因为账户 Confirm 暂时失败而改为 Cancel,只能重试 Confirm。','一旦改成 Cancel,就会出现“借据已生效但账户释放冻结”的不一致。','重试需要退避与上限;长时间失败要告警并转人工。',{s:{gtx:'COMMITTING·重试'},n:'错误说法:“Confirm 超时就改成 Cancel。”准确说法:决定已形成后,第二阶段只能向前重试,直到成功或转人工。',tg:['eng']}),
+ St('退避重试,账户库恢复','恢复任务按退避策略重试。账户库恢复可用。','按日志里的全局状态驱动恢复,而不是靠记忆或人工。','恢复期间,冻结的 100 元对客户是“暂时不可用”。',{s:{down:[],ph:'重试 Confirm'}}),
+ St('Confirm 重试成功','账户服务重试 Confirm:账面 900、冻结 0、分支 CONFIRMED。','重试成功后与一次成功没有区别,这就是幂等的价值。','若多次重试都失败,需要触发告警与人工处置。',{m:[M('tm','acc','Confirm(重试)'),M('acc','adb','UPDATE 冻结→扣减','req',1),M('acc','tm','Confirm 成功','ok',2)],s:{led:900,fz:0,abr:'CONFIRMED'}}),
+ St('借据确认并完成','借据服务 Confirm,借据生效,全局事务 COMMITTED。','最终状态与无故障路径一致。','整个过程中冻结时间被拉长,需要监控。',{m:[M('tm','loan','Confirm'),M('loan','ldb','UPDATE 生效','req',1),M('loan','tm','Confirm 成功','ok',2)],s:{loan:'已生效 100',lbr:'CONFIRMED',gtx:'COMMITTED',ph:'完成'}})
+],'故障路径'),
+Sc('5f','预留不等于全局隔离','tcc2',{},[
+ St('初始状态','账户:账面 1,000、可用 1,000、冻结 0。放款 A 申请 100 元,放款 B 申请 950 元,同时有报表在读账户数据。','设置一个并发场景:预留机制能防超额,但中间态仍可被读到。','——',{}),
+ St('A 的 Try:冻结 100','A 完成 Try:可用 900、冻结 100,账面仍是 1,000。','Try 预留立即提交,A 尚未 Confirm。','这是一个对其他事务可见的中间态。',{m:[M('ta','db','Try 冻结 100'),M('db','ta','Try 成功','ok',1)],s:{sa:'Try 成功',av:900,fz:100}}),
+ St('报表读到两种口径','报表查询账户:账面 1,000(含冻结),可用 900。同一时刻,“余额”有两个数。','TCC 没有全局快照:各参与者本地事务各自提交,读者看到的是所有已提交的中间态。','如果报表把账面当作客户“可用余额”,就会多算 100 元。',{m:[M('rpt','db','查询余额'),M('db','rpt','返回两种余额','ok',1)],s:{r1:1000,r2:900},n:'预留状态会改变“账面”与“可用”的对应关系,对外口径要由业务明确(例如客户端只展示可用余额)。'}),
+ St('B 的 Try 被拒绝','B 要冻结 950 元,但可用只有 900,Try 失败。','预留确实阻止了超额占用,这正是 TCC 的价值。','B 的失败是基于 A 的中间态做出的判断。',{m:[M('tb','db','Try 冻结 950'),M('db','tb','Try 失败:可用不足','fail',1)],s:{sb:'Try 失败',res:'可用不足(拒绝)'}}),
+ St('A 取消后,B 的拒绝成了“误拒”','A 随后 Cancel,释放冻结:可用回到 1,000。此时 B 的 950 元本来是可以满足的,但它已经被拒绝。','中间态产生了“幻影影响”:一次最终取消的事务,曾经影响过别人的结果。','业务要决定是否允许 B 重试、排队或降级;这些都不是 TCC 机制自动提供的。',{m:[M('ta','db','Cancel 释放冻结','comp'),M('db','ta','成功','ok',1)],s:{sa:'已取消(Cancel)',av:1000,fz:0}}),
+ St('结论','TCC 的预留提供资源占位和较短的锁持有时间,但不提供可串行化的全局隔离。读到中间态、基于中间态做决定,都是业务要处理的现实。','要在“性能”和“全局隔离”之间做选择:想要严格隔离,需要 2PC/XA 或在业务层加额外控制。','资金场景要明确对外口径、并发策略与补偿方式,并通过测试验证。',{n:'错误说法:“TCC 预留天然具备全局数据库隔离。”准确说法:预留提供业务层面的资源占位,隔离性由业务设计与框架约束共同保证。',tg:['eng']})
+],'隔离性辨析')
+]});
+})();
+</script>
+<script>
+(function(){
+const {CH,M,St,Sc}=window.DT;
+const T1={led:900,ent:'扣款流水',lg:'T1 完成'};
+const VOID={loan:'已作废(保留记录)'};
+const REV={led:1000,ent:'扣款+冲正流水'};
+const FAILSTART={gs:'COMPENSATING',lg:'T3 失败',led:900,ent:'扣款流水',loan:'已生效 100',pay:'失败'};
+CH.push({nav:'Saga',title:'Saga:本地事务序列与逆序补偿',
+intro:'Saga 把长业务拆成一串各自提交的本地事务 T1…Tn。任何一步失败,就按相反顺序执行已完成步骤的补偿 Cn…C1。它放弃了跨步骤隔离,换来了无长锁和更好的可用性。',
+bounds:[
+['std','Saga 源自 Garcia-Molina 与 Salem(1987)对长事务的处理:拆成可独立提交的子事务,并为每个子事务配补偿事务;它保证的是“要么全部完成,要么补偿到可接受状态”,不提供跨步骤隔离。'],
+['teach','教学假设:本章把“账户扣款 T1”设为可由“冲正入账 C1”业务补偿的动作。现实中银行记账通常不能随意撤销,冲正、红冲、追款都要遵循会计规则、监管与审计要求。'],
+['eng','补偿不是数据库回滚:T1 已经提交并对外可见,C1 是一笔新的业务事务,会留下“扣款”和“冲正”两条历史流水。'],
+['eng','中间态可见:Saga 运行期间,其他人能读到已提交但最终会被补偿的数据(例如借据已生效)。'],
+['eng','补偿必须幂等、可重试、可转人工。对不可逆动作(渠道出款、已发送的短信、已提交给外部的数据)只能设计追回、更正类的新业务流程,而不能假装撤销。']],
+scenarios:[
+Sc('6a','正常:T1 → T2 → T3','saga',{},[
+ St('初始状态','账户账面 1,000,借据库无借据,渠道未出款。Saga 编排器将按顺序执行:T1 账户扣款、T2 创建借据、T3 渠道出款。每个 Ti 都是各自服务里的本地事务。','先固定起点。注意:T1 作为“可补偿”动作是教学假设。','没有全局锁,也没有全局事务号保证的隔离。',{s:{gs:'未开始'},tg:['teach']}),
+ St('编排器启动并记录日志','编排器创建 Saga 实例,持久化流程状态 RUNNING,准备执行 T1。','流程状态必须持久化,崩溃后才能知道执行到哪一步。','日志写在编排器自己的库里,它成为恢复的依据。',{s:{gs:'RUNNING',lg:'START'},tg:['eng']}),
+ St('T1:账户扣款','账户服务在本地事务里扣款 100,生成扣款流水,立即提交:账面 900。','每一步提交后立即释放资源,不等后续步骤。','T1 提交后别人就能看到账面 900,即使最终可能被补偿。',{m:[M('orc','acc','T1 扣款 100'),M('acc','orc','T1 成功','ok',1)],s:T1}),
+ St('T2:创建借据','借据服务创建借据并提交,状态“已生效 100”。','业务顺序由编排器按流程定义推进。','借据在渠道出款之前就对外可见,是一个典型的中间态。',{m:[M('orc','loan','T2 创建借据'),M('loan','orc','T2 成功','ok',1)],s:{loan:'已生效 100',lg:'T1,T2 完成'}}),
+ St('T3:渠道出款','放款渠道(外部系统)出款 100 元成功。','最后一步是外部操作,成功后整个业务才完整。','外部操作通常难以撤销,是 Saga 设计中风险最大的步骤。',{m:[M('orc','chan','T3 渠道出款'),M('chan','orc','T3 成功','ok',1)],s:{pay:'已出款 100',lg:'T1~T3 完成'}}),
+ St('Saga 完成','三步都成功,编排器把 Saga 标记为 COMPLETED。','成功路径比较简单,真正的难点在失败路径。','成功路径也可能因日志丢失、重复调用等产生异常,仍需要幂等。',{s:{gs:'COMPLETED'}})
+]),
+Sc('6b','中途失败:T3 失败 → 依次 C2、C1','saga',{},[
+ St('初始状态','账户账面 1,000,借据为空,渠道未出款。','固定起点。','——',{s:{gs:'未开始'}}),
+ St('T1:账户扣款','T1 成功:账面 900,生成扣款流水。','与成功路径相同。','——',{m:[M('orc','acc','T1 扣款 100'),M('acc','orc','T1 成功','ok',1)],s:Object.assign({gs:'RUNNING'},T1)}),
+ St('T2:创建借据','T2 成功:借据已生效 100。','与成功路径相同。','中间态:此时账户已扣、借据已生效,渠道还没出款。',{m:[M('orc','loan','T2 创建借据'),M('loan','orc','T2 成功','ok',1)],s:{loan:'已生效 100',lg:'T1,T2 完成'}}),
+ St('T3 明确失败,开始补偿','渠道返回“明确失败”(例如账户状态异常,未出款)。编排器把状态改为 COMPENSATING,准备按 T2、T1 的相反顺序补偿。','T3 没有产生效果,所以不需要补偿 T3;只需补偿已成功的 T2、T1。','这里是“明确失败”。若是超时未知,必须先查询渠道结果,不能直接补偿(见 7e 的思路)。',{m:[M('orc','chan','T3 渠道出款'),M('chan','orc','拒绝(明确失败)','fail',1)],s:{pay:'失败',lg:'T3 失败',gs:'COMPENSATING'}}),
+ St('C2:作废借据','编排器调用借据服务的补偿动作:把借据标记为“已作废”(保留记录,不物理删除)。','逆序补偿:后做的先补偿。C2 作废的是业务记录,留下可审计的轨迹。','在 C2 完成之前,借据一直处于“已生效”的状态,别人可能已经使用它。',{m:[M('orc','loan','C2 作废借据','comp'),M('loan','orc','C2 完成','ok',1)],s:Object.assign({lg:'C2 完成'},VOID)}),
+ St('C1:冲正入账','编排器调用账户服务的补偿动作:冲正入账 100,账面回到 1,000。账户历史里保留“扣款”和“冲正”两条流水。','C1 是一笔新的业务事务,不是数据库回滚。教学假设:该业务允许通过冲正恢复。','中间期间客户曾看到账面 900;如果其间发生了依赖这笔余额的其他交易,会更复杂。',{m:[M('orc','acc','C1 冲正 +100','comp'),M('acc','orc','C1 完成','ok',1)],s:Object.assign({lg:'C2,C1 完成'},REV),n:'错误说法:“Saga 补偿就是回滚。”准确说法:补偿是新的业务动作,历史上存在过的提交不会消失,账户里会留下扣款与冲正两条流水。'}),
+ St('Saga 以补偿告终','编排器把 Saga 标记为 COMPENSATED。最终账户 1,000,借据已作废(有记录),渠道未出款。','业务上回到“放款未发生”的可接受状态,但不是“从未发生”。','审计需要看到完整轨迹;对外展示要明确“已取消”的含义。',{s:{gs:'COMPENSATED'}})
+],'故障路径'),
+Sc('6c','补偿失败:重试后成功','saga',FAILSTART,[
+ St('起点:T1、T2 已成功,T3 失败','账户 900(已扣款),借据已生效 100,渠道出款失败。编排器处于 COMPENSATING,准备执行 C2、C1。','直接从补偿开始,聚焦补偿失败。','——',{}),
+ St('C2:作废借据成功','借据服务作废借据,返回成功。','逆序补偿的第一步完成。','——',{m:[M('orc','loan','C2 作废借据','comp'),M('loan','orc','C2 完成','ok',1)],s:Object.assign({lg:'C2 完成'},VOID)}),
+ St('C1:冲正失败(账户库不可用)','编排器调用 C1 冲正,但账户库暂时不可用,调用超时。','补偿本身也会失败;它没有“免死金牌”。','账户仍是 900,客户资金被“占着”,必须继续补偿而不是放弃。',{m:[M('orc','acc','C1 冲正 +100','lost')],s:{down:['acc'],lg:'C1 失败,待重试'}}),
+ St('第一次重试仍失败','编排器按退避策略重试 C1,账户库仍然不可用,再次失败。日志记录重试次数。','补偿要重试,并且要有退避、次数上限和告警。','无限立即重试会放大故障;失败超过阈值需要转人工。',{m:[M('orc','acc','C1 重试 #1','lost')],s:{lg:'C1 重试 #1 失败'},tg:['eng']}),
+ St('账户库恢复,第二次重试成功','账户库恢复后,编排器用同一个补偿流水号重试 C1,冲正成功:账面回到 1,000。','补偿流水号稳定不变,账户服务才能识别重复并保证只冲正一次。','如果补偿不幂等,一次超时重试可能冲正两次(多还钱)。',{m:[M('orc','acc','C1 冲正(同一流水号)','comp'),M('acc','orc','C1 完成','ok',1)],s:Object.assign({down:[],lg:'C2,C1 完成'},REV),tg:['eng']}),
+ St('Saga 完成补偿','C2、C1 都完成,编排器标记 COMPENSATED。','最终一致需要“持续重试 + 幂等 + 告警”才能兑现。','“失败后一直重试”并不是保证:重试需要有上限、监控和人工兜底。',{s:{gs:'COMPENSATED'},n:'错误说法:“失败重试就能保证最终一致。”准确说法:重试要配合幂等、持久化日志、告警和人工通道,才能把“一直失败”转化为可处置的事件。',tg:['eng']})
+],'故障路径'),
+Sc('6d','补偿失败转人工 · 不可逆操作','saga',{gs:'RUNNING',lg:'T1~T3 完成',led:900,ent:'扣款流水',loan:'已生效 100',pay:'已出款 100'},[
+ St('起点:三步已完成,渠道已出款','账户 900,借据已生效 100,渠道已把 100 元出款给客户。','直接从“三步已完成”开始。','渠道出款是外部真实资金动作。',{}),
+ St('后置校验失败,决定整体取消','编排器在 T3 之后做后置业务复核,发现借款人命中限制名单,决定整笔业务取消,进入补偿。','业务规则可能在最后一步才发现问题,这是真实场景。','此时最危险的 T3 已经完成。',{s:{gs:'COMPENSATING',lg:'后置校验失败'}}),
+ St('C3:渠道出款无法撤销','编排器按逆序先补偿 T3,请求渠道撤销出款。渠道返回“资金已出账,不可撤销”。','出款是不可逆动作,不存在“撤销”接口,只存在“追回”这种新业务。','补偿失败不是技术故障,而是业务本身不允许。',{m:[M('orc','chan','C3 撤销出款','comp'),M('chan','orc','拒绝:资金已出账','fail',1)],s:{lg:'C3 失败',pay:'已出款(不可撤销)'},tg:['teach','eng']}),
+ St('补偿链暂停,转人工','编排器停止继续执行 C2、C1,把 Saga 置为“待人工处置”,创建工单。','若继续自动作废借据、冲正账户,账实会失衡(钱已出去、账上却恢复),后果更严重。','需要明确的升级路径和值班机制,否则失败的 Saga 会长期悬而未决。',{s:{gs:'待人工处置',lg:'已建工单 #8812'},tg:['eng']}),
+ St('人工确认后发起追款','经业务与风控确认,通过追款(新的业务流程)向渠道/客户追回 100 元。追款本身是一笔新业务,有自己的状态和风险。','不可逆动作只能用“新的业务”来修复,而不是“撤销”。','追款可能不成功,需要继续跟进并保留审计记录。',{m:[M('orc','chan','追款请求(新业务)','comp'),M('chan','orc','追款处理中','ok',1)],s:{pay:'追款处理中',lg:'追款中'}}),
+ St('追款到账','追款到账,渠道侧记录为“已追回 100”。','确认真实资金回到本方后,才能继续恢复账务。','在确认到账前不要冲正账户,以免资金实际损失。',{s:{pay:'已追回 100',lg:'追款完成'}}),
+ St('再执行 C2、C1,对账闭环','追回后再执行 C2 作废借据、C1 冲正入账,账户回到 1,000。人工在工单中记录原因、操作人和对账结果。','先确认外部资金,再恢复内部账务,保持账实一致。','全部动作要可审计;事后复盘需要完整的日志与工单。',{m:[M('orc','loan','C2 作废借据','comp'),M('orc','acc','C1 冲正 +100','comp'),M('loan','orc','C2 完成','ok',1),M('acc','orc','C1 完成','ok',1)],s:Object.assign({gs:'已闭环(人工)',lg:'人工闭环'},VOID,REV),n:'错误说法:“所有 Saga 步骤都可以补偿。”准确说法:能否补偿由业务规则决定,不可逆动作必须在设计阶段用确认、预留、延迟生效或人工流程管理风险。',tg:['teach','eng']})
+],'补偿失败 / 不可逆'),
+Sc('6e','协同(事件驱动)模式','sagac',{},[
+ St('初始状态','账户账面 1,000,借据为空,渠道未出款。没有中央编排器:每个服务只订阅自己关心的事件,处理后发布新事件。','协同模式(choreography)靠事件推动流程,而不是由一个中心调用各服务。','流程分散在各服务,整体顺序不易一眼看全。',{}),
+ St('账户扣款并发布事件','账户服务在本地事务里扣款 100,同时发布 AcctDebited 事件。账面 900。','服务在本地事务内完成自己的动作,并发出事件触发后续步骤。','“写库 + 发事件”本身要用 Outbox 保证原子(见第 7 章),否则可能只写了库没发事件。',{m:[M('acc','bus','AcctDebited')],s:{led:900,ent:'扣款流水',ev:'AcctDebited'}}),
+ St('借据服务订阅并创建借据','借据服务收到 AcctDebited,创建借据并发布 LoanCreated。','后一步由前一步的事件触发,不需要中心调度器。','事件可能重复到达,借据服务必须幂等。',{m:[M('bus','loan','AcctDebited'),M('loan','bus','LoanCreated','req',1)],s:{loan:'已生效 100',ev:'LoanCreated'}}),
+ St('渠道服务出款失败','渠道服务收到 LoanCreated,出款失败,发布 PayoutFailed 事件。','失败也用事件表达,触发补偿链。','失败事件要带足上下文(业务号、原因),方便补偿。',{m:[M('bus','chan','LoanCreated'),M('chan','bus','PayoutFailed','fail',1)],s:{pay:'失败',ev:'PayoutFailed'}}),
+ St('借据服务补偿:作废借据','借据服务订阅 PayoutFailed,作废借据并发布 LoanVoided。','补偿也是事件驱动,逆序由事件依赖关系隐含决定。','补偿顺序不是由代码里的“列表”保证,而是靠订阅关系设计,容易出错。',{m:[M('bus','loan','PayoutFailed'),M('loan','bus','LoanVoided','comp',1)],s:Object.assign({ev:'LoanVoided'},VOID)}),
+ St('账户服务补偿:冲正入账','账户服务订阅 LoanVoided,冲正入账 100,账面回到 1,000,发布 AcctReversed。','补偿链闭合,系统回到可接受的业务状态。','需要超时与死信机制:如果某个事件丢了,补偿链就会停在半路。',{m:[M('bus','acc','LoanVoided'),M('acc','bus','AcctReversed','comp',1)],s:Object.assign({ev:'AcctReversed'},REV)}),
+ St('编排 vs 协同','编排式有中心流程、易于追踪、易加超时和重试,但编排器是单点逻辑;协同式松耦合,但流程隐含在订阅关系中,排错与全局视图困难,容易出现循环依赖。','没有绝对好坏:步骤少、团队独立时协同方便;步骤多、需要审计时编排更清晰。','无论哪种,补偿都不是回滚;每个服务都要幂等,并通过 Outbox 等机制保证事件可靠发布。',{n:'选型提示:资金类关键流程更倾向于编排式(便于审计和人工介入),周边通知类流程更适合协同式。',tg:['eng']})
+])
+]});
+})();
+</script>
+<script>
+(function(){
+const {CH,M,St,Sc}=window.DT;
+
+/* ---------- 第 7 章:Outbox + MQ ---------- */
+const BASE={loan:'已生效 100',ob:'PENDING'};
+const SENT={loan:'已生效 100',ob:'SENT',q:'1 条 M-9001'};
+CH.push({nav:'Outbox + MQ',title:'Outbox + MQ:本地消息表与可靠投递',
+intro:'Outbox 把“业务变更”和“要发的消息”放进同一个本地事务,再由投递器异步发送。它解决的是“本库写入与发消息”的原子绑定,而不是让外部接口也变成原子。',
+bounds:[
+['std','AWS Prescriptive Guidance 与 microservices.io 的 Outbox 说明:业务表与 outbox 表在同一个本地事务内提交;独立进程把消息投递到 Broker;投递器可能重复发送,所以消费者应当幂等(例如记录已处理的消息 ID)。'],
+['eng','Outbox 只原子绑定“本库业务变更”与“发送意图”。它不会让 MQ、消费者或外部接口自动具备原子性。'],
+['eng','至少一次投递允许重复:投递器在“发送成功但尚未更新状态”时崩溃,会重发;消费者在“处理成功但 ACK 丢失”时会被重投。业务副作用必须靠幂等实现。'],
+['eng','Publisher Confirm 与 Consumer ACK 相互独立:前者说明 Broker 已接收,后者说明消费者已处理。ACK 应在业务处理成功之后发出。'],
+['eng','唯一记录存在不等于处理成功:去重记录要区分 PROCESSING、SUCCESS、UNKNOWN、FAILED。外部结果未知时,要用稳定幂等键查询确认,或转对账与人工。'],
+['eng','可靠性有前提:Broker 持久化与副本、重试上限与死信、监控告警、对账兜底。最终一致不是“失败后一直重试”的口头保证。']],
+scenarios:[
+Sc('7a','正常:原子落库 → 投递 → 消费确认','outbox',{},[
+ St('初始状态','放款服务尚未写入任何数据:借据库没有借据,没有待发消息。MQ 为空,征信服务没有去重记录,外部征信接口没有收到过报送。','先固定起点。本章的消息号是 M-9001,报送幂等键是 rpt-9001(都是教学假设)。','——',{}),
+ St('同一本地事务:借据 + 待发消息','放款服务在一个数据库本地事务里同时写入借据(已生效 100)和一条待发消息(状态 PENDING),一起提交。','本地事务保证“借据生效”和“要报送征信”这两件事要么同时存在,要么同时不存在。','这个原子性只覆盖借据库自己;消息此刻还没有离开本库。',{s:BASE,tg:['std','eng']}),
+ St('投递器读取 PENDING','独立的投递器(轮询或日志订阅)读取状态为 PENDING 的消息。','投递是异步的,不占用放款请求的事务和响应时间。','读取时不能长时间持有数据库事务去等网络调用。',{m:[M('loan','relay','读取 PENDING')],s:{rl:'投递中'}}),
+ St('发布到 MQ,等待 Broker 确认','投递器把 M-9001 发布到 MQ;Broker 持久化后返回 Publisher Confirm。','只有收到 Broker 确认,才能认为“消息已可靠交给 MQ”。','没收到确认就不能标记已发送;确认只说明 Broker 已接收。',{m:[M('relay','mq','发布 M-9001'),M('mq','relay','Confirm','ok',1)],s:{q:'1 条 M-9001',rl:'已收到确认'},tg:['eng']}),
+ St('标记 SENT','投递器把 outbox 里这条消息更新为 SENT。','状态更新让对账与监控知道“这条已交给 MQ”。','如果这一步之前崩溃,会重发(见 7c)。',{m:[M('relay','loan','标记 SENT')],s:{ob:'SENT',rl:'空闲'}}),
+ St('消费者先登记去重记录','MQ 把消息投递给征信报送服务。服务先以消息号为唯一键插入去重记录,状态 PROCESSING。','唯一键保证同一条消息只会有一个“占位者”。','此时记录只代表“有人正在处理”,不代表处理成功。',{m:[M('mq','cons','投递 M-9001')],s:{dd:'PROCESSING',ack:'未确认'}}),
+ St('调用外部征信接口(带幂等键)','服务用稳定的幂等键 rpt-9001 调用外部征信接口,外部返回“已受理”。','外部调用不在任何本地事务内,所以必须靠幂等键支持重复请求。','外部接口是否真的幂等,要通过接口约定验证。',{m:[M('cons','ext','key=rpt-9001'),M('ext','cons','已受理','ok',1)],s:{ext:'已受理'}}),
+ St('落 SUCCESS,再 ACK','服务把去重记录改为 SUCCESS,然后向 MQ 发送消费 ACK。MQ 删除该消息。','先落成功状态,再 ACK:即使 ACK 前崩溃,重投时也能识别为已成功。','若先 ACK 再处理,崩溃会导致消息丢失(没有处理却被确认)。',{m:[M('cons','mq','ACK')],s:{dd:'SUCCESS',ack:'已 ACK',q:'空'},n:'错误说法:“只要去重表里有记录,就代表处理成功。”准确说法:记录存在只说明有人占位;只有 SUCCESS 才表示成功,PROCESSING 与 UNKNOWN 要区别对待。'})
+]),
+Sc('7b','发送失败:MQ 不可用','outbox',BASE,[
+ St('起点:借据已生效,消息待发送','借据已生效 100,outbox 中有一条 PENDING 消息。MQ 尚未收到。','业务事务已经提交,发送是后续异步动作。','——',{}),
+ St('发布失败:MQ 不可达','投递器读取消息并尝试发布,MQ 不可用,没有收到 Publisher Confirm。','没有确认就不能认为已发送。','此时业务已成功,但征信报送被延迟。',{m:[M('loan','relay','读取 PENDING'),M('relay','mq','发布 M-9001','lost',1)],s:{down:['mq'],rl:'发送失败',rt:1}}),
+ St('保持 PENDING,退避重试','消息状态保持 PENDING,重试次数记为 1。投递器按退避策略再次尝试。','状态不动,意味着不会丢:下一轮仍会被取到。','重试需要退避和上限,避免对故障的 Broker 形成风暴。',{s:{rl:'等待重试'}}),
+ St('MQ 恢复,重试成功','MQ 恢复,投递器重新发布 M-9001,Broker 持久化并确认。','这就是 Outbox 的价值:发送失败不会丢消息。','需要监控 PENDING 的年龄,及时发现“很久没发出去”。',{m:[M('relay','mq','重发 M-9001'),M('mq','relay','Confirm','ok',1)],s:{down:[],q:'1 条 M-9001',rl:'已收到确认'}}),
+ St('标记 SENT','投递器把消息更新为 SENT。','消息交接完成。','业务不受 MQ 故障影响,代价是报送延迟。',{m:[M('relay','loan','标记 SENT')],s:{ob:'SENT',rl:'空闲'}})
+],'故障路径'),
+Sc('7c','发送成功但状态更新前崩溃:重复投递','outbox',BASE,[
+ St('起点:借据已生效,消息待发送','借据已生效 100,outbox 中有一条 PENDING 消息 M-9001。','起点同 7b。','——',{}),
+ St('发布成功,Broker 已确认','投递器发布 M-9001,Broker 持久化并返回确认。此时 outbox 里该消息仍是 PENDING(还没来得及更新)。','消息已到 MQ,但投递器尚未记录这件事。','这是 Outbox 的经典窗口:成功与记录之间的间隙。',{m:[M('relay','mq','发布 M-9001'),M('mq','relay','Confirm','ok',1)],s:{q:'1 条 M-9001',rl:'已收到确认'}}),
+ St('投递器在更新 SENT 前崩溃','投递器进程崩溃,没来得及把消息改成 SENT。outbox 仍显示 PENDING。','崩溃可以发生在任意两条语句之间。','重启后的投递器只能看到 PENDING,不知道已发布过。',{s:{down:['relay']}}),
+ St('消费者正常处理第一份消息','消费者收到 M-9001,登记 PROCESSING,调用外部(key=rpt-9001)受理,落 SUCCESS 并 ACK。','第一份消息已完整处理。','——',{m:[M('mq','cons','投递 M-9001'),M('cons','ext','key=rpt-9001','req',1),M('ext','cons','已受理','ok',2),M('cons','mq','ACK','req',3)],s:{dd:'SUCCESS',ack:'已 ACK',ext:'已受理',q:'空'}}),
+ St('投递器重启,重发','投递器重启,读到 M-9001 仍是 PENDING,于是重新发布,MQ 再次确认并入队。','投递器无法区分“没发”和“发了没记录”,保守选择是重发——这就是“至少一次”。','重复消息不是 bug,而是该模式的设计结果。',{m:[M('loan','relay','读取 PENDING'),M('relay','mq','重发 M-9001','req',1),M('mq','relay','Confirm','ok',2)],s:{down:[],q:'1 条(重复)',rl:'重发'},tg:['eng']}),
+ St('消费者发现已 SUCCESS,直接 ACK','消费者收到重复的 M-9001,查去重记录:状态是 SUCCESS,于是不再调用外部,直接 ACK。','去重记录让重复消息的业务副作用只发生一次。','判断依据是状态 SUCCESS,而不是“记录存在”。',{m:[M('mq','cons','投递 M-9001(重复)'),M('cons','mq','ACK(跳过业务)','req',1)],s:{q:'空',ack:'已 ACK(重复)'}}),
+ St('投递器最终标记 SENT','投递器标记 SENT。业务副作用(外部报送)只发生了一次。','状态收敛。','消息可靠性 = 至少一次投递 + 幂等消费,而不是“只发一次”。',{m:[M('relay','loan','标记 SENT')],s:{ob:'SENT',rl:'空闲'},n:'错误说法:“消息可靠就是消息不会重复。”准确说法:可靠投递通常意味着不丢但可能重复,业务幂等才能保证副作用只生效一次。'})
+],'故障路径'),
+Sc('7d','ACK 丢失导致重投','outbox',SENT,[
+ St('起点:消息已入队','借据已生效,消息 M-9001 已 SENT 并在队列中,消费者尚未处理。','起点:发布路径已经完成。','——',{}),
+ St('消费者处理成功并落 SUCCESS','消费者登记 PROCESSING,调用外部并受理成功,然后把去重记录改为 SUCCESS。','业务处理本身正确完成。','此时 ACK 还没发出。',{m:[M('mq','cons','投递 M-9001'),M('cons','ext','key=rpt-9001','req',1),M('ext','cons','已受理','ok',2)],s:{dd:'SUCCESS',ext:'已受理',ack:'未确认'}}),
+ St('ACK 在网络中丢失','消费者发出 ACK,但在网络中丢失,MQ 没有收到。','ACK 是消费者对 MQ 的单独通信,会独立于业务结果而失败。','MQ 不知道消息已被处理成功。',{m:[M('cons','mq','ACK','lost')],s:{ack:'ACK 丢失'}}),
+ St('MQ 超时,重投','MQ 在超时后把 M-9001 重新投递给消费者。','Broker 只能按“没收到 ACK 就当没处理”处理,以免丢消息。','重投会再次触发消费逻辑。',{m:[M('mq','cons','重投 M-9001')],s:{q:'1 条(重投)'}}),
+ St('去重命中 SUCCESS,直接 ACK','消费者查去重记录:SUCCESS,于是不重复调用外部,重新发送 ACK,这次成功。','幂等消费把“重复投递”变成“无副作用的确认”。','ACK 可以多次发送,这并不影响业务。',{m:[M('cons','mq','ACK')],s:{ack:'已 ACK',q:'空'}}),
+ St('思考:命中的是 PROCESSING 呢?(不改变状态)','假设重投时记录是 PROCESSING:可能是另一个实例正在处理,也可能是上次进程崩溃留下的。此时不能直接 ACK(会丢消息),也不能立刻再调外部。要看处理租约:租约未过期则延后重试;已过期则接管,并以同一幂等键调用或查询外部。','“记录存在”不是“成功”。PROCESSING、UNKNOWN、SUCCESS 的处理方式各不相同。','租约、重试和接管逻辑要设计并测试;否则要么重复调用外部,要么消息悬而不决。',{n:'错误说法:“去重表里有这条消息,说明已经处理成功。”准确说法:必须区分状态;PROCESSING 与 UNKNOWN 不能当作成功。',tg:['eng']})
+],'故障路径'),
+Sc('7e','外部结果未知:稳定幂等键与查询确认','outbox',SENT,[
+ St('起点:消息已入队','M-9001 在队列里,消费者准备处理。','——','——',{}),
+ St('登记 PROCESSING 并调用外部','消费者插入去重记录 PROCESSING,用幂等键 rpt-9001 调用外部征信接口。','先占位,再调用外部。','外部调用可能超时,调用方看不到结果。',{m:[M('mq','cons','投递 M-9001'),M('cons','ext','key=rpt-9001','req',1)],s:{dd:'PROCESSING',ack:'未确认'}}),
+ St('外部超时,结果未知','外部接口没有返回(超时)。外部可能已经受理,也可能没收到。','超时不等于失败,也不等于成功。','错误地标记 FAILED,可能导致重复报送;标记 SUCCESS 则可能漏报。',{m:[M('ext','cons','(无响应)','lost')],s:{dd:'UNKNOWN',ext:'超时未知'},tg:['eng']}),
+ St('不 ACK,等待重投','消费者不发 ACK(或延迟重试),让消息在 MQ 里保持可再投递。','保持消息不丢,同时给外部系统缓冲时间。','不能无限重投;要有次数上限与告警(见 7f)。',{s:{q:'1 条(待重投)'}}),
+ St('重投:看到 UNKNOWN,先查询','MQ 重投。消费者看到记录是 UNKNOWN,不盲目重发,先用幂等键 rpt-9001 向外部查询结果。外部回答“已受理”。','先查后做:查询可以确认外部状态,避免重复副作用。','这依赖外部提供查询接口或幂等语义;没有的话只能依赖约定或人工对账。',{m:[M('mq','cons','重投 M-9001'),M('cons','ext','查 key=rpt-9001','req',1),M('ext','cons','已受理','ok',2)],s:{ext:'已受理'},tg:['eng']}),
+ St('确认受理 → SUCCESS → ACK','确认外部已受理,去重记录改为 SUCCESS,发送 ACK。','结果由确认得出,不是由猜测。','——',{m:[M('cons','mq','ACK')],s:{dd:'SUCCESS',ack:'已 ACK',q:'空'}}),
+ St('若查询不到怎么办(不改变状态)','若查询结果是“不存在”,可以用同一幂等键重发(外部接口需支持幂等)。若外部既无幂等也无查询,就只能靠接口约定、对账和人工处置。','幂等键必须稳定:同一业务每次重试都用同一个 key。','每次重试换新 key,会让外部把它当成新请求,造成重复。',{n:'错误说法:“外部调用超时就当失败重试。”准确说法:结果未知要用稳定幂等键查询确认,或转对账/人工;不能凭超时猜结果。',tg:['eng']})
+],'故障路径'),
+Sc('7f','重试超限 → 死信 → 对账修复','outbox',SENT,[
+ St('起点:消息已入队','M-9001 在队列里。外部征信接口出现持续故障(演示用设定)。','——','——',{}),
+ St('前几次消费失败','消费者多次处理 M-9001,外部都返回 500 错误。去重记录标记 FAILED(可重试),累计失败 4 次。','暂时性故障应重试,但不是无限次。','每次重试都应有退避,避免打爆故障中的外部服务。',{m:[M('mq','cons','投递 M-9001'),M('cons','ext','key=rpt-9001','req',1),M('ext','cons','500 错误','fail',2)],s:{dd:'FAILED(可重试)',ack:'已失败 4/5 次'}}),
+ St('第 5 次失败,超过重试上限','第 5 次仍然失败,达到上限。消费者把记录置为终态失败,并拒绝该消息且不再重新入队。','重试上限防止“毒消息”无限占用资源。','上限值要结合业务时限(例如监管报送时限)设置。',{m:[M('mq','cons','投递 M-9001'),M('cons','ext','key=rpt-9001','req',1),M('ext','cons','500 错误','fail',2)],s:{dd:'FAILED(终态)',ack:'超限 5/5'}}),
+ St('进入死信队列并告警','MQ 把被拒绝的消息转入死信队列(DLQ),监控触发告警。','死信把“无法自动处理”的消息隔离出来,保留现场供人处理。','没人看的死信队列等于消息黑洞;必须有告警和处置责任人。',{m:[M('cons','mq','拒绝,不重入队')],s:{q:'空',dlq:'1 条 M-9001'},tg:['eng']}),
+ St('对账发现:借据已生效,征信未报','对账任务比对借据与报送记录,发现 100 元借据已生效,但没有成功的报送记录,生成差异。','对账是“最后一道防线”:即使消息链路本身出了问题,也能发现缺失。','对账周期决定了发现延迟(T+0 或 T+1)。',{m:[M('rec','loan','读取借据'),M('rec','cons','读取报送状态','req',1)],s:{diff:'借据 1 笔未报送'},tg:['eng']}),
+ St('修复外部问题,用原 key 重放','故障修复后,运维通过对账任务把死信重新投递(redrive),报送仍用同一幂等键 rpt-9001。','原 key 保证外部可以识别重复;死信重放要有审批和记录。','重放前要确认去重记录的保留时间覆盖死信重放的周期。',{m:[M('rec','cons','指令:重放死信')],s:{dlq:'空',q:'1 条(重放)'},tg:['eng']}),
+ St('重放成功,闭环','重放后外部受理,去重记录 SUCCESS,ACK,对账差异关闭。','死信 + 对账让“持续失败”变成“可处置的事件”。','最终一致 = 可靠投递 + 幂等 + 重试上限 + 死信 + 对账 + 人工治理。',{m:[M('mq','cons','投递 M-9001'),M('cons','ext','key=rpt-9001','req',1),M('ext','cons','已受理','ok',2),M('cons','mq','ACK','req',3)],s:{dd:'SUCCESS',ext:'已受理',ack:'已 ACK',q:'空',diff:'已对平'},n:'错误说法:“失败了一直重试就行。”准确说法:要有重试上限、死信隔离、告警、对账与人工修复,并保证重放使用同一幂等键。',tg:['eng']})
+],'重试超限 / 死信')
+]});
+
+/* ---------- 第 8 章:银行信贷案例 ---------- */
+const AFTERCONF={gtx:'COMMITTED',ph:'完成',led:900,av:900,fz:0,loan:'已生效 100',ob:'PENDING'};
+CH.push({nav:'银行信贷案例',title:'银行信贷案例:组合选型',
+intro:'一笔 100 元放款要同时满足两类要求:资金账务不能错,征信报送允许略晚但不能丢。把它们分成两个域,各用适合的方案,再说明每个选择成立的前提。',
+bounds:[
+['teach','教学假设:核心资金(账户冻结/扣减、借据生效)必须业务强约束,服务由本机构控制,可以改造出 Try/Confirm/Cancel;征信报送是对外系统,不能加入本机构的全局事务,允许延迟但不能丢。'],
+['eng','组合方案的前提:TCC 参与者能实现幂等、空回滚、防悬挂并有监控;Outbox 在借据库内与借据生效同事务;报送接口支持幂等键或结果查询;存在对账与人工处置通道。'],
+['eng','业务规则前提:征信报送允许在监管时限内延后与补报。如果报送是放款的前置条件(必须同步成功才能放款),则需要把它改为同步校验或前置步骤,而不能用异步 Outbox 掩盖。'],
+['eng','不同域各自治理:核心资金域看冻结时长、悬挂、Confirm 失败;报送域看 PENDING 年龄、死信、对账差异。']],
+scenarios:[
+Sc('8a','正常:TCC 资金 + Outbox 报送','bank',{},[
+ St('选型逻辑与初始状态','账户:账面 1,000 / 可用 1,000 / 冻结 0;借据为空。资金主链路用 TCC(业务强约束、服务可改造、锁占用短);征信报送用 Outbox + MQ(对外、异步、允许延迟)。','不同要求配不同方案:不要用一个模式解决所有问题。','组合方案增加了系统数量,治理要覆盖两个域。',{tg:['teach','eng']}),
+ St('TCC Try:账户冻结 + 借据预创建','TM 开启全局事务。账户 Try:可用 900、冻结 100。借据 Try:借据 TRYING(未生效)。','先预留,保证后续 Confirm 不会因资源不足失败。','预留状态对外可见;冻结时长要监控。',{m:[M('tm','acc','Try 冻结 100'),M('tm','loan','Try 预创建借据'),M('acc','tm','Try 成功','ok',1),M('loan','tm','Try 成功','ok',1)],s:{gtx:'ACTIVE',ph:'Try 阶段',av:900,fz:100,loan:'TRYING(未生效)'}}),
+ St('TM 决定 Confirm 并持久化','两个 Try 都成功,TM 把 Confirm 决定落盘。','决定落盘后恢复机制才有依据。','从此只能向前,Confirm 要重试到成功。',{s:{gtx:'COMMITTING',ph:'Confirm 阶段'},tg:['eng']}),
+ St('Confirm:账户扣减','账户把冻结转为扣减:账面 900、可用 900、冻结 0。','消耗预留,完成资金变动。','Confirm 幂等。',{m:[M('tm','acc','Confirm'),M('acc','tm','Confirm 成功','ok',1)],s:{led:900,fz:0}}),
+ St('Confirm:借据生效 + 同事务写 outbox','借据服务 Confirm:借据由 TRYING 变为已生效,并在同一个本地事务里插入一条“征信报送”待发消息(PENDING)。','借据生效与报送意图原子绑定:借据一旦生效,报送意图一定同时存在。','这里 Outbox 的原子性只覆盖借据库内部。',{m:[M('tm','loan','Confirm'),M('loan','tm','Confirm 成功','ok',1)],s:{loan:'已生效 100',ob:'PENDING'},tg:['std','eng']}),
+ St('资金主链路完成','TM 把全局事务标记 COMMITTED。客户可以放款:账面 900、可用 900、冻结 0。','核心资金域在这一刻完成,不等待征信报送。','报送尚未完成,征信数据暂时落后。',{s:{gtx:'COMMITTED',ph:'完成'}}),
+ St('投递器把报送消息发到 MQ','投递器读取 PENDING,发布到 MQ,收到 Broker 确认后标记 SENT。','报送域从这里开始异步运行,与资金域解耦。','MQ 不可用时,消息停在 PENDING,不影响已完成的放款。',{m:[M('loan','mq','投递报送消息'),M('mq','loan','Confirm','ok',1)],s:{ob:'SENT',q:'1 条 rpt-9001'}}),
+ St('征信服务消费并报送','征信报送服务先登记去重记录,再用幂等键调用外部征信,受理后落 SUCCESS 并 ACK。','按 7a 的消费流程执行,保证重复投递只产生一次报送效果。','外部结果未知时,走“稳定幂等键 + 查询确认”流程(7e)。',{m:[M('mq','cr','投递报送消息'),M('cr','ext','key=rpt-9001','req',1),M('ext','cr','已受理','ok',2),M('cr','mq','ACK','req',3)],s:{dd:'SUCCESS',ext:'已受理',q:'空'}}),
+ St('组合方案的前提(总结)','本组合成立,取决于:参与者可改造并实现幂等/空回滚/防悬挂;Outbox 与借据生效同库同事务;外部接口支持幂等或查询;业务允许报送延迟;日志、监控、对账与人工处置齐备。','每一种方案都带着前提;前提不满足,就要换方案或补措施。','不要把“用了 TCC + Outbox”当成已经解决问题,治理才是长期成本。',{n:'错误说法:“组合方案就是绝对可靠。”准确说法:它把可靠性建立在一组明确前提和持续治理之上。',tg:['eng']})
+]),
+Sc('8b','报送故障:不回滚资金,延迟补报','bank',AFTERCONF,[
+ St('起点:资金已确认,报送待发','资金主链路已完成:账面 900 / 可用 900 / 冻结 0,借据已生效,报送消息 PENDING。','直接从资金完成后开始,聚焦报送故障。','——',{}),
+ St('投递到 MQ','投递器把报送消息发到 MQ,标记 SENT。','消息已离开借据库。','——',{m:[M('loan','mq','投递报送消息'),M('mq','loan','Confirm','ok',1)],s:{ob:'SENT',q:'1 条 rpt-9001'}}),
+ St('外部征信超时,结果未知','征信服务调用外部,超时无响应。去重记录标记 UNKNOWN。','不确定时不猜,保持 UNKNOWN。','不要把 UNKNOWN 当作失败直接重发。',{m:[M('mq','cr','投递报送消息'),M('cr','ext','key=rpt-9001','req',1),M('ext','cr','(无响应)','lost',2)],s:{dd:'UNKNOWN',ext:'超时未知'}}),
+ St('重试超限 → 死信 + 告警','多次重试后仍无法确认,消息进入死信队列并触发告警。','让异常显性化。','死信需要责任人;否则报送会长期缺失。',{s:{q:'死信 1 条',dd:'FAILED(待人工)'},tg:['eng']}),
+ St('资金侧不受影响,不得为报送失败回滚放款','放款已经完成,客户已获得资金。报送失败不应倒过来取消放款。','两个域的责任不同:报送是“必须补上”,不是“失败就撤销资金”。','这个选择依赖业务规则:报送允许延后补报。若监管要求放款前必须报送成功,就不能这样设计。',{n:'前提:该业务规则允许报送延后与补报。如果报送是放款前置条件,必须改为同步或前置校验。',tg:['teach','eng']}),
+ St('修复后用同一幂等键补报,对账闭环','外部恢复后,运维重放死信,征信服务先用幂等键查询,再补报,外部受理,去重记录 SUCCESS,对账差异关闭。','同一幂等键保证不会重复报送。','记录处置过程:谁、何时、依据什么重放。',{m:[M('mq','cr','重放报送消息'),M('cr','ext','查询/补报 key=rpt-9001','req',1),M('ext','cr','已受理','ok',2)],s:{dd:'SUCCESS',ext:'已受理',q:'空'},tg:['eng']})
+],'故障路径')
+]});
+})();
+</script>
+<script>
+(function(){
+const {CH,M,St,Sc}=window.DT;
+
+/* ---------- 第 9 章:治理 ---------- */
+CH.push({nav:'治理与对账',title:'治理:日志、监控、恢复、对账与人工处置',
+intro:'分布式事务不是“选一个方案就结束”。无论哪种方案,都需要全局号、分支日志、状态机、监控、恢复任务、对账和可审计的人工处置,才能把“最终一致”落到实处。',
+bounds:[
+['eng','每笔全局事务都要有全局事务号(xid、Saga 实例号或业务流水号),每个分支有日志和状态机。没有它们,崩溃后无法恢复,对账也无从下手。'],
+['eng','恢复依据是持久化的决策与状态,而不是超时猜测:已决定 Confirm/COMMIT 的只能向前重试;未形成决策的,按协议与产品规则处理。'],
+['eng','监控关注:各中间状态的滞留时长(PREPARED、TRYING、COMMITTING、COMPENSATING、PENDING)、重试次数、死信数量、冻结金额、对账差异。'],
+['eng','对账分 T+0(近实时,发现快)与 T+1(日终,全量兜底)。对账是“机制失效后的兜底”,不能替代一致性机制本身。'],
+['eng','人工处置要有工单、审批、操作人、依据与前后值,全部留痕可审计;高风险操作建议双人复核。']],
+scenarios:[
+Sc('9a','异常事务:发现 → 恢复 → 升级 → 人工','gov',{},[
+ St('每笔全局事务都有全局号与日志','事务日志库里登记全局事务 G-1001:状态机处于 COMMITTING(决定提交、第二阶段进行中),分支日志显示账户 Confirm 待执行。','全局号 + 状态机 + 分支日志,是恢复与对账的基础。','日志本身必须持久、可查询、可追溯。',{s:{br:'Confirm 待执行',sm:'COMMITTING',bl:'账户 Confirm 待执行'},tg:['eng']}),
+ St('监控发现 COMMITTING 滞留','监控扫描事务日志,发现 G-1001 停留在 COMMITTING 超过阈值(例如 5 分钟),触发 P2 告警。','滞留时长是最直接的“卡住”信号。','阈值太宽会漏报,太窄会噪声多;要按业务与方案分别设置。',{m:[M('txlog','mon','滞留超过 5 分钟')],s:{al:'P2:G-1001 滞留'}}),
+ St('恢复任务按日志推进,重试失败','恢复任务领取 G-1001,按日志决定“向前”:重试账户 Confirm(幂等)。账户服务返回失败。','恢复动作取决于已记录的决策(COMMITTING),不是现场猜测。','重试要有次数与退避限制。',{m:[M('txlog','rec','领取 G-1001'),M('rec','biz','Confirm(幂等)','req',1),M('biz','rec','失败','fail',2)],s:{ra:'重试 #1 失败',br:'Confirm 失败'}}),
+ St('超过阈值,升级告警并建工单','多次重试仍失败,告警升级为 P1,自动重试暂停,并创建工单 #8812。','自动化有边界;超出边界要有明确的人工通道。','没有值班和责任人,告警只是噪声。',{m:[M('mon','ops','创建工单')],s:{al:'P1:重试超限',tk:'#8812 待处理',ra:'暂停自动重试'}}),
+ St('人工核对后重放 Confirm,并留痕','值班人员核对账户与借据状态,确认 G-1001 已决定提交,授权恢复任务重放 Confirm。成功后状态机改为 COMMITTED,工单记录操作人、依据、前后值。','人工也只能沿着“已决定提交”的方向向前,不能为了处理方便改成取消。','人工操作若无审计留痕,事后无法追责与复盘。',{m:[M('ops','rec','授权重放 Confirm'),M('rec','biz','Confirm(幂等)','req',1),M('biz','rec','Confirm 成功','ok',2),M('rec','txlog','更新状态','req',3)],s:{br:'CONFIRMED',ra:'已重放',sm:'COMMITTED',bl:'全部完成',tk:'#8812 已处理',au:'操作人/依据已留痕'},n:'错误做法:卡住了就手工把事务改成“已取消”。已决定提交的事务强行取消,会与已确认的分支产生不一致。'}),
+ St('关闭告警并复盘','告警关闭。复盘:为什么账户库不可用?是否需要容量、超时、重试参数或监控阈值调整?','治理是闭环:发现 → 处置 → 复盘 → 改进。','不复盘,同类故障会反复发生。',{s:{al:'已关闭'}})
+],'恢复与升级'),
+Sc('9b','T+0 / T+1 对账与修复','recon',{},[
+ St('三类数据来自不同系统','账户系统有扣款流水(100),借据系统有借据(已生效 100),征信报送服务没有成功的报送记录。','三份数据各自“看起来正确”,只有对照才能发现缺失。','如果没有对账,这种缺失可能长期不被发现。',{s:{n1:'扣款 100',n2:'已生效 100',n3:'无报送记录'}}),
+ St('T+0 近实时对账发现差异','对账服务近实时读取三方数据并比对,发现“借据已生效、报送缺失”,记录差异。','近实时对账缩短发现时间,适合高风险环节。','比对口径(金额、状态、业务号)要统一,否则会有大量误差。',{m:[M('rc','acc','读扣款流水'),M('rc','loan','读借据'),M('rc','cr','读报送状态')],s:{diff:'报送缺 1 笔'},tg:['eng']}),
+ St('差异分类','按类型分类:金额不符(长款/短款)、状态不一致、重复、缺失。本例属于“缺失”,且可通过补报修复。','分类决定处置方式:有的可自动修复,有的必须人工。','不要对资金差异自动“抹平”;要先查清原因。',{s:{diff:'类型:报送缺失'}}),
+ St('生成修复建议,进入审批','对账服务提交修复建议“补报 rpt-9001”,工单 #8813 进入审批。','修复也是业务动作,需要审批与留痕。','自动修复必须幂等并可回溯。',{m:[M('rc','ops','提交修复建议')],s:{fx:'待审批',tk:'#8813 待审批'}}),
+ St('审批后用同一幂等键补报','审批通过后补报,使用稳定幂等键 rpt-9001。外部受理,三方一致,差异关闭,审计记录前后值与审批人。','同一幂等键保证即使补报重复,也不会重复报送。','修复后要再次对账确认。',{m:[M('ops','rc','批准补报'),M('rc','cr','补报 key=rpt-9001','req',1),M('cr','rc','已受理','ok',2)],s:{n3:'已报送',diff:'已对平',fx:'已修复',tk:'#8813 已处理',au:'审批人/前后值已留痕'},tg:['eng']}),
+ St('T+1 日终全量核对','日终对账汇总账户总额、借据本金、报送笔数,做全量核对,覆盖 T+0 漏掉的差异(例如跨日、批量文件)。','T+0 发现快,T+1 覆盖全;两者互补。','对账是兜底,不是替代:如果每天靠对账救火,说明上游机制需要加固。',{n:'错误说法:“有对账就不需要幂等和恢复机制。”准确说法:对账用来发现机制失效后的差异,可靠恢复与幂等才是第一道防线。',tg:['eng']})
+],'对账')
+]});
+
+/* ---------- 第 10 章:总结 ---------- */
+const CMP=[
+['本地事务','单库内原子','库内 ACID 隔离','无','数据库日志','回滚','单库内的业务','无法跨库'],
+['2PC / XA','原子(强一致),依赖协调者与持久日志','准备态持锁到全局结束;隔离由各库本地保证','低(框架 + 数据库支持 XA)','TM 决策日志 + xa_recover','准备失败 → 全局回滚;协调者失联 → 阻塞,按日志恢复','参与者少、同构数据库、必须强一致','锁占用、协调者单点、吞吐低、启发式分歧'],
+['3PC','前提成立时可非阻塞','与 2PC 类似','高(需特殊实现)','参与者互相查询状态','协调者宕机时存活者推断;分区时可能分歧','理论与教学,受控网络','前提难满足、分区下可能不一致、延迟更高'],
+['TCC','业务层最终一致(预留 + 确认/取消)','Try 本地事务短暂持锁;预留中间态对外可见,无全局隔离','高(Try/Confirm/Cancel + 幂等/空回滚/防悬挂)','全局事务日志 + Confirm/Cancel 重试','Try 失败 → Cancel;Confirm 失败 → 向前重试','资金类核心链路、服务可改造','开发复杂、中间态可见、悬挂与空回滚'],
+['Saga','最终一致(补偿)','无长锁;中间态可见;无隔离','中高(正向 + 补偿动作)','流程状态日志 + 补偿重试','失败 → 逆序补偿;补偿失败 → 重试/人工','长流程、跨多个服务、补偿业务上可行','补偿不是回滚、不可逆动作、补偿失败'],
+['Outbox + MQ','最终一致(至少一次投递 + 幂等消费)','本地事务;无分布式锁','中(outbox 表、投递器、幂等消费)','outbox 状态 + 重试 + 死信 + 对账','重发;重复靠幂等;超限 → 死信 → 对账','异步通知、数据同步、对外报送','重复投递、顺序、外部结果未知、死信无人处理']];
+const HEAD=['方案','一致性','锁与隔离','业务侵入','恢复依据','典型失败处理','适用场景','主要风险'];
+const MIS=[
+['XA 就是两阶段提交。','XA 是 TM 与 RM 之间的接口规范;2PC 是它所支持的提交协议。XA 也支持单资源一阶段优化。'],
+['准备态超时后,参与者可以自行回滚。','投 YES 后参与者已承诺,不能凭超时单方面回滚;应依据 TM 持久化的决策和 xa_recover 恢复,并告警。'],
+['提交遇到超时,可以改成取消。','提交/确认决策一旦形成,只能向前重试(或转人工),不能为处理超时改成取消。'],
+['3PC 在任意网络分区下都非阻塞且安全。','非阻塞结论依赖延迟有界、故障可检测、无分区;分区下两侧可能做出相反决定。'],
+['TCC 预留天然具备全局隔离。','预留是真实提交的本地事务,中间态对其他事务可见;隔离与并发控制要由业务设计。'],
+['Saga 补偿就是数据库回滚。','补偿是新的业务事务,已提交的历史不会消失;不可逆动作只能走追回/更正流程。'],
+['Outbox 让外部接口调用也原子。','Outbox 只原子绑定本库业务与发送意图;外部调用需要幂等键、查询确认与对账。'],
+['至少一次投递不会重复。','至少一次就是允许重复;业务副作用必须靠幂等实现。'],
+['去重表里有记录就说明处理成功。','必须区分 PROCESSING、UNKNOWN、SUCCESS、FAILED;只有 SUCCESS 才代表成功。'],
+['外部超时就按失败重试。','结果未知要用稳定幂等键查询确认,或转对账/人工;不能凭超时猜结果。'],
+['消息可靠性是绝对保证。','可靠性建立在持久化、副本、确认、重试上限、死信、监控与对账等前提之上。'],
+['失败后一直重试,就能保证最终一致。','最终一致需要可靠恢复与持续治理:日志、幂等、重试上限、告警、对账、人工处置。']];
+const GL=[
+['全局事务 / xid','一次跨多个资源的业务事务的总编号,所有分支都挂在它下面,恢复与对账都靠它。'],
+['分支事务','全局事务在某一个资源或服务上执行的那一部分,通常是一个本地事务。'],
+['TM(事务管理器)/ 协调者','负责驱动全局事务、记录决策、协调各参与者提交或回滚的组件。'],
+['RM(资源管理器)/ 参与者','持有数据并执行分支事务的资源,如数据库或实现了 TCC 的服务。'],
+['2PC','两阶段提交:先 Prepare 投票,再由协调者持久化决策并通知 Commit/Rollback。'],
+['XA','X/Open DTP 中 TM 与 RM 之间的接口规范,包含 start/end/prepare/commit/rollback/recover/forget 等。'],
+['PREPARED(准备态)','RM 已承诺“能提交”并持久化,仍持有锁,等待全局决策;不能凭超时自行决定。'],
+['启发式决策','RM 在失联时单方面提交或回滚已准备的分支。可能与全局决策冲突,需要 forget 与对账善后。'],
+['3PC','在 2PC 中插入 PreCommit 的三阶段协议;非阻塞结论依赖同步网络模型与无分区。'],
+['网络分区','网络分裂为互相不可达的几部分,各部分可能各自继续运行。'],
+['TCC','Try 预留、Confirm 确认、Cancel 取消;预留是真实提交的本地事务。'],
+['幂等','同一请求执行一次与多次的效果相同。Confirm/Cancel、消费、补偿都需要。'],
+['空回滚','没有收到 Try 就收到 Cancel;应返回成功,并记录以便拦截之后的 Try。'],
+['防悬挂','空回滚之后到达的 Try 必须被拒绝,避免资源被永久预留。'],
+['Saga','把长事务拆成一串本地事务,失败时按相反顺序执行补偿动作。'],
+['补偿 / 冲正','对已提交结果的新业务修复动作;不是数据库回滚,历史流水保留。'],
+['编排 / 协同','编排:由中心编排器调度各步;协同:服务通过事件相互触发。'],
+['Outbox(本地消息表)','与业务数据同库同事务写入的待发消息表,由独立投递器发往 MQ。'],
+['Publisher Confirm','Broker 对发布者“已接收并持久化”的确认。'],
+['ACK(消费确认)','消费者对 Broker“已处理完成”的确认;应在业务成功之后发送。'],
+['至少一次投递','消息不丢但可能重复,消费者需要幂等。'],
+['去重记录','以消息号为唯一键的处理状态表;要区分 PROCESSING / SUCCESS / UNKNOWN / FAILED。'],
+['死信队列(DLQ)','无法自动处理的消息被隔离到的队列,需要告警和责任人。'],
+['对账 T+0 / T+1','近实时与日终两种对账节奏,用于发现并修复机制失效后的差异。'],
+['最终一致','在没有新更新时,各副本或各系统经过恢复与重试最终趋于一致;需要治理才能兑现。'],
+['隔离性','并发事务互不干扰的程度;TCC 与 Saga 的中间态可见,不等同于数据库隔离。']];
+const QZ=[
+['XA 与 2PC 是什么关系?',['XA 只是 2PC 的另一个名字','XA 是 TM 与 RM 之间的接口规范,2PC 是它所支持的一种提交协议','XA 是 3PC 的实现','XA 是 Saga 的标准接口'],1,'XA 规定的是 TM 如何调用 RM(start/end/prepare/commit/rollback/recover/forget);2PC 规定的是投票与决策规则。XA 还允许单资源一阶段优化,所以二者不能画等号。'],
+['2PC 中某个 RM 已处于 PREPARED,等 TM 消息超时了,应该怎么办?',['自行回滚并释放锁','自行提交','不能凭超时单方面决定;应依据 TM 持久化的决策恢复(查询/xa_recover),并告警','直接丢弃分支日志'],2,'投出 YES 后 RM 已承诺。回滚可能与已决定提交的全局决策冲突,提交则可能违背他人的 NO。XA 的“启发式”完成只能作最后手段,并需 forget 与对账善后。'],
+['关于 3PC 的“非阻塞”,哪个说法准确?',['在任意网络分区下都成立','在延迟有界、故障可检测、无分区等前提下成立','因为它比 2PC 消息更少','因为它不需要协调者'],1,'3PC 的非阻塞证明依赖同步模型。网络分区时,A 在 PRECOMMIT 超时选择提交,B 在 WAIT 超时选择中止,就会出现分歧(见 4b)。'],
+['TCC 中 Cancel 比 Try 先到达,正确处理是?',['返回失败,让 TM 重试','空回滚:返回成功,并记录 CANCELLED;之后到达的 Try 要被拒绝','忽略 Cancel,等 Try','先执行 Try 再 Cancel'],1,'没有 Try 就收到 Cancel 叫空回滚,必须返回成功;记录 CANCELLED 才能让迟到的 Try 被识别并拒绝,避免悬挂(见 5d)。'],
+['TCC 中 Confirm 被重复调用,结果应该是?',['再扣一次','状态已 CONFIRMED,直接返回成功,金额不变','报错','回滚到 Try'],1,'网络与恢复机制使 Confirm/Cancel 可能被多次调用,必须幂等。重复扣减会造成多扣款(见 5c)。'],
+['关于 TCC 预留与隔离,哪个说法正确?',['预留使其他事务看不到中间态','Try 把冻结真实提交,中间态对其他事务可见,隔离需业务设计','TCC 使用数据库长事务锁实现隔离','TCC 等价于可串行化隔离级别'],1,'Try 是一个已提交的本地事务,可用与账面等中间态对外可见。它防止超额占用,但不是全局快照隔离(见 5f)。'],
+['Saga 中 T1、T2 成功,T3 失败,补偿顺序是?',['C1 → C2','C2 → C1','C1 与 C2 任意并行','只需补偿 T3'],1,'逆序补偿:后完成的先补偿。T3 失败且未产生效果,不需要补偿 T3(见 6b)。'],
+['Saga 的补偿本质上是?',['数据库 ROLLBACK','一笔新的业务事务,历史提交仍然存在,会留下冲正流水','物理删除之前的记录','重启服务'],1,'T1 已提交并可见,C1 是新的业务动作。银行记账是否允许冲正取决于业务规则,本教学中的冲正是假设(见 6b、6d)。'],
+['Outbox 的原子性覆盖哪里?',['业务写入、发 MQ 和外部调用','本库的业务变更与“待发消息”记录','MQ 与消费者','外部征信接口'],1,'Outbox 把业务变更与发送意图放进同一个本地事务;投递、消费、外部调用都在这个原子范围之外(见 7a)。'],
+['消费者收到重复消息,发现去重记录是 PROCESSING,应该?',['直接 ACK','按租约判断:未过期则延后重试;已过期则接管,并用同一幂等键处理或查询','立即再次调用外部接口','丢弃消息'],1,'记录存在不等于成功。直接 ACK 可能丢消息;立即重复调用可能造成重复副作用(见 7d)。'],
+['调用外部征信接口超时,结果未知,正确做法?',['标记 FAILED 并换新 key 重发','标记 SUCCESS','标记 UNKNOWN,用稳定幂等键查询确认,必要时重试或转对账/人工','回滚放款'],2,'超时既可能已受理也可能没收到。换新 key 会造成重复;标记成功可能漏报(见 7e)。'],
+['银行案例中征信报送持续失败,应?',['回滚已完成的放款','死信 + 告警 + 对账 + 修复后用同一幂等键补报(前提:业务允许延后补报)','忽略','无限立即重试'],1,'资金域与报送域分治。该做法的前提是业务规则允许延后补报;若报送是放款前置条件,则要改成同步校验(见 8b)。'],
+['关于“最终一致”,哪个说法准确?',['只要失败后一直重试就能保证','需要可靠恢复与持续治理:日志、幂等、重试上限、死信、对账、人工处置','等同于强一致','不需要监控'],1,'重试没有上限会放大故障;没有对账和人工通道,“永远失败”的事务无人处理(见 6c、7f、9a)。']];
+
+function renderSummary(el){
+  let html='';
+  html+='<section class="sumsec panel"><h2>方案对比表</h2><div class="tblwrap"><table class="cmp"><thead><tr>'+HEAD.map(x=>`<th scope="col">${x}</th>`).join('')+'</tr></thead><tbody>';
+  CMP.forEach(r=>{html+='<tr>'+r.map((c,i)=>i===0?`<th scope="row" data-l="${HEAD[i]}">${c}</th>`:`<td data-l="${HEAD[i]}">${c}</td>`).join('')+'</tr>';});
+  html+='</tbody></table></div><p class="hint">选型不是“谁更先进”,而是在一致性强度、锁占用、业务侵入、恢复复杂度之间取舍,并明确每种方案的成立前提。</p></section>';
+  html+='<section class="sumsec panel"><h2>常见说法辨析</h2><div class="mis">'+MIS.map(m=>`<div class="row"><div class="bad"><b>常见简化说法</b>${m[0]}</div><div class="good"><b>更严谨的表述</b>${m[1]}</div></div>`).join('')+'</div></section>';
+  html+='<section class="sumsec panel"><h2>术语解释</h2><dl class="gl">'+GL.map(g=>`<dt>${g[0]}</dt><dd>${g[1]}</dd>`).join('')+'</dl></section>';
+  html+='<section class="sumsec panel"><h2>自测题(带解析)</h2><p class="hint">选择答案后立即显示解析。<span class="score" id="qzScore" role="status"></span> <button type="button" class="btn" id="qzReset">重做</button></p><div id="qzBox"></div></section>';
+  el.innerHTML=html;
+  const box=el.querySelector('#qzBox');let right=0,done=0;
+  const sc=()=>{el.querySelector('#qzScore').textContent=done?`已答 ${done}/${QZ.length},答对 ${right}`:'';};
+  QZ.forEach((q,qi)=>{
+    const f=document.createElement('fieldset');f.className='q';
+    f.innerHTML=`<legend>第 ${qi+1} 题:${q[0]}</legend>`+q[1].map((o,oi)=>`<label><input type="radio" name="q${qi}" value="${oi}"><span>${String.fromCharCode(65+oi)}. ${o}</span></label>`).join('')+'<div class="res" hidden aria-live="polite"></div>';
+    box.appendChild(f);
+    f.addEventListener('change',e=>{
+      if(f.dataset.done)return;f.dataset.done='1';
+      const v=+e.target.value,ok=v===q[2],res=f.querySelector('.res');
+      done++;if(ok)right++;
+      res.hidden=false;res.className='res '+(ok?'ok':'no');
+      res.innerHTML=`<b>${ok?'回答正确':'回答不正确'}。</b>正确答案:${String.fromCharCode(65+q[2])}。${q[3]}`;
+      [].forEach.call(f.querySelectorAll('input'),i=>i.disabled=true);sc();
+    });
+  });
+  el.querySelector('#qzReset').addEventListener('click',()=>renderSummary(el));
+}
+const AN=[
+'两个银行柜台各自记账:一个柜台已经把钱划走,另一个柜台的单据没开出来,中间没有一个人能喊一声“大家一起撤销”。',
+'像物流:货主(业务方案)选发货方式,国际运单格式(接口规范)规定交接单怎么填,运输规则(协议)规定谁先签收谁后发车,仓库(资源层)真正存放货物。',
+'像婚礼:司仪先问双方“愿意吗?”(Prepare),说了“我愿意”就不能自己反悔;司仪登记并宣布“礼成”(Commit)。司仪晕倒时,新人不能擅自离场,只能等司仪醒来按记录宣布。',
+'在婚礼里多加一步“预告:马上宣布礼成”(PreCommit),让司仪缺席时大家能推断结果。但如果会场被隔成两半,两边各自推断,可能得出相反的结论。',
+'像订酒店:先“预订并锁房”(Try),再“确认入住”(Confirm)或“取消预订”(Cancel)。若取消通知比预订请求先到酒店,酒店要记下“已取消”,以免迟到的预订又把房间占住(防悬挂)。',
+'像旅行社订行程:订机票 → 订酒店 → 订租车;租车失败,就先退酒店、再退机票。这是“退订”这个新动作,不是时光倒流,而且已经出发的航班退不了。',
+'像寄信:先把“信的内容”和“要寄出的登记”一起写进同一本账(同一事务),邮差之后按登记簿投递。邮差可能重复送,收信人要靠“已签收记录”避免重复处理。',
+'柜台办放款像当场验钱:资金必须当场确认(TCC);征信报送像事后挂号信:可以稍晚,但不能丢,丢了要补寄(Outbox + 对账)。',
+'像仓库盘点:每批货有单号(全局事务号),巡检员发现卡住的货(监控),盘点员核对账实不符(对账),处理差异要签字留痕(审计)。'];
+AN.forEach((t,i)=>{CH[i].analogy=t;});
+CH.push({nav:'总结与自测',title:'总结:对比、术语与自测',intro:'把前面各章的方案放在一张表里比较,辨析常见的简化说法,最后用带解析的题目自测。各方案之间为什么一个接一个出现,见上一章《演化脉络》。',render:renderSummary});
+
+/* ---------- 参考资料 ---------- */
+window.DT.REFS_HTML=`
+<p>下列资料用于核实各方案的技术边界;页面本身完全离线运行,链接仅供查阅。检索时对网络上的简化说法保持谨慎,以官方文档、标准和原始论文为准。</p>
+<h3 style="font-size:14px;margin:8px 0 2px">标准与官方文档</h3>
+<ul>
+<li>The Open Group,《Distributed Transaction Processing: The XA Specification》:<a href="https://pubs.opengroup.org/onlinepubs/009680699/toc.pdf" target="_blank" rel="noopener">pubs.opengroup.org/onlinepubs/009680699/toc.pdf</a>;XA+ 规范:<a href="https://pubs.opengroup.org/onlinepubs/8095979699/toc.pdf" target="_blank" rel="noopener">pubs.opengroup.org/onlinepubs/8095979699/toc.pdf</a></li>
+<li>Oracle Database,DBMS_XA(xa_prepare/commit/rollback/forget/recover 与一阶段优化):<a href="https://docs.oracle.com/en/database/oracle/oracle-database/21/arpls/DBMS_XA.html" target="_blank" rel="noopener">docs.oracle.com/…/DBMS_XA.html</a></li>
+<li>PostgreSQL,PREPARE TRANSACTION(准备态事务继续持有锁,面向外部事务管理器):<a href="https://www.postgresql.org/docs/current/sql-prepare-transaction.html" target="_blank" rel="noopener">postgresql.org/docs/current/sql-prepare-transaction.html</a></li>
+<li>MariaDB,XA Transactions(XA 状态 ACTIVE/IDLE/PREPARED 与外部协调者):<a href="https://mariadb.com/docs/server/reference/sql-statements/transactions/xa-transactions" target="_blank" rel="noopener">mariadb.com/docs/…/xa-transactions</a></li>
+<li>Apache Seata,TCC 模式:<a href="https://seata.apache.org/docs/user/mode/tcc/" target="_blank" rel="noopener">seata.apache.org/docs/user/mode/tcc/</a>;TCC 设计原则(空回滚、防悬挂、幂等):<a href="https://seata.apache.org/blog/tcc-mode-design-principle" target="_blank" rel="noopener">seata.apache.org/blog/tcc-mode-design-principle</a>;TCC fence(tcc_fence_log,1.5.1+):<a href="https://seata.apache.org/blog/seata-tcc-fence/" target="_blank" rel="noopener">seata.apache.org/blog/seata-tcc-fence/</a></li>
+<li>AWS Prescriptive Guidance,Transactional outbox pattern:<a href="https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html" target="_blank" rel="noopener">docs.aws.amazon.com/prescriptive-guidance/…/transactional-outbox.html</a>;microservices.io,Transactional outbox:<a href="https://microservices.io/patterns/data/transactional-outbox.html" target="_blank" rel="noopener">microservices.io/patterns/data/transactional-outbox.html</a></li>
+<li>RabbitMQ,Dead Letter Exchanges:<a href="https://blog.rabbitmq.com/docs/3.13/dlx" target="_blank" rel="noopener">blog.rabbitmq.com/docs/3.13/dlx</a>;Consumer Acknowledgements and Publisher Confirms:<a href="https://www.rabbitmq.com/docs/confirms" target="_blank" rel="noopener">rabbitmq.com/docs/confirms</a></li>
+</ul>
+<h3 style="font-size:14px;margin:8px 0 2px">原始论文</h3>
+<ul>
+<li>D. Skeen,《Nonblocking Commit Protocols》,SIGMOD 1981;D. Skeen、M. Stonebraker,《A Formal Model of Crash Recovery in a Distributed System》,IEEE TSE 1983:<a href="https://www.cs.purdue.edu/homes/bb/cs542-16Spr/TSE83_SS.pdf" target="_blank" rel="noopener">cs.purdue.edu/…/TSE83_SS.pdf</a></li>
+<li>D. Skeen,《A Quorum-Based Commit Protocol》,1982(处理分区下的提交)</li>
+<li>J. Gray、L. Lamport,《Consensus on Transaction Commit》,ACM TODS 2006(Paxos Commit):<a href="https://arxiv.org/abs/cs/0408036" target="_blank" rel="noopener">arxiv.org/abs/cs/0408036</a></li>
+<li>P. Helland,《Life beyond Distributed Transactions: an Apostate’s Opinion》,CIDR 2007:<a href="https://ics.uci.edu/~cs223/papers/cidr07p15" target="_blank" rel="noopener">ics.uci.edu/~cs223/papers/cidr07p15</a>;精简版:<a href="https://queue.acm.org/detail.cfm?id=3025012" target="_blank" rel="noopener">queue.acm.org/detail.cfm?id=3025012</a></li>
+<li>H. Garcia-Molina、K. Salem,《Sagas》,SIGMOD 1987:<a href="https://www.cs.cornell.edu/andru/cs711/2002fa/reading/sagas.pdf" target="_blank" rel="noopener">cs.cornell.edu/…/sagas.pdf</a></li>
+</ul>
+<h3 style="font-size:14px;margin:8px 0 2px">核实记录与说明</h3>
+<ul>
+<li>已核实:XA 是 TM–RM 接口,支持 2PC 并允许单资源一阶段提交优化;PREPARED 事务继续持有锁;XA 有 recover 与启发式完成/forget 的设计。</li>
+<li>已核实:3PC 的非阻塞依赖有界延迟与可靠故障检测;分区下可能分歧,Skeen 另有基于法定人数的协议。</li>
+<li>已核实(演化脉络章):Gray 与 Lamport 指出经典 2PC 在协调者失效时阻塞,Paxos Commit 以共识消除对单一协调者的依赖;Helland(CIDR 2007)讨论了拒绝分布式事务后的替代做法。2PC、XA 的年代为大致说法(70 年代末、90 年代初),TCC 与 Helland 思路的关系是“思路相通”,不是官方的源流声明。</li>
+<li>已核实:Seata 的 TCC 预留是真实提交的本地事务;要求处理幂等、空回滚、防悬挂;1.5.1 起提供 tcc_fence_log。</li>
+<li>已核实:Outbox 依赖本地事务原子性,投递器可能重复发送,消费者应幂等;Publisher Confirm 与 Consumer ACK 相互独立;RabbitMQ 经典队列的死信重新发布默认不带发布确认,仲裁队列支持至少一次死信。</li>
+<li>教学假设(未做外部核实,仅为示例):100 元与 1,000 元金额、状态名、表结构、重试上限 5 次、告警阈值 5 分钟、Saga 中“扣款可冲正”。真实银行记账、监管报送时限与会计规则以所在机构制度为准。</li>
+</ul>`;
+})();
+</script>
+<script>
+(function(){
+const {CH,M,St,Sc}=window.DT;
+
+const FIN={s0:'单库原子',n0:'无法跨库',s1:'跨库原子提交',n1:'持锁·会阻塞',s2:'有前提不阻塞',n2:'分区可能分歧',s3:'短锁·可跨服务',n3:'侵入大·无隔离',s4:'长流程·无长锁',n4:'补偿·中间态可见',s5:'本库原子发信',n5:'重复·结果未知',s6:'分域选型+兜底',n6:'复杂·持续成本'};
+const ALL=['loc','xa','p3','tcc','saga','ob','gov'];
+
+const evo1=Sc('evo1','主线:每个方案解决什么、又留下什么','evo',{},[
+ St('起点:本地事务(单库 ACID)','一个数据库内,把“扣款 + 记流水”放进同一个本地事务:要么都生效,要么都不生效,并发之间有隔离,提交后持久。',
+  '靠数据库自己的日志(redo/undo)和锁,在单个资源管理器内实现原子、一致、隔离、持久。',
+  '它只管“这一个库”。账户库和借据库分属两个库(或两个服务)时,各自提交各自的,没有人能让它们同成同败;调用超时还会让调用方不知道对端到底做没做。→ 于是需要“跨资源的原子提交”。',
+  {s:{s0:FIN.s0,n0:FIN.n0},tg:['std','eng'],hl:['loc']}),
+ St('2PC / XA:让多个库同成同败','要让两个以上的库对“提交还是回滚”达成一致。两阶段提交(2PC)在 20 世纪 70 年代末已有系统描述;X/Open 的 XA 规范(90 年代初)把事务管理器与资源管理器之间的接口标准化,让异构数据库也能配合。',
+  '先让所有参与者“准备并承诺”(Prepare),协调者把全局决策持久化后,再通知提交或回滚;XA 接口统一了 start / end / prepare / commit / rollback / recover 等调用。',
+  '① 准备态持有锁,锁占用 = 整个两阶段 + 故障恢复时间;② 协调者在决策后失联,参与者只能阻塞等待恢复;③ 多轮同步往返,吞吐与延迟受限;④ 要求参与者支持 XA,第三方接口、非数据库资源很难纳入。→ 有人想“去掉阻塞”,有人想“去掉长锁”,于是分成两条路。',
+  {m:[M('loc','xa','跨库原子')],s:{s1:FIN.s1,n1:FIN.n1},tg:['std'],hl:['xa']}),
+ St('路线一:3PC 想去掉阻塞','保持强一致,但不想在协调者宕机时让参与者无限等待。Skeen 在 1981 年前后提出三阶段提交(3PC):在 Prepare 之后增加 PreCommit。',
+  'PreCommit 让存活的参与者能通过互相交换状态来推断全局决定,协调者失效时不必无限阻塞。',
+  '非阻塞依赖“延迟有界、故障可准确检测、无网络分区”。真实网络里这些前提常不成立,分区下两侧可能做出相反决定(见第 4 章);还多一轮往返,更慢。→ 靠超时去猜的路走不通。另一条同步路线是用共识复制协调者(Gray 与 Lamport 的 Paxos Commit),本页不展开。',
+  {m:[M('xa','p3','怕阻塞')],s:{s2:FIN.s2,n2:FIN.n2},tg:['std'],hl:['p3'],n:'3PC 不是“2PC 的完全升级版”:它用更强的网络假设换取非阻塞,假设被破坏时可能出现不一致。'}),
+ St('路线二:TCC 把“准备”挪到业务层','放弃“数据库层的跨库同步原子提交”,改在业务层做预留。Pat Helland 2007 年的论文总结了大规模系统“拒绝分布式事务”后常用的做法;“暂定操作 + 确认/取消”的思路与 TCC 一脉相承,Seata 等框架提供了工程化实现。',
+  'Try 用一个会立即提交的本地事务“预留”资源(冻结 100 元),Confirm 消耗预留,Cancel 释放预留;数据库行锁很快释放,还能纳入非数据库资源。',
+  '① 业务侵入:每个服务都要写 Try / Confirm / Cancel;② 幂等、空回滚、防悬挂必须自己保证;③ 预留的中间态对外可见,没有全局隔离;④ Confirm / Cancel 必须最终成功,只能向前重试。→ 参与者多、流程长、第三方不可能都为你写“预留”接口时,TCC 就推不动了。',
+  {m:[M('xa','tcc','嫌锁太长'),M('p3','tcc','前提难满足','fail')],s:{s3:FIN.s3,n3:FIN.n3},tg:['std','eng'],hl:['tcc']}),
+ St('Saga:流程长、参与者多','流程很长,或部分参与者只能提供“做”和“撤”,无法提供“预留”。Garcia-Molina 与 Salem 在 1987 年提出 Saga:把长事务拆成一串本地事务。',
+  '每一步立即提交、立即释放资源;任何一步失败,按相反顺序执行各步的补偿动作。参与者只需提供“正向 + 补偿”两个接口。',
+  '① 放弃隔离:已提交但最终会被补偿的数据,其他人能读到;② 补偿不是回滚,可能失败、也可能不可逆(出款、短信);③ 补偿同样要幂等、防悬挂;④ 需要持久化的流程状态与人工通道。→ 无论 TCC 还是 Saga,每个服务内部都要“写库 + 通知下一步”,这两件事本身就可能只成功一半。',
+  {m:[M('tcc','saga','要长流程')],s:{s4:FIN.s4,n4:FIN.n4},tg:['std'],hl:['saga']}),
+ St('Outbox + MQ:解决“写库 + 发消息”的双写','服务“写本库”与“发消息给别人”是两个动作:写成功但消息没发出去,下游永远不知道;先发消息再写库失败,下游会收到“幻影”消息。',
+  '把业务变更和“待发送消息”放进同一个本地事务;独立的投递器稍后读取并发送到 MQ,收到 Broker 确认后再标记已发送。',
+  '① 只保证“本库业务 + 发送意图”原子,外部系统仍不是原子的;② 至少一次投递 → 消息会重复,消费者必须幂等并区分处理状态;③ 外部结果可能未知,需要稳定幂等键与查询确认;④ 重试必须有上限,超限进入死信,靠对账和人工收尾。→ 机制越多,越需要治理来兜底。',
+  {m:[M('saga','ob','双写问题')],s:{s5:FIN.s5,n5:FIN.n5},tg:['std','eng'],hl:['ob']}),
+ St('组合与治理:机制总会有失效的时候','日志可能丢,重试可能耗尽,对账可能发现差异。银行信贷这类场景需要“分域选型 + 持续治理”。',
+  '核心资金域用 TCC 之类强约束方案;异步报送用 Outbox + MQ;再用全局事务号、分支日志、状态机、监控告警、恢复任务、T+0 / T+1 对账、人工处置与审计兜底。',
+  '系统与运维复杂度上升;多种方案并存,要求团队理解各自的成立前提;对账周期决定发现延迟;任何前提不再成立(幂等被破坏、告警没人看),保证就会失效。',
+  {m:[M('ob','gov','会失效')],s:{s6:FIN.s6,n6:FIN.n6},tg:['eng'],hl:['gov']}),
+ St('回看全图:不是替代,是取舍','这条线是“按问题推进的逻辑演化”,不是严格的历史先后,更不是新方案淘汰旧方案。',
+  '它们在一致性强度、锁占用、业务侵入、隔离性、恢复复杂度之间交换代价:越往后,越不阻塞、可用性越高,但让出的隔离性越多,恢复与治理的负担越转移到业务和运维。',
+  '2PC / XA 在“参与者少、同构数据库、必须强一致”的场景仍然合理;TCC、Saga、Outbox 常常在同一个系统里同时出现。选型看业务能容忍什么,而不是哪个更新。',
+  {hl:ALL,tg:['eng'],n:'错误说法:“Saga/TCC 取代了 2PC”。准确说法:它们是在不同约束下换了一种代价,各有成立前提。'})
+]);
+evo1.trail=true;
+evo1.lb={a:'要解决的问题',flow:'为什么走到这一步(图中箭头)',b:'它怎么解决',c:'图中记录的变化',r:'带来的新问题 / 推动下一步',noflow:'本步没有箭头,是对整条演化线的回看。'};
+
+const evo2=Sc('evo2','选型追问:遇到什么情形,走哪条路','evo',FIN,[
+ St('情形一:必须同成同败,参与者少且同构','参与者是少数几个同构、支持 XA 的数据库,业务不能容忍中间态,能接受持锁带来的吞吐下降。',
+  '选 2PC / XA。前提:协调者可靠、决策日志持久、有恢复任务和监控;准备态不能凭超时自行回滚。',
+  '代价:持锁时间长、协调者失联时阻塞、吞吐受限。',{hl:['xa'],tg:['eng']}),
+ St('情形二:想要强一致,但怕协调者宕机阻塞','先分清是“协调者单点”问题还是“网络假设”问题。',
+  '一般不单独上 3PC。更常见的是给协调者加复制/共识(如 Paxos Commit 的思路),或直接使用已经内置这类机制的分布式数据库。',
+  '代价:实现复杂、多一轮消息;3PC 的非阻塞前提在真实网络里难以保证。',{hl:['p3'],tg:['std','eng']}),
+ St('情形三:要预留资金,服务可改造,不能长时间占库锁','核心资金链路,参与者都是本机构可改造的服务。',
+  '选 TCC:Try 冻结、Confirm 扣减、Cancel 释放,并实现幂等、空回滚、防悬挂。',
+  '代价:业务侵入大,预留中间态对外可见,没有全局隔离;Confirm/Cancel 只能向前重试。',{hl:['tcc'],tg:['eng']}),
+ St('情形四:流程长、参与者多,部分只能“做”和“撤”','例如放款流程跨账户、借据、外部渠道,外部渠道无法提供“预留”。',
+  '选 Saga:本地事务序列 + 逆序补偿,编排器持久化流程状态,设置重试上限与人工通道。',
+  '代价:中间态可见;补偿可能失败或不可逆;不可逆动作要提前用确认、延迟生效或人工流程管控。',{hl:['saga'],tg:['eng']}),
+ St('情形五:只需要“写库后可靠通知下游”,允许延迟','例如放款成功后向征信系统报送。',
+  '选 Outbox + MQ:业务与待发消息同库同事务,独立投递,消费端幂等去重,外部调用用稳定幂等键。',
+  '代价:消息会重复、外部结果可能未知;重试超限需要死信、对账和人工处置。',{hl:['ob'],tg:['eng']}),
+ St('情形六:方案选好了,怎么保证长期不出事','上线之后,机制仍会遇到日志丢失、重试耗尽、人工误操作。',
+  '全局事务号 + 分支日志 + 状态机 + 监控 + 恢复任务 + 对账 + 人工处置与审计。',
+  '代价:持续的运维投入;前提(幂等、告警、演练)必须长期成立。',{hl:['gov'],tg:['eng']})
+],'选型追问');
+evo2.lb={a:'遇到的情形',flow:'走向',b:'选择与前提',c:'图中记录的变化',r:'要付出的代价',noflow:'本步用高亮表示被选中的方案。',nochg:'本步只是高亮被选中的方案,不改变图中记录。'};
+
+function extra(el){
+  const T=[
+   ['本地事务','单库内操作要原子、一致、隔离、持久','日志 + 锁 + 事务管理','只管一个库,跨库无法同成败;超时结果未知','跨资源原子提交 → 2PC / XA'],
+   ['2PC / XA','多个库要同成同败','准备 + 持久化决策 + 提交/回滚;XA 统一 TM–RM 接口','持锁时间长;协调者失联时阻塞;吞吐低;要求参与者支持 XA','去阻塞 → 3PC;去长锁 → TCC'],
+   ['3PC','协调者宕机时不要无限阻塞','增加 PreCommit,存活者可推断结果','前提苛刻(有界延迟、可靠故障检测、无分区),分区可能分歧;更慢','放弃“超时猜测”,转向业务层最终一致(或用共识复制协调者)'],
+   ['TCC','想要“先预留再确认”的形态,但不要数据库长锁,还要能跨服务','Try 预留(立即提交)→ Confirm / Cancel','业务侵入;幂等/空回滚/防悬挂;预留中间态可见;无全局隔离','流程长、参与者不可改造 → Saga'],
+   ['Saga','长流程、参与者多,不能长时间持锁','本地事务序列 + 逆序补偿','无隔离;补偿可能失败或不可逆;需要流程状态与人工通道','“写库 + 发事件”的双写问题 → Outbox'],
+   ['Outbox + MQ','写库与发消息不一致(双写)','业务与待发消息同库同事务,异步可靠投递','重复投递;外部结果未知;重试超限与死信','机制总会失效 → 治理与对账'],
+   ['组合 + 治理','机制失效后如何发现、恢复、收尾','全局号、日志、监控、恢复、对账、人工处置','复杂度与运维成本;前提需要长期维护','—']];
+  const H=['阶段','要解决的问题','怎么解决','带来的新问题','由此催生'];
+  let html='<section class="sumsec panel"><h2>演化关系一览表</h2><div class="tblwrap"><table class="cmp"><thead><tr>'+H.map(x=>`<th scope="col">${x}</th>`).join('')+'</tr></thead><tbody>';
+  T.forEach(r=>{html+='<tr>'+r.map((c,i)=>i===0?`<th scope="row" data-l="${H[i]}">${c}</th>`:`<td data-l="${H[i]}">${c}</td>`).join('')+'</tr>';});
+  html+='</tbody></table></div></section>';
+  html+='<section class="sumsec panel"><h2>四条贯穿的主线</h2><ul class="lines">'
+   +'<li><b>一致性强度逐步放松</b>强原子提交(2PC)→ 有前提的非阻塞(3PC)→ 业务层最终一致(TCC / Saga / Outbox)。</li>'
+   +'<li><b>锁与可用性</b>持锁直到全局结束 → 预留后立即释放短锁 → 没有跨服务的锁。可用性和吞吐随之提高。</li>'
+   +'<li><b>隔离性逐步让出</b>数据库级隔离 → 预留中间态对外可见 → Saga 中间态完全可见。隔离交给业务设计。</li>'
+   +'<li><b>复杂度转移,而不是消失</b>基础设施(XA、协调者)→ 业务代码(Try/Confirm/Cancel、补偿、幂等)→ 运维治理(监控、对账、人工处置)。</li></ul></section>';
+  html+='<section class="sumsec panel"><h2>不是替代,而是各有适用的地方</h2><ul class="lines">'
+   +'<li><b>2PC / XA 仍然合理</b>参与者少、同构数据库、同一机构可控、必须强一致且吞吐要求不极端。</li>'
+   +'<li><b>3PC</b>更多是理论与教学价值;需要非阻塞时更常见的是共识复制协调者或内置该机制的分布式数据库。</li>'
+   +'<li><b>TCC</b>核心资金等需要“先占住、再确认”的链路,且服务可以改造。</li>'
+   +'<li><b>Saga</b>长流程、跨多个服务、补偿在业务上可行。</li>'
+   +'<li><b>Outbox + MQ</b>几乎所有“写库后可靠通知”,包括事件驱动的 Saga。</li>'
+   +'<li><b>组合使用</b>同一个系统常常同时用多种方案(见第 8 章银行信贷案例),并靠治理兜底。</li></ul></section>';
+  html+='<section class="sumsec panel"><h2>时间线(年份为近似,仅帮助理解先后)</h2><dl class="tline">'
+   +'<dt>1970s 末</dt><dd>两阶段提交(2PC)被系统描述,成为分布式原子提交的经典方法。</dd>'
+   +'<dt>1981</dt><dd>Skeen 提出非阻塞提交协议,即三阶段提交(3PC)。</dd>'
+   +'<dt>1987</dt><dd>Garcia-Molina 与 Salem 提出 Saga:长事务拆成可补偿的本地事务序列。</dd>'
+   +'<dt>1990s 初</dt><dd>X/Open 制定 XA 规范,统一事务管理器与资源管理器之间的接口。</dd>'
+   +'<dt>2006</dt><dd>Gray 与 Lamport 发表《Consensus on Transaction Commit》,用 Paxos 让提交决策不再依赖单一协调者,并指出 2PC 是其 F=0 的特例。</dd>'
+   +'<dt>2007</dt><dd>Pat Helland 发表《Life beyond Distributed Transactions》,总结大规模系统“拒绝分布式事务”后的做法,“暂定操作 + 确认/取消”的思路影响了后来的 TCC。</dd>'
+   +'<dt>近十多年</dt><dd>微服务普及,Seata 等框架提供 XA、TCC、Saga 等模式的工程实现,Outbox 成为服务间可靠通知的常用模式。</dd></dl>'
+   +'<p class="hint">本章的“演化”是按问题推进的逻辑线索,不是严格的线性升级;各方案在时间上有重叠,并不断被一起使用。</p></section>';
+  el.innerHTML=html;
+}
+
+CH.splice(CH.length-1,0,{nav:'演化脉络',title:'演化脉络:各方案解决了什么,又带来了什么',
+ intro:'这一章把前面的方案串成一条线:每个方案都是为了解决上一个方案留下的问题而出现,同时又带来新的问题。左右节点里的“解决 / 遗留”会随着步骤逐个填上。',
+ analogy:'像城市交通的演进:先是单个路口的红绿灯(本地事务);再统一全路网信号,要么全通要么全停,一堵全堵(2PC);想让信号灯在中控失灵时也能自己判断,却发现通信不可靠时会各判各的(3PC);于是改成各路口自管,先“占道预约”再确认(TCC),或出了事故就逐个路口疏导补救(Saga);再加行车记录与交警巡查(治理)。',
+ bounds:[
+  ['eng','本章是“按问题推进”的逻辑演化,不是严格的历史线性升级;年份只用于帮助理解先后。'],
+  ['std','Gray 与 Lamport 指出:经典 2PC 在协调者失效时会阻塞;Paxos Commit 用共识让决策不再依赖单一协调者,2PC 是其 F=0 的特例。'],
+  ['std','Helland(CIDR 2007)讨论了大规模系统里拒绝分布式事务的原因与替代做法;TCC 的“暂定操作 + 确认/取消”思路与之相通,但具体工程实现以 Seata 等框架文档为准。'],
+  ['eng','没有任何一个后出现的方案“全面优于”前一个:它们是在一致性、锁占用、业务侵入、隔离性与恢复复杂度之间交换代价。']],
+ scenarios:[evo1,evo2],extra});
+})();
+</script>
+<script>window.DT.boot();</script>
+</body>
+</html>

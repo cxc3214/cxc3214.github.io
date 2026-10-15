@@ -4,6 +4,8 @@ import { resolve, relative } from "node:path";
 
 // Check the actual static output, including cross-page fragments. Run after build.
 const root = resolve("dist");
+const studyRoot = resolve(".study-dist");
+assert.equal(existsSync(resolve(root, "study")), false, "protected study files must not enter GitHub Pages");
 const walk = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((entry) =>
   entry.isDirectory() ? walk(resolve(dir, entry.name)) : [resolve(dir, entry.name)]);
 const files = walk(root).filter((file) => file.endsWith(".html"));
@@ -14,11 +16,13 @@ const attr = (tag, name) => decode(tag.match(new RegExp(`(?:^|\\s)${name}="([^"]
 const tags = (html, name) => [...html.matchAll(new RegExp(`<${name}\\b[^>]*>`, "g"))].map((match) => match[0]);
 const urlFor = (file) => new URL(`/${relative(root, file).replace(/index\.html$/, "")}`, origin);
 const targetFor = (pathname) => {
-  const path = resolve(root, `.${decodeURIComponent(pathname)}`);
-  assert.ok(path === root || path.startsWith(root + "/"), "link escaped dist");
+  const targetRoot = pathname === "/study" || pathname.startsWith("/study/") ? studyRoot : root;
+  const path = resolve(targetRoot, `.${decodeURIComponent(pathname)}`);
+  assert.ok(path === targetRoot || path.startsWith(targetRoot + "/"), "link escaped build output");
   return existsSync(path) && statSync(path).isDirectory() ? resolve(path, "index.html") : path;
 };
 const sitemap = readFileSync(resolve(root, "sitemap-0.xml"), "utf8");
+assert.ok(!sitemap.includes("/study/"), "protected study pages must not enter the public sitemap");
 let links = 0;
 let fragments = 0;
 let articles = 0;

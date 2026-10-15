@@ -7,9 +7,12 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && npm run build:study",
+    "build:study": "node scripts/build-study.mjs",
+    "dev:study": "npm run build:study && wrangler dev --config wrangler.study.jsonc --port 8787 --host localhost",
+    "deploy:study": "npm run build:study && wrangler deploy --config wrangler.study.jsonc",
     "generate:qrs": "node scripts/generate-app-qrs.mjs",
-    "test": "node --test tests/site.test.mjs",
+    "test": "node --test tests/*.test.mjs",
     "test:built": "node scripts/verify-built-site.mjs",
     "preview": "astro preview",
     "astro": "astro"
@@ -21,6 +24,7 @@
   },
   "devDependencies": {
     "qrcode": "^1.5.4",
-    "satteri": "^0.10.5"
+    "satteri": "^0.10.5",
+    "wrangler": "4.151.0"
   }
 }

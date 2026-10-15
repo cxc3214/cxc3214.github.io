@@ -1,0 +1,3 @@
+[data-study-document="exam-notes"] .layout > main { min-width: 0; }
+[data-study-document="elk-loki"] :is(.stage, .idx-head, .split, .pc, .pick) > * { min-width: 0; }
+[data-study-document="elk-loki"] .idx-line { flex-basis: 100%; }

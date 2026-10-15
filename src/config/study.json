@@ -1,0 +1,42 @@
+[
+  {
+    "id": "essays",
+    "title": "系统架构设计师论文专题",
+    "subtitle": "一套方法，十五篇范文",
+    "category": "论文",
+    "description": "从审题、论点拆解到项目叙述，集中复习论文方法与专题范文。",
+    "source": "系统架构设计师论文专题：一套方法，十五篇范文.html"
+  },
+  {
+    "id": "exam-notes",
+    "title": "考前必背知识精要",
+    "subtitle": "系统架构设计师",
+    "category": "知识",
+    "description": "架构、网络、数据库与安全等重点知识，配合导图和复习进度逐项回顾。",
+    "source": "系统架构设计师 考前必背知识精要.html"
+  },
+  {
+    "id": "redis",
+    "title": "Redis 全景手册",
+    "subtitle": "原理、场景与动画演示",
+    "category": "知识",
+    "description": "数据类型、缓存一致性、持久化、分布式锁与高可用。",
+    "source": "Redis 全景手册 · 原理、场景与动画演示.html"
+  },
+  {
+    "id": "distributed-transactions",
+    "title": "分布式事务交互式教学实验室",
+    "subtitle": "协议、故障与一致性",
+    "category": "实验",
+    "description": "通过流程与交互实验复习分布式事务协议及方案取舍。",
+    "source": "分布式事务交互式教学实验室.html"
+  },
+  {
+    "id": "elk-loki",
+    "title": "ELK 与 Loki",
+    "subtitle": "架构、流程与取舍",
+    "category": "知识",
+    "description": "对照日志采集、索引、存储与查询链路，梳理两类日志平台的适用场景。",
+    "source": "ELK 与 Loki：架构、流程与取舍.html"
+  }
+]

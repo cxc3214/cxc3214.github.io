@@ -1,5 +1,7 @@
 # build output
 dist/
+.study-dist/
+.wrangler/
 # generated types
 .astro/
 
@@ -16,6 +18,9 @@ pnpm-debug.log*
 # environment variables
 .env
 .env.production
+.env.*
+.dev.vars*
+.study-credentials.json
 
 
 # macOS-specific files

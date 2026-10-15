@@ -84,6 +84,35 @@ google.com, pub-3132117537257566, DIRECT, f08c47fec0942fa0
 3. Source 选择 GitHub Actions。
 4. 确认仓库默认分支是 `main`，或把工作流里的分支改成你的实际发布分支。
 
+## 学习资料栏目与 Basic Auth
+
+栏目入口是 `https://imspring.cn/study/`，主站导航中显示为“学习资料”。目录收录论文专题、考前精要、Redis、分布式事务实验室和 ELK/Loki；阅读页顶部提供资料切换、上一份、下一份与返回目录。原页面的交互、动画和本地复习进度保留。
+
+GitHub Pages 本身不能执行服务端 Basic Auth，因此主站继续由 GitHub Pages 发布，`/study` 和 `/study/*` 由 `imspring-study` Cloudflare Worker 提供。域名必须经过 Cloudflare 代理。`www` 域名的同一路径也绑定认证 Worker。
+
+- `study/pages/`：可以进入 GitHub 的原始 HTML。
+- `src/config/study.json`：资料的标题、说明、顺序、文件名与稳定 URL。
+- `.study-dist/`：受保护的资料构建产物，独立于公开的 `dist/`。
+- `workers/study.mjs` 和 `wrangler.study.jsonc`：认证逻辑、静态资源绑定及域名路由。
+
+构建过程不会把资料复制到 `public/` 或 GitHub Pages 的 `dist/`；所有 Worker 静态资源都先经过认证。Worker Secrets 缺失时返回 503，未认证时返回 401；认证后的响应也禁止共享缓存。资料不进入公开 sitemap，并设置 `noindex`。
+
+固定账号与密码存放在 Cloudflare Worker Secrets 中，不写入源码、浏览器脚本或构建产物。首次部署和更换凭据时，在终端交互输入：
+
+```sh
+npm run deploy:study
+npx wrangler secret put STUDY_BASIC_USER --config wrangler.study.jsonc
+npx wrangler secret put STUDY_BASIC_PASSWORD --config wrangler.study.jsonc
+```
+
+也可以把 `.study-credentials.example.json` 的两个空值填入本机 `.study-credentials.json`，然后执行 `npx wrangler secret bulk .study-credentials.json --config wrangler.study.jsonc`。实际凭据文件已在 `.gitignore` 中排除；不要提交真实凭据。密码更换后浏览器需要重新输入，部分浏览器会在会话中记住旧凭据。
+
+本地预览：在未提交的 `.dev.vars` 中配置同名变量，然后运行 `npm run dev:study`，打开 `http://localhost:8787/study/`。普通 Astro 开发服务器只提供主站，资料入口由这个独立 Worker 开发服务器提供。
+
+新增或更新资料后运行 `npm test`、`npm run build`、`npm run test:built`，再运行 `npm run deploy:study` 更新 Worker。主站的 `main` 推送仍自动发布 GitHub Pages；资料 Worker 可从本机发布，也可手动触发 `Deploy protected study library` 工作流。后者需要在 GitHub Actions Secrets 配置 `CLOUDFLARE_API_TOKEN` 和 `CLOUDFLARE_ACCOUNT_ID`，API Token 仅授予此账户 Worker 编辑和该域名路由编辑所需权限。资料登录密码只留在 Worker Secrets，不需要放入 GitHub Actions。
+
+本次允许资料进入 GitHub：如果仓库公开，任何人仍能在仓库中阅读或下载 HTML 源文件。Basic Auth 保护网站入口，不改变仓库权限。
+
 ## 自定义域名和 DNS
 
 项目包含 `public/CNAME`，内容是：

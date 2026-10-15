@@ -1,0 +1,1740 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Redis 全景手册 · 原理、场景与动画演示</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;900&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EEF1F4;--card:#FFFFFF;--ink:#16202A;--muted:#566170;--line:#D3DAE2;
+  --red:#C9302A;--red-soft:#FBE3E0;--teal:#0B7666;--teal-soft:#DBF1EC;--amber:#9A6A00;--amber-soft:#FFF1CF;--blue:#2A56BE;--blue-soft:#E1E9FB;
+  --lab:#1C2430;--lab2:#283243;--lab3:#36435A;--lab-ink:#E7ECF2;--lab-mut:#95A2B4;
+  --l-red:#F25A4F;--l-teal:#3CC4AA;--l-amber:#EDB53C;--l-blue:#73A0F5;--l-violet:#B494F2;
+  --serif:"Noto Serif SC","Songti SC","STSong",serif;
+  --sans:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#11161D;--card:#19202A;--ink:#E3E8EE;--muted:#9AA6B5;--line:#2B3441;
+  --red:#F0605A;--red-soft:#3A2020;--teal:#45C7AE;--teal-soft:#15332E;--amber:#E6B547;--amber-soft:#382E16;--blue:#7CA2F2;--blue-soft:#1B2843;
+  --lab:#0C1117;--lab2:#1A222D;--lab3:#2A3545;color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --paper:#11161D;--card:#19202A;--ink:#E3E8EE;--muted:#9AA6B5;--line:#2B3441;
+  --red:#F0605A;--red-soft:#3A2020;--teal:#45C7AE;--teal-soft:#15332E;--amber:#E6B547;--amber-soft:#382E16;--blue:#7CA2F2;--blue-soft:#1B2843;
+  --lab:#0C1117;--lab2:#1A222D;--lab3:#2A3545;color-scheme:dark;}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 16px);scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.78 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--blue)}
+code{font-family:var(--mono);font-size:.86em;background:var(--blue-soft);color:var(--ink);padding:.08em .38em;border-radius:4px;word-break:break-word}
+pre{font-family:var(--mono);font-size:13.5px;line-height:1.65;background:var(--lab);color:var(--lab-ink);padding:14px 16px;border-radius:8px;overflow-x:auto;margin:14px 0}
+pre code{background:none;padding:0;color:inherit;font-size:inherit}
+pre .c{color:var(--lab-mut)}pre .k{color:var(--l-amber)}pre .s{color:var(--l-teal)}
+img,svg,canvas{max-width:100%}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+/* layout */
+.shell{display:grid;grid-template-columns:250px minmax(0,1fr);max-width:1240px;margin:0 auto}
+.side{position:sticky;top:env(safe-area-inset-top,0px);height:100vh;height:100dvh;overflow:auto;padding:28px 18px 28px 24px;border-right:1px solid var(--line)}
+.brand{font-family:var(--serif);font-weight:900;font-size:22px;line-height:1.2;margin:0 0 4px}
+.brand span{display:inline-block;width:12px;height:12px;background:var(--red);border-radius:2px;margin-right:8px;transform:translateY(-2px)}
+.side p{font-size:13px;color:var(--muted);margin:0 0 18px}
+.toc{list-style:none;margin:0;padding:0;counter-reset:t}
+.toc li{counter-increment:t}
+.toc a{display:flex;gap:10px;padding:6px 8px;border-radius:6px;color:var(--ink);text-decoration:none;font-size:14.5px;line-height:1.4}
+.toc a::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);font-size:11.5px;color:var(--muted);padding-top:2px;min-width:18px}
+.toc a:hover{background:var(--card)}
+.toc a.cur{background:var(--card);box-shadow:inset 3px 0 0 var(--red)}
+.toc a.cur::before{color:var(--red)}
+.theme-btn{margin-top:18px;background:none;border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:4px 10px;font-size:13px}
+main{padding:0 40px 80px;min-width:0}
+.mobile-nav{display:none}
+
+@media (max-width:900px){
+  html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px)}
+  .shell{grid-template-columns:1fr}
+  .side{display:none}
+  .mobile-nav{display:block;position:sticky;top:0;z-index:20;background:var(--paper);border-bottom:1px solid var(--line);padding:calc(env(safe-area-inset-top,0px) + 8px) 18px 8px;margin-top:calc(-1 * env(safe-area-inset-top,0px))}
+  .mobile-nav summary{font-weight:700;cursor:pointer;list-style:none}
+  .mobile-nav summary::after{content:" ▾";color:var(--muted)}
+  .mobile-nav .toc{max-height:60vh;overflow:auto;margin-top:8px}
+  main{padding:0 18px 60px}
+}
+
+/* hero */
+.hero{padding:56px 0 30px}
+.hero h1{font-family:var(--serif);font-weight:900;font-size:clamp(38px,6vw,64px);line-height:1.08;margin:0;letter-spacing:-.01em}
+.hero .lead{font-size:17.5px;color:var(--muted);max-width:640px;margin:14px 0 26px}
+.hero-stats{display:flex;gap:28px;flex-wrap:wrap;font-size:14px;color:var(--muted);margin-top:10px}
+.hero-stats b{display:block;font-family:var(--mono);font-size:24px;color:var(--ink);font-weight:600}
+
+/* chapter */
+.ch{padding-top:56px}
+.ch>header{border-top:3px solid var(--ink);padding-top:14px;margin-bottom:8px;display:flex;gap:16px;align-items:baseline}
+.ch>header .no{font-family:var(--mono);color:var(--red);font-size:14px;font-weight:600}
+.ch h2{font-family:var(--serif);font-weight:900;font-size:clamp(26px,3.6vw,34px);line-height:1.25;margin:0}
+.ch h3{font-family:var(--serif);font-weight:600;font-size:22px;margin:38px 0 8px;line-height:1.35}
+.ch h4{font-size:16.5px;margin:22px 0 4px}
+.prose{max-width:760px}
+.prose p{margin:10px 0}
+.prose ul,.prose ol{padding-left:1.3em;margin:8px 0}
+.prose li{margin:4px 0}
+.prose li::marker{color:var(--red)}
+
+/* tables */
+.tbl{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:8px;background:var(--card)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;line-height:1.6}
+th,td{padding:9px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--paper);font-weight:700;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600;white-space:nowrap}
+
+/* callouts */
+.note,.warn,.mem{border-radius:8px;padding:12px 16px;margin:16px 0;font-size:15px;max-width:760px}
+.note{background:var(--teal-soft);border-left:4px solid var(--teal)}
+.warn{background:var(--amber-soft);border-left:4px solid var(--amber)}
+.mem{background:var(--red-soft);border-left:4px solid var(--red)}
+.note b.t,.warn b.t,.mem b.t{display:block;margin-bottom:2px}
+.note p,.warn p,.mem p{margin:4px 0}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:16px 0}
+.cell{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px 16px;font-size:14.5px}
+.cell h4{margin:0 0 6px}
+.cell p{margin:4px 0}
+
+/* lab */
+.lab{background:var(--lab);color:var(--lab-ink);border-radius:12px;margin:22px 0;padding:16px 16px 14px;max-width:820px}
+.lab-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.lab-head b{font-size:15.5px}
+.lab-head span{font-size:12.5px;color:var(--lab-mut)}
+.stage{display:block;width:100%;height:auto;background:var(--lab2);border-radius:8px}
+.cap{list-style:none;margin:12px 0 0;padding:0;min-height:52px}
+.cap li{display:none;font-size:14.5px;line-height:1.65}
+.cap li.cur{display:block;animation:capin .35s ease}
+@keyframes capin{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.ctrl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.ctrl button,.lab .btn{background:var(--lab3);color:var(--lab-ink);border:1px solid #4A5870;border-radius:6px;padding:5px 12px;font-size:13.5px}
+.ctrl button:hover,.lab .btn:hover{border-color:var(--l-blue)}
+.ctrl button.pri,.lab .btn.pri{background:var(--l-red);border-color:var(--l-red);color:#fff}
+.lab .btn.on{background:var(--l-teal);border-color:var(--l-teal);color:#08201b}
+.ctrl .count{font-family:var(--mono);font-size:12.5px;color:var(--lab-mut);margin-left:auto}
+.dots{display:flex;gap:4px;margin-left:6px}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--lab3)}
+.dots i.cur{background:var(--l-red)}
+.lab input[type=text],.lab input[type=number]{background:var(--lab2);border:1px solid #4A5870;color:var(--lab-ink);border-radius:6px;padding:5px 10px;font:14px var(--mono);min-width:0}
+.lab input[type=range]{accent-color:var(--l-red)}
+.lab .out{font-family:var(--mono);font-size:13px;color:var(--lab-mut);margin-top:10px;line-height:1.7}
+.lab .out b{color:var(--lab-ink)}
+.lab label{font-size:13.5px;color:var(--lab-mut)}
+
+/* svg vocab */
+.stage text{fill:var(--lab-ink);font:13px var(--sans)}
+.stage .ts{fill:var(--lab-mut);font-size:11.5px}
+.stage .tm{font-family:var(--mono);font-size:12px}
+.stage .tb{font-weight:700;font-size:14px}
+.stage .box{fill:var(--lab3);stroke:#51617A;stroke-width:1}
+.stage .lane{stroke:#4A5870;stroke-dasharray:4 5}
+.stage .ln{stroke:var(--lab-mut);stroke-width:1.6;fill:none}
+.stage .flow{stroke-dasharray:6 6;animation:dash 1s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-24}}
+.stage .pk rect{fill:var(--l-blue)}
+.stage .pk text{fill:#0B1424;font:600 12px var(--sans)}
+.stage .pk.r rect{fill:var(--l-red)} .stage .pk.r text{fill:#fff}
+.stage .pk.t rect{fill:var(--l-teal)}
+.stage .pk.a rect{fill:var(--l-amber)}
+.stage .pk.v rect{fill:var(--l-violet)}
+.stage g.hot>rect,.stage rect.hot{fill:#5B2523;stroke:var(--l-red);stroke-width:2}
+.stage g.ok>rect,.stage rect.ok{fill:#163E37;stroke:var(--l-teal);stroke-width:2}
+.stage g.warn>rect,.stage rect.warn{fill:#4A3A12;stroke:var(--l-amber);stroke-width:2}
+.stage g.lead>rect{stroke:var(--l-violet);stroke-width:2.5}
+.stage g.dead{opacity:.35}
+.stage .bar{transform-box:fill-box;transform-origin:left center}
+.stage [data-s],.stage [data-only],.stage [data-e]{transition:opacity .45s ease}
+.stage [data-tf]{transition:transform .9s cubic-bezier(.5,.05,.25,1),opacity .45s ease}
+.stage .off{opacity:0 !important;pointer-events:none}
+.stage.init *{transition:none !important}
+.stage g.c1>rect{stroke:var(--l-blue);stroke-width:2.5}
+.stage g.c2>rect{stroke:var(--l-violet);stroke-width:2.5}
+.stage .hot-txt{fill:var(--l-red) !important}
+.stage .ok-txt{fill:var(--l-teal) !important}
+
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--lab-mut);margin-top:8px}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:0}
+.seg{display:inline-flex;border:1px solid #4A5870;border-radius:7px;overflow:hidden}
+.seg button{background:transparent;color:var(--lab-mut);border:0;padding:5px 12px;font-size:13.5px;border-radius:0}
+.seg button.on{background:var(--lab3);color:var(--lab-ink)}
+
+/* timeline */
+.tl{list-style:none;padding:0;margin:16px 0;border-left:2px solid var(--line);max-width:760px}
+.tl li{position:relative;padding:0 0 16px 22px}
+.tl li::before{content:"";position:absolute;left:-7px;top:7px;width:12px;height:12px;border-radius:50%;background:var(--card);border:2px solid var(--muted)}
+.tl li.new::before{border-color:var(--red);background:var(--red)}
+.tl b{font-family:var(--mono);margin-right:8px}
+.tl span{color:var(--muted);font-size:14px}
+
+/* toys */
+.bits{display:grid;grid-template-columns:repeat(20,1fr);gap:3px;margin:16px 0 4px}
+.bits div{aspect-ratio:1;border-radius:3px;background:var(--lab3);display:grid;place-items:center;font:11px var(--mono);color:var(--lab-mut);transition:background .3s,transform .3s}
+.bits div.on{background:var(--l-red);color:#fff}
+.bits div.q{outline:2px solid var(--l-amber);transform:translateY(-3px)}
+.bitidx{display:grid;grid-template-columns:repeat(20,1fr);gap:3px;font:10px var(--mono);color:var(--lab-mut);text-align:center}
+.cache-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.cache-col h5{margin:0 0 6px;font-size:13.5px;color:var(--lab-mut);font-weight:500}
+.slots{display:flex;gap:6px;min-height:58px}
+.slot{flex:1;background:var(--lab2);border:1px solid var(--lab3);border-radius:6px;text-align:center;padding:6px 0;font:600 18px var(--mono);transition:all .35s}
+.slot small{display:block;font:400 11px var(--sans);color:var(--lab-mut)}
+.slot.hit{border-color:var(--l-teal);background:#163E37}
+.slot.new{border-color:var(--l-blue)}
+.slot.empty{color:transparent}
+.evict{font-size:13px;color:var(--l-red);min-height:20px;margin-top:6px}
+.bucket{display:flex;gap:18px;align-items:flex-end;flex-wrap:wrap}
+.bkt{width:120px;height:150px;border:2px solid #4A5870;border-top:0;border-radius:0 0 14px 14px;display:flex;flex-wrap:wrap-reverse;align-content:flex-start;gap:4px;padding:6px;position:relative}
+.tok{width:22px;height:22px;border-radius:50%;background:var(--l-amber);box-shadow:inset 0 -3px 0 rgba(0,0,0,.25);animation:drop .35s ease}
+@keyframes drop{from{transform:translateY(-30px);opacity:0}}
+.reqlog{flex:1;min-width:220px;height:150px;overflow:auto;font:12.5px/1.7 var(--mono);background:var(--lab2);border-radius:6px;padding:6px 10px}
+.reqlog .ok{color:var(--l-teal)}.reqlog .no{color:var(--l-red)}
+.socks{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:10px}
+.sock{background:var(--lab2);border:1px solid var(--lab3);border-radius:6px;text-align:center;font:12px var(--mono);padding:10px 0;color:var(--lab-mut);transition:all .2s}
+.sock.ready{background:#4A3A12;border-color:var(--l-amber);color:var(--lab-ink)}
+.sock.scan{outline:2px solid var(--l-blue)}
+.sock.done{background:#163E37;border-color:var(--l-teal)}
+.rq{display:flex;gap:6px;min-height:34px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.rq span{background:var(--l-amber);color:#231a00;border-radius:4px;padding:2px 8px;font:12px var(--mono);animation:drop .3s}
+.aof{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+.aof pre{margin:0;min-height:150px;max-height:220px;background:var(--lab2)}
+.slotbar{position:relative;height:30px;border-radius:6px;overflow:hidden;display:flex;margin-top:14px}
+.slotbar div{display:grid;place-items:center;font:11px var(--mono);color:#101820}
+.slotbar .mk{position:absolute;top:-2px;bottom:-2px;width:3px;background:#fff;box-shadow:0 0 0 2px var(--lab);transition:left .5s}
+.kv{font-family:var(--mono);font-size:14px}
+.kv mark{background:var(--l-amber);color:#231a00;border-radius:3px;padding:0 2px}
+.sim-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.sim-stats div{background:var(--lab2);border-radius:6px;padding:6px 10px;font-size:12px;color:var(--lab-mut)}
+.sim-stats b{display:block;font:600 18px var(--mono);color:var(--lab-ink)}
+@media (max-width:600px){.sim-stats{grid-template-columns:repeat(2,1fr)}.socks{grid-template-columns:repeat(4,1fr)}.aof,.cache-col{grid-template-columns:1fr}.bits div{font-size:8px}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms !important;scroll-behavior:auto !important}.stage [data-tf]{transition-duration:.15s}}
+
+.lab .stage [data-tf]{transition:transform var(--dur,1.6s) cubic-bezier(.45,.05,.3,1),opacity .5s ease}
+.stage .flash{animation:flash 1.3s ease}
+@keyframes flash{0%,100%{opacity:1}20%{opacity:.25}45%{opacity:1}70%{opacity:.45}}
+.stage-wrap{position:relative;overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:8px;overscroll-behavior-x:contain}
+.swipe{display:none;font-size:12px;color:var(--lab-mut);margin:6px 0 0;text-align:center}
+.narr{background:var(--lab2);border-left:3px solid var(--l-amber);border-radius:8px;padding:10px 14px;margin-top:12px}
+.narr-h{display:flex;gap:10px;align-items:baseline;font-size:12.5px;color:var(--lab-mut);flex-wrap:wrap}
+.narr-h span{color:var(--l-amber);font-weight:700}
+.narr .cap{margin:4px 0 0;min-height:52px}
+.narr .cap li{font-size:15.5px;line-height:1.75}
+.narr p{margin:4px 0 0;font-size:15px;line-height:1.75;min-height:1.75em}
+.narr b{color:#fff}
+.narr .g,.out .g{color:var(--l-teal);font-weight:600}.narr .r,.out .r{color:var(--l-red);font-weight:600}.narr .a{color:var(--l-amber);font-weight:600}.narr .v{color:var(--l-violet);font-weight:600}
+.narr .evt{color:var(--l-amber);opacity:0;transition:opacity .4s;min-height:0;font-size:14.5px}
+.narr .evt.show{opacity:1}
+.lab code{background:var(--lab3);color:var(--lab-ink)}
+.guide{background:var(--card);border:1px dashed var(--line);border-radius:8px;padding:10px 14px;font-size:14.5px;line-height:1.75;max-width:820px;margin:18px 0 -8px}
+.guide::before{content:"怎么看这张图：";font-weight:700;color:var(--red)}
+.allsteps{margin-top:10px;font-size:13.5px;color:var(--lab-mut)}
+.allsteps summary{cursor:pointer;padding:4px 0}
+.allsteps ol{padding-left:1.4em;color:var(--lab-ink);line-height:1.7}
+.allsteps li{margin:5px 0}
+.hero-lab{margin-top:0;margin-bottom:0}
+button{touch-action:manipulation}
+@media (pointer:coarse){.ctrl button,.lab .btn,.seg button{min-height:42px;padding:8px 14px;font-size:14.5px}.lab input[type=text]{min-height:42px;font-size:16px}}
+@media (max-width:640px){
+  main{padding:0 12px 60px}
+  .lab{margin-left:-12px;margin-right:-12px;border-radius:0;padding:14px 12px}
+  .stage-wrap>svg.stage{min-width:520px}
+  .stage-wrap>#hero{min-width:0}
+  #hero text{font-size:22px}
+  #hero .ts{display:none}
+  #hero .tm{font-size:20px}
+  .swipe{display:block}
+  .hero{padding-top:28px}
+  .hero .lead{font-size:16px}
+  .ch h3{font-size:20px}
+  .narr .cap li,.narr p{font-size:15px}
+  .ctrl .count{margin-left:0}
+  .guide{font-size:14px}
+}
+
+.foot{margin-top:70px;padding-top:18px;border-top:1px solid var(--line);font-size:13.5px;color:var(--muted);max-width:760px}
+</style>
+</head>
+<body>
+<details class="mobile-nav"><summary>Redis 全景手册 · 目录</summary><ol class="toc" id="tocM"></ol></details>
+<div class="shell">
+<aside class="side">
+  <p class="brand"><span></span>Redis 全景手册</p>
+  <p>基础理论 + 常见场景 + 补充强化 + Redis 8 新特性，整合在一页。</p>
+  <ol class="toc" id="toc">
+    <li><a href="#c1">认识 Redis</a></li>
+    <li><a href="#c2">数据类型与命令</a></li>
+    <li><a href="#c3">缓存三大问题</a></li>
+    <li><a href="#c4">缓存与数据库一致性</a></li>
+    <li><a href="#c5">持久化 RDB / AOF</a></li>
+    <li><a href="#c6">过期删除与内存淘汰</a></li>
+    <li><a href="#c7">分布式锁、事务与并发</a></li>
+    <li><a href="#c8">高可用：复制、哨兵、集群</a></li>
+    <li><a href="#c9">线程模型与 IO 多路复用</a></li>
+    <li><a href="#c10">Redis 做消息队列</a></li>
+    <li><a href="#c11">限流、热点、多级缓存、排查</a></li>
+    <li><a href="#c12">Redis 8 新特性与向量检索</a></li>
+    <li><a href="#c13">分布式理论：CAP / BASE / 事务</a></li>
+    <li><a href="#c14">勘误与考前速记</a></li>
+  </ol>
+  <button class="theme-btn" id="themeBtn" type="button">切换深浅色</button>
+</aside>
+
+<main>
+<section class="hero">
+  <h1>Redis 全景手册</h1>
+  <p class="lead">从“为什么快”到“怎么不丢、不乱、不崩”。难懂的机制都配了可以一步步点的动画，下面这条请求流就是 Redis 最常见的用法：旁路缓存。</p>
+  <div class="lab hero-lab">
+    <div class="lab-head"><b>旁路缓存（Cache-Aside）实时模拟</b><span>小圆点 = 一次读请求。蓝色去程，绿色命中返回，黄色未命中去查库</span></div>
+    <div class="stage-wrap"><svg class="stage" id="hero" viewBox="0 0 760 220" role="img" aria-label="请求从客户端到 Redis，未命中时再到 MySQL 并回填缓存的动画">
+      <rect class="box" x="24" y="40" width="120" height="140" rx="10"/><text x="84" y="104" text-anchor="middle" class="tb">客户端</text><text x="84" y="124" text-anchor="middle" class="ts">读请求</text>
+      <rect class="box" x="320" y="40" width="130" height="140" rx="10" style="stroke:var(--l-red)"/><text x="385" y="70" text-anchor="middle" class="tb">Redis</text>
+      <g id="heroKeys"></g>
+      <rect class="box" x="612" y="40" width="124" height="140" rx="10" style="stroke:var(--l-blue)"/><text x="674" y="104" text-anchor="middle" class="tb">MySQL</text><text x="674" y="124" text-anchor="middle" class="ts">磁盘 · 慢 10~100 倍</text>
+      <g id="heroDots"></g>
+    </svg></div>
+    <div class="narr"><div class="narr-h"><span>旁白</span><b>跟着带黄圈的请求走一遍</b></div><p id="heroNarr">等待第一个请求…</p></div>
+    <div class="ctrl"><button id="heroToggle" type="button">暂停</button><span class="count" id="heroStat">命中率 0%</span></div>
+  </div>
+</section>
+
+<!-- ================= 1 ================= -->
+<section class="ch" id="c1">
+<header><span class="no">01</span><h2>认识 Redis</h2></header>
+<div class="prose">
+<p><b>Redis</b>（Remote Dictionary Server）是开源的、基于 Key-Value 的 <b>NoSQL 内存数据库</b>，支持网络访问、可持久化，并提供丰富的数据结构。它最常见的定位是客户端与持久化数据库（如 MySQL）之间的<b>缓存层</b>，目的是：减少数据库 IO 压力、提升访问速度（内存比磁盘快 10~100 倍以上）、支撑高并发。</p>
+</div>
+<h3>核心特性</h3>
+<div class="tbl"><table>
+<tr><th>特性</th><th>说明</th><th>软考答题要点</th></tr>
+<tr><td>高性能</td><td>纯内存操作，单机读写可达 10 万+ QPS</td><td>适用高并发读，缓解数据库压力</td></tr>
+<tr><td>丰富的数据结构</td><td>String、Hash、List、Set、ZSet，以及 Geo、HyperLogLog、Bitmap、Stream；Redis 8 起内置 JSON、时序、概率结构、向量集合</td><td>按业务场景选择合适的结构</td></tr>
+<tr><td>持久化</td><td>RDB 快照 + AOF 日志，可混合</td><td>保障数据安全，平衡性能与可靠性</td></tr>
+<tr><td>高可用</td><td>主从复制、哨兵、Cluster 集群</td><td>故障转移，避免单点故障</td></tr>
+<tr><td>原子性</td><td>命令由单线程执行，单条命令天然原子；多条命令用 Lua / 事务保证</td><td>计数器、分布式锁、扣库存</td></tr>
+</table></div>
+<h3>典型使用场景</h3>
+<div class="cols">
+  <div class="cell"><h4>缓存</h4><p>热点数据、Session 共享。延伸考点：穿透、击穿、雪崩、双写一致、持久化、过期与淘汰。</p></div>
+  <div class="cell"><h4>分布式锁</h4><p><code>SET NX EX</code>、Redisson（看门狗、可重入、红锁）。</p></div>
+  <div class="cell"><h4>计数与排行</h4><p>INCR 计数器 / 点赞 / 全局 ID；ZSet 排行榜、热搜榜。</p></div>
+  <div class="cell"><h4>消息与异步</h4><p>List 队列、Pub/Sub 广播、Stream 消费组、ZSet 延时队列。</p></div>
+  <div class="cell"><h4>限流防刷</h4><p>INCR+EXPIRE 固定窗口、ZSet 滑动窗口、Lua 令牌桶。</p></div>
+  <div class="cell"><h4>AI 场景</h4><p>向量检索、语义缓存、RAG 召回、Agent 记忆（Redis 8 向量集合 / 查询引擎）。</p></div>
+</div>
+<h3>Redis 与 Memcached 的区别</h3>
+<div class="tbl"><table>
+<tr><th>维度</th><th>Memcached</th><th>Redis</th></tr>
+<tr><td>数据类型</td><td>只有字符串键值</td><td>字符串、哈希、列表、集合、有序集合等，可直接存结构化数据</td></tr>
+<tr><td>持久化</td><td>无，重启数据全丢</td><td>RDB / AOF，重启可恢复</td></tr>
+<tr><td>高可用</td><td>无原生方案，靠客户端分片</td><td>主从、哨兵、Cluster 自动故障转移</td></tr>
+<tr><td>原子操作</td><td>incr/decr、CAS，复杂组合操作难</td><td>单命令原子 + Lua 脚本 + 事务</td></tr>
+<tr><td>内存管理</td><td>Slab 预分配，有内部碎片</td><td>jemalloc 动态分配，8 种（8.6 起 10 种）淘汰策略</td></tr>
+<tr><td>线程模型</td><td><b>多线程</b></td><td>命令执行单线程，6.0 起网络 IO 可多线程</td></tr>
+<tr><td>集群</td><td>客户端一致性哈希</td><td>服务端哈希槽（16384 个）</td></tr>
+</table></div>
+</section>
+
+<!-- ================= 2 ================= -->
+<section class="ch" id="c2">
+<header><span class="no">02</span><h2>数据类型与核心命令</h2></header>
+<h3>5 种基础数据类型</h3>
+<div class="tbl"><table>
+<tr><th>类型</th><th>特性</th><th>常用命令</th><th>典型场景</th></tr>
+<tr><td>String</td><td>字符串 / 整数 / 浮点，原子增减，最大 512MB</td><td>SET/GET、MSET/MGET、SETEX、INCRBY/DECRBY、SETNX</td><td>缓存对象、Session、分布式锁、全局 ID、计数器、限流</td></tr>
+<tr><td>Hash</td><td>field-value 嵌套，可单独改字段；7.4 起支持字段级过期</td><td>HSET/HGET、HMGET、HDEL、HKEYS、HSETNX、HINCRBY、HEXPIRE</td><td>购物车（用户为 key，商品为 field）、对象存储</td></tr>
+<tr><td>List</td><td>双端链表，有序可重复，两端增删 O(1)</td><td>LPUSH/RPUSH、LPOP/RPOP、BRPOP、LRANGE、LLEN、BLMOVE</td><td>消息队列、消息列表、最新评论</td></tr>
+<tr><td>Set</td><td>无序不重复，支持交并差</td><td>SADD/SREM、SMEMBERS、SCARD、SINTER/SUNION/SDIFF、SPOP</td><td>抽奖、点赞、标签、共同好友</td></tr>
+<tr><td>ZSet</td><td>按 score 有序、成员不重复</td><td>ZADD、ZRANGE/ZREVRANGE、ZRANGEBYSCORE、ZINCRBY、ZREM</td><td>排行榜、延时队列、滑动窗口限流</td></tr>
+</table></div>
+<h3>底层编码（补充）</h3>
+<p class="prose">同一种类型会根据数据量自动切换编码：小数据用紧凑的连续内存省空间，大数据换成哈希表 / 跳表保证复杂度。Redis 7 起 listpack 全面替代 ziplist。</p>
+<div class="tbl"><table>
+<tr><th>类型</th><th>小数据编码</th><th>大数据编码</th><th>为什么</th></tr>
+<tr><td>String</td><td>int / embstr</td><td>raw（SDS）</td><td>SDS 记录长度，O(1) 取长度、二进制安全、预分配减少扩容</td></tr>
+<tr><td>List</td><td colspan="2">quicklist（由多个 listpack 组成的双向链表）</td><td>兼顾内存紧凑与两端操作效率</td></tr>
+<tr><td>Hash</td><td>listpack</td><td>hashtable</td><td>字段少时线性扫描也很快，更省内存</td></tr>
+<tr><td>Set</td><td>intset / listpack</td><td>hashtable</td><td>纯整数小集合用有序数组</td></tr>
+<tr><td>ZSet</td><td>listpack</td><td>skiplist + dict</td><td>跳表支持 O(logN) 范围查询，dict 支持 O(1) 查 score</td></tr>
+</table></div>
+<h3>特殊数据类型</h3>
+<div class="tbl"><table>
+<tr><th>类型</th><th>核心功能</th><th>应用场景</th></tr>
+<tr><td>Geospatial</td><td>存经纬度（底层是 ZSet + GeoHash），算距离、范围</td><td>附近的人、门店距离排序</td></tr>
+<tr><td>HyperLogLog</td><td>约 12KB 统计不重复元素个数，标准误差约 0.81%</td><td>UV、日活 / 月活</td></tr>
+<tr><td>Bitmap</td><td>按位存 0/1，极省内存</td><td>签到、在线状态、布隆过滤器底座</td></tr>
+<tr><td>Stream（5.0）</td><td>持久化的消息日志，支持消费组、ACK</td><td>可靠消息队列（见第 10 章）</td></tr>
+</table></div>
+<h3>Redis 8 起内置的数据结构</h3>
+<div class="prose"><p>Redis 8 把原先 Redis Stack 的模块合并进开源版，开箱即用：</p>
+<ul>
+<li><b>JSON</b>：原生存取 JSON 文档，可按路径修改（JSON.SET / JSON.GET）。</li>
+<li><b>Time Series</b>：时序数据，带降采样与聚合（TS.ADD / TS.RANGE）。</li>
+<li><b>概率结构</b>：Bloom、Cuckoo（可删除的布隆）、Count-Min Sketch（频率估计）、Top-K、t-digest（分位数）。</li>
+<li><b>Vector Set</b>：向量相似度检索，基于 HNSW（VADD / VSIM），8.0 为 beta。</li>
+<li><b>Array</b>：Redis 8.8 新增的数据结构，由 Redis 作者 antirez 设计。</li>
+</ul></div>
+<h3>通用命令与考点</h3>
+<div class="tbl"><table>
+<tr><th>命令</th><th>功能</th><th>考点</th></tr>
+<tr><td>KEYS *</td><td>遍历所有 key</td><td>O(N) 阻塞主线程，生产禁用；改用 <code>SCAN cursor MATCH p COUNT n</code> 渐进遍历</td></tr>
+<tr><td>EXISTS key</td><td>判断是否存在</td><td>缓存穿透“空值缓存”的前置判断</td></tr>
+<tr><td>EXPIRE / TTL</td><td>设置 / 查看过期时间</td><td>与击穿、雪崩相关</td></tr>
+<tr><td>TYPE / OBJECT ENCODING</td><td>查看类型 / 底层编码</td><td>排查类型误用、内存优化</td></tr>
+<tr><td>DEL / UNLINK</td><td>同步删 / 异步删</td><td>删大 key 用 UNLINK，避免阻塞</td></tr>
+<tr><td>SELECT / MOVE</td><td>切库 / 移动 key</td><td>Cluster 只有 0 号库</td></tr>
+<tr><td>FLUSHDB / FLUSHALL</td><td>清空当前库 / 所有库</td><td>误操作风险，可用 rename-command 禁用</td></tr>
+</table></div>
+</section>
+
+<!-- ================= 3 ================= -->
+<section class="ch" id="c3">
+<header><span class="no">03</span><h2>缓存三大问题：穿透、击穿、雪崩</h2></header>
+<p class="prose">三个问题的共同结局都是“大量请求越过 Redis 直接打到数据库”，区别在于<b>为什么越过</b>。先在模拟器里看看它们的样子，再打开防护对比。</p>
+<p class="guide">每个小圆点是一个用户请求，从左往右跑：先到 Redis 查缓存，<b>命中</b>就变绿原路返回，<b>没命中</b>就继续往右去查 MySQL。右边竖条是数据库每秒收到的查询数，超过黄色虚线就扛不住了。带白圈和文字标签的是<b>被跟踪的请求</b>，下方旁白会实时讲它正在经历什么；出现突发情况时，旁白会用黄字提示。建议先看“关闭防护”时的样子，再点“开启防护”对比。</p>
+<div class="lab">
+  <div class="lab-head"><b>缓存三兄弟模拟器</b><span>数据库每秒查询超过 4 次（黄色虚线）即判定过载</span></div>
+  <div class="ctrl" style="margin:0 0 10px">
+    <div class="seg" id="trioMode"><button class="on" data-m="pen" type="button">穿透</button><button data-m="brk" type="button">击穿</button><button data-m="ava" type="button">雪崩</button></div>
+    <button class="btn" id="trioProtect" type="button">开启防护</button>
+    <div class="seg" id="trioSpeed"><button class="on" data-ts="0.5" type="button">慢速</button><button data-ts="1" type="button">正常</button></div>
+    <button class="btn" id="trioPause" type="button">暂停</button>
+  </div>
+  <p class="out" id="trioTip" style="margin:0 0 10px;color:var(--lab-ink)"></p>
+  <div class="stage-wrap"><canvas id="trio" class="stage" width="760" height="300" aria-label="缓存问题模拟动画"></canvas></div>
+  <div class="narr"><div class="narr-h"><span>旁白</span><b>跟踪带白圈的请求</b></div><p id="trioNarr">等待请求…</p><p class="evt" id="trioEvt"></p></div>
+  <div class="sim-stats"><div>请求总数<b id="sReq">0</b></div><div>Redis 命中<b id="sHit">0</b></div><div>打到数据库<b id="sDb">0</b></div><div>被拦截 / 等待<b id="sBlk">0</b></div></div>
+  <div class="legend"><span><i style="background:var(--l-blue)"></i>去程请求</span><span><i style="background:var(--l-teal)"></i>命中返回</span><span><i style="background:var(--l-amber)"></i>查库 / 持锁重建</span><span><i style="background:var(--l-red)"></i>被拦截或空结果</span><span><i style="background:var(--l-violet)"></i>等待锁</span></div>
+</div>
+
+<h3>缓存穿透：查一个根本不存在的数据</h3>
+<div class="prose">
+<p><b>定义</b>：请求的 key 在缓存和数据库里都不存在。数据库查不到就不会回写缓存，于是每次请求都直达数据库。多半是恶意攻击（用脚本刷 id=-1、9999999、abc123）。</p>
+<p><b>例子</b>：商品详情接口被每秒 10 万次刷不存在的商品 ID，MySQL CPU 打满，正常用户也查不了商品。</p>
+<p><b>方案一：缓存空对象</b>。查不到也缓存 <code>{key:1, value:null}</code>，设置短 TTL。简单，但会占内存，且后来真插入了数据会短暂不一致。</p>
+<p><b>方案二：布隆过滤器</b>。在 Redis 前加一道拦截：判断为“一定不存在”的直接返回。内存占用小，但实现复杂、存在误判、标准布隆不支持删除（要删用 Cuckoo 过滤器）。实现可用 Redisson 的 RBloomFilter、Guava，或 Redis 8 内置的 <code>BF.ADD / BF.EXISTS</code>。</p>
+</div>
+<div class="lab">
+  <div class="lab-head"><b>布隆过滤器：位数组 + 3 个哈希函数</b><span>添加会把 3 个位置为 1；查询时 3 位全为 1 才“可能存在”</span></div>
+  <div class="ctrl" style="margin:0">
+    <input type="text" id="bfIn" value="id1" aria-label="输入元素" style="width:140px">
+    <button class="btn pri" id="bfAdd" type="button">添加</button>
+    <button class="btn" id="bfQ" type="button">查询</button>
+    <button class="btn" id="bfReset" type="button">清空</button>
+  </div>
+  <div class="bits" id="bfBits"></div><div class="bitidx" id="bfIdx"></div>
+  <p class="out" id="bfOut">已添加：（无）。试试先添加 id1、id2、id3，再查询 id4、hello 等，碰运气撞出一次误判。</p>
+</div>
+<div class="note"><b class="t">答题要点</b><p>布隆过滤器说“不存在”一定不存在，说“存在”可能误判。误判率与数组长度、哈希函数个数、元素数量有关：数组越大误判越低、内存越多，项目中一般设到 5% 以内（Redisson：<code>tryInit(预期元素数, 0.05)</code>）。缓存预热时同步预热布隆过滤器。</p></div>
+
+<h3>缓存击穿：一个热点 key 刚好过期</h3>
+<div class="prose">
+<p><b>定义</b>：某个热点 key 过期的瞬间，大量并发请求同时未命中，一起去数据库重建缓存，可能瞬间压垮 DB。</p>
+<p><b>例子</b>：618 秒杀的 9.9 元耳机缓存恰好在 10:00:00 过期，10 万并发同时查 MySQL，连接被占满。</p>
+</div>
+<div class="tbl"><table>
+<tr><th>方案</th><th>做法</th><th>特点</th></tr>
+<tr><td>互斥锁</td><td>未命中时先 <code>SETNX</code> 抢锁，抢到的线程查库并回写缓存，其他线程休眠后重试读缓存</td><td>强一致，性能差，有死锁风险（锁要设过期）</td></tr>
+<tr><td>逻辑过期</td><td>不给 key 设 TTL，而是在 value 里存 expire 字段；读到已逻辑过期时，抢锁开新线程异步重建，当前线程先返回旧数据</td><td>高可用、性能好，但短时间返回旧数据</td></tr>
+<tr><td>补充</td><td>热点 key 永不过期（PERSIST）+ 主动更新；活动前预热</td><td>适合可预知的热点</td></tr>
+</table></div>
+
+<h3>缓存雪崩：大量 key 同时失效或 Redis 宕机</h3>
+<div class="prose">
+<p><b>定义</b>：同一时段大量 key 同时过期（设置了相同 TTL），或 Redis 整体宕机，请求洪峰直达数据库。</p>
+<p><b>例子</b>：生鲜电商把所有商品缓存设为“0 点整过期”，0 点秒杀开始时几千万查询同时打到 MySQL；或机房网络故障导致整个 Redis 集群不可用，打车预估价全部查库。</p>
+<p><b>方案</b>：TTL 加随机值打散过期时间；Redis 哨兵 / 集群提高可用性；限流降级（Nginx、Spring Cloud Gateway、Sentinel 熔断）；多级缓存（Caffeine / Guava 本地缓存 + Redis）。<b>降级限流可作为三个问题共同的保底策略。</b></p>
+</div>
+<div class="tbl"><table>
+<tr><th>问题</th><th>本质</th><th>产生原因</th><th>解决方案</th></tr>
+<tr><td>穿透</td><td>数据根本不存在</td><td>恶意攻击、误删</td><td>缓存空值、布隆过滤器、参数校验</td></tr>
+<tr><td>击穿</td><td>一个热点 key 过期</td><td>高并发 + 热点过期</td><td>互斥锁、逻辑过期、预热</td></tr>
+<tr><td>雪崩</td><td>大量 key 过期 / Redis 挂了</td><td>相同 TTL、Redis 宕机</td><td>随机 TTL、集群高可用、限流降级、多级缓存</td></tr>
+</table></div>
+<div class="mem"><b class="t">口诀</b><p>穿透无中生有 key，布隆过滤 null 隔离；<br>击穿过期热点 key，锁与非期解难题；<br>雪崩大量过期 key，过期时间要随机；<br>面试必考三兄弟，可用限流来保底。</p></div>
+</section>
+<!-- ================= 4 ================= -->
+<section class="ch" id="c4">
+<header><span class="no">04</span><h2>缓存与数据库一致性（双写一致）</h2></header>
+<div class="prose">
+<p>一份数据同时存在 Redis 和 MySQL，数据变更时两边就可能不一致。回答这类题<b>一定先交代业务背景</b>：是要求强一致，还是允许短暂延迟？方案完全不同。</p>
+<p>几个先要想清楚的选择：</p>
+<ul>
+<li><b>删缓存还是更新缓存？</b>删除。更新缓存在并发写时容易乱序，且很多写入后并不会被读，白白浪费计算。</li>
+<li><b>先删缓存还是先改数据库？</b>两种都有并发问题。“先删缓存再改库”在读写并发时很容易把旧值写回缓存；“先改库再删缓存”出问题需要“读库比写库还慢”，概率低得多，是 Cache-Aside 的标准做法。</li>
+</ul>
+</div>
+<p class="guide">左右两条竖虚线分别是正在<b>改价格</b>的线程 A 和正在<b>查价格</b>的线程 B；中间上方是 Redis 缓存，下方是 MySQL。彩色胶囊是线程发出的命令，从发出方飞向目标，<b>飞到之后</b>目标里的值才会变化并闪烁。红框表示数据错了，绿框表示正确。建议用“下一步”自己点，边看旁白边看图。</p>
+<div class="lab" data-stepper>
+  <div class="lab-head"><b>为什么需要“延迟双删”</b><span>逐步演示读写并发如何把旧值写回缓存</span></div>
+  <div class="stage-wrap"><svg class="stage" viewBox="0 0 640 300" role="img" aria-label="延迟双删时序动画">
+    <line class="lane" x1="70" y1="44" x2="70" y2="286"/><text x="70" y="30" text-anchor="middle" class="tb">线程 A · 写</text>
+    <line class="lane" x1="570" y1="44" x2="570" y2="286"/><text x="570" y="30" text-anchor="middle" class="tb">线程 B · 读</text>
+    <g data-cls="4:hot|5:|6:ok"><rect class="box" x="230" y="40" width="180" height="64" rx="8"/><text x="320" y="64" text-anchor="middle" class="ts">Redis 缓存</text><text x="320" y="90" text-anchor="middle" class="tb" data-txt="0:price = 10|1:（空）|4:price = 10 ⚠ 脏|5:（空）|6:price = 20">price = 10</text></g>
+    <g data-cls="3:ok"><rect class="box" x="230" y="196" width="180" height="64" rx="8"/><text x="320" y="220" text-anchor="middle" class="ts">MySQL</text><text x="320" y="246" text-anchor="middle" class="tb" data-txt="0:price = 10|3:price = 20">price = 10</text></g>
+    <g class="pk r" data-only="1" data-tf="0:100,72|1:180,72"><rect x="-40" y="-13" width="80" height="26" rx="13"/><text text-anchor="middle" y="4">① DEL</text></g>
+    <g class="pk" data-only="2" data-tf="0:540,72|2:460,72"><rect x="-44" y="-13" width="88" height="26" rx="13"/><text text-anchor="middle" y="4">GET 未命中</text></g>
+    <g class="pk a" data-only="2" data-d="1" data-tf="0:440,228|2:520,228"><rect x="-40" y="-13" width="80" height="26" rx="13"/><text text-anchor="middle" y="4">读到 10</text></g>
+    <g class="pk" data-only="3" data-tf="0:100,228|3:178,228"><rect x="-46" y="-13" width="92" height="26" rx="13"/><text text-anchor="middle" y="4">UPDATE 20</text></g>
+    <g class="pk a" data-only="4" data-tf="0:540,72|4:460,72"><rect x="-40" y="-13" width="80" height="26" rx="13"/><text text-anchor="middle" y="4">SET 10</text></g>
+    <g data-only="5"><rect x="22" y="134" width="96" height="26" rx="6" fill="#4A3A12"/><text x="70" y="152" text-anchor="middle" class="tm">sleep ≈500ms</text></g>
+    <g class="pk r" data-only="5" data-tf="0:100,72|5:180,72"><rect x="-40" y="-13" width="80" height="26" rx="13"/><text text-anchor="middle" y="4">② DEL</text></g>
+    <g class="pk t" data-only="6" data-tf="0:320,182|6:320,130"><rect x="-48" y="-13" width="96" height="26" rx="13"/><text text-anchor="middle" y="4">回填 20</text></g>
+  </svg></div>
+  <div class="narr"><div class="narr-h"><span>旁白</span><b class="narr-no"></b></div><ol class="cap">
+    <li>初始：缓存和数据库里都是 10。线程 A 要把价格改为 20，线程 B 同时在读。</li>
+    <li>A 先删除缓存（第一次删）。</li>
+    <li>B 读缓存未命中，去查数据库，此时 A 还没改库，B 读到旧值 10。</li>
+    <li>A 把数据库更新为 20。</li>
+    <li>B 把刚才读到的旧值 10 写回缓存 —— 缓存与数据库不一致了，而且会一直错到 TTL 过期。</li>
+    <li>A 休眠一段时间（略大于“读库 + 写缓存”耗时，也要覆盖主从同步延迟）后第二次删除缓存，把脏数据清掉。</li>
+    <li>之后的读请求未命中，从数据库读到 20 并回填，最终一致。缺点：延迟多久难以确定，延迟期间仍可能读到脏数据，不是强一致。</li>
+  </ol></div>
+  <div class="ctrl"><button data-act="prev" type="button">上一步</button><button data-act="next" class="pri" type="button">下一步</button><button data-act="play" type="button">自动播放</button><button data-act="reset" type="button">重置</button><span class="dots"></span><span class="count"></span></div>
+</div>
+<h3>四种同步办法 + 一种强一致办法</h3>
+<div class="tbl"><table>
+<tr><th>办法</th><th>真实场景</th><th>优点</th><th>缺点 / 适用</th></tr>
+<tr><td>先改库再删缓存</td><td>电商改价：MySQL 99→89 成功后删缓存，下次读回填</td><td>简单，九成中小业务够用</td><td>删缓存失败会短暂不一致；加 TTL 兜底，风险可控</td></tr>
+<tr><td>延迟双删</td><td>社交 App 改昵称：删缓存→改库→延迟 2 秒再删</td><td>避免旧数据回写</td><td>延迟时间难定，仍有极短不一致</td></tr>
+<tr><td>MQ 异步通知</td><td>外卖改起送价：改库后发 MQ，消费者更新 / 删除缓存，失败自动重试</td><td>解耦，有重试兜底</td><td>需要保证 MQ 可靠性，架构复杂，适合中大型系统</td></tr>
+<tr><td>Canal 监听 Binlog</td><td>直播粉丝数：Canal 伪装成 MySQL 从节点读 binlog，自动更新缓存</td><td>业务代码零侵入，实时性高</td><td>要部署运维 Canal</td></tr>
+<tr><td>Redisson 读写锁</td><td>抢券库存：读加共享锁，写加排他锁</td><td>强一致</td><td>性能低，读写方法必须用同一把锁</td></tr>
+</table></div>
+<div class="prose"><p>Binlog 记录所有 DDL 和 DML 语句，不记录 SELECT、SHOW 等查询语句，Canal 正是基于 MySQL 主从复制协议来拿到这些变更。</p></div>
+<div class="note"><b class="t">面试 / 软考答法</b>
+<p>① 文章热点数据：实时性要求不高，允许延迟一致 → 用 Canal 异步同步（不改业务代码）。</p>
+<p>② 抢券库存：需要实时强一致 → Redisson 读写锁：读读不互斥、读写互斥、写写互斥，写时其他线程读不到脏数据。</p>
+<p>③ 为什么不用延迟双删：延时多久不好确定，延时期间仍会出现脏数据，不能保证强一致。</p>
+<p>④ 若业务要求强一致，最稳妥的是不走缓存，直接读数据库；最终一致方案只适合能接受短暂不一致的场景（商品详情、用户信息）。</p></div>
+<h3>四种缓存读写策略</h3>
+<div class="tbl"><table>
+<tr><th>策略</th><th>谁负责读写</th><th>一句话</th><th>特点</th></tr>
+<tr><td>Cache-Aside（旁路）</td><td>业务代码</td><td>读：先缓存后库并回填；写：先改库再删缓存</td><td>最常用、灵活，本章方案都属此类</td></tr>
+<tr><td>Read-Through</td><td>缓存组件</td><td>缓存组件负责从库读并回填</td><td>业务代码更简洁</td></tr>
+<tr><td>Write-Through</td><td>缓存组件</td><td>写缓存时同步写库</td><td>强同步，写入偏慢</td></tr>
+<tr><td>Write-Behind</td><td>缓存组件</td><td>先写缓存，异步批量落库</td><td>吞吐高，宕机有丢数据风险</td></tr>
+</table></div>
+</section>
+
+<!-- ================= 5 ================= -->
+<section class="ch" id="c5">
+<header><span class="no">05</span><h2>持久化：RDB 与 AOF</h2></header>
+<h3>RDB：内存快照</h3>
+<div class="prose">
+<p>RDB（Redis Database Backup file）把某一时刻内存中的全部数据写成压缩的二进制文件 <code>dump.rdb</code>，重启时直接加载。</p>
+</div>
+<pre><span class="k">save</span>       <span class="c"># 主进程执行，阻塞所有命令，几乎不用</span>
+<span class="k">bgsave</span>     <span class="c"># fork 子进程执行，主进程继续服务</span>
+
+<span class="c"># redis.conf：满足任一条件自动 bgsave</span>
+save 900 1       <span class="c"># 900 秒内至少 1 个 key 被修改</span>
+save 300 10
+save 60 10000</pre>
+<p class="guide">左边是 Redis 主进程，右边是 bgsave 时复制出来的子进程。两者各有一张“页表”，可以理解成<b>目录</b>：记录每份数据放在物理内存的哪个位置。连线表示“目录指向这块内存”。重点看第 4 步：主进程要改数据时，它的连线改指向一份新副本，而子进程的连线不动，所以快照不受影响。</p>
+<div class="lab" data-stepper>
+  <div class="lab-head"><b>bgsave 如何做到不阻塞：fork + 写时复制</b><span>页表 = 虚拟地址到物理地址的映射</span></div>
+  <div class="stage-wrap"><svg class="stage" viewBox="0 0 640 300" role="img" aria-label="fork 与写时复制演示">
+    <rect class="box" x="40" y="22" width="150" height="46" rx="8"/><text x="115" y="50" text-anchor="middle" class="tb">主进程</text>
+    <line class="ln" x1="115" y1="68" x2="115" y2="100"/>
+    <rect class="box" x="60" y="100" width="110" height="36" rx="6"/><text x="115" y="123" text-anchor="middle">页表</text>
+    <g data-s="1"><rect class="box" x="450" y="22" width="150" height="46" rx="8" style="stroke:var(--l-violet)"/><text x="525" y="50" text-anchor="middle" class="tb">子进程</text>
+      <line class="ln" x1="525" y1="68" x2="525" y2="100"/>
+      <rect class="box" x="470" y="100" width="110" height="36" rx="6"/><text x="525" y="123" text-anchor="middle">页表（副本）</text></g>
+    <rect x="170" y="172" width="300" height="112" rx="10" fill="none" stroke="#4A5870" stroke-dasharray="5 5"/><text x="186" y="194" class="ts">物理内存</text>
+    <line class="ln" x1="115" y1="136" x2="231" y2="212"/>
+    <line class="ln" x1="115" y1="136" x2="321" y2="212" data-e="2"/>
+    <line class="ln" x1="115" y1="136" x2="411" y2="212" data-s="3" style="stroke:var(--l-amber)"/>
+    <line class="ln" x1="525" y1="136" x2="231" y2="212" data-s="1" style="stroke:var(--l-violet)"/>
+    <line class="ln" x1="525" y1="136" x2="321" y2="212" data-s="1" style="stroke:var(--l-violet)"/>
+    <rect class="box" x="196" y="212" width="70" height="40" rx="6"/><text x="231" y="237" text-anchor="middle">数据 A</text>
+    <g data-cls="3:dead"><rect class="box" x="286" y="212" width="70" height="40" rx="6"/><text x="321" y="237" text-anchor="middle">数据 B</text></g>
+    <g data-s="3" class="warn"><rect class="box" x="376" y="212" width="70" height="40" rx="6"/><text x="411" y="237" text-anchor="middle">副本 B′</text></g>
+    <text x="411" y="272" text-anchor="middle" class="ts" data-s="3">写命令改的是 B′</text>
+    <g data-s="2"><line class="ln flow" x1="525" y1="68" x2="560" y2="200" style="stroke:var(--l-violet)"/>
+      <rect class="box" x="494" y="200" width="126" height="62" rx="8"/><text x="557" y="224" text-anchor="middle" class="tm" data-txt="0:temp.rdb 写入中|4:dump.rdb ✓">temp.rdb 写入中</text>
+      <rect x="506" y="240" width="102" height="8" rx="4" fill="#4A5870"/><rect class="bar" x="506" y="240" width="102" height="8" rx="4" fill="var(--l-teal)" data-tf="0:sx0.02|2:sx0.45|3:sx0.75|4:sx1"/></g>
+  </svg></div>
+  <div class="narr"><div class="narr-h"><span>旁白</span><b class="narr-no"></b></div><ol class="cap">
+    <li>执行 bgsave 前：主进程通过页表访问物理内存中的数据 A、B。</li>
+    <li>fork 子进程：只复制页表，不复制数据，父子进程共享同一份物理内存。fork 这一下主进程会短暂阻塞，实例内存越大越久。</li>
+    <li>子进程读取共享内存写入新的 RDB 临时文件；主进程照常处理请求，读操作直接访问共享内存。</li>
+    <li>主进程收到写命令要改 B：触发写时复制，先拷贝出 B′，主进程页表指向 B′ 再修改。子进程看到的仍是旧 B，快照不受影响。</li>
+    <li>子进程写完，用新文件原子替换旧 RDB。快照内容是 fork 那一刻的数据，两次快照之间的写入宕机后会丢。</li>
+  </ol></div>
+  <div class="ctrl"><button data-act="prev" type="button">上一步</button><button data-act="next" class="pri" type="button">下一步</button><button data-act="play" type="button">自动播放</button><button data-act="reset" type="button">重置</button><span class="dots"></span><span class="count"></span></div>
+</div>
+<div class="note"><b class="t">写时复制的代价</b><p>写入很频繁时，大量页面被复制，内存可能接近翻倍，所以要给 Redis 预留内存，并关闭 Linux 透明大页（THP），否则一次复制的是 2MB 大页。</p></div>
+
+<h3>AOF：追加命令日志</h3>
+<div class="prose"><p>AOF（Append Only File）把每条写命令追加到文件，重启时重放命令恢复数据。默认关闭：</p></div>
+<pre>appendonly yes                   <span class="c"># 开启 AOF，默认 no</span>
+appendfilename "appendonly.aof"
+appendfsync everysec             <span class="c"># always / everysec（默认）/ no</span>
+auto-aof-rewrite-percentage 100  <span class="c"># 比上次重写后增长 100% 触发重写</span>
+auto-aof-rewrite-min-size 64mb   <span class="c"># 至少 64MB 才触发</span></pre>
+<div class="tbl"><table>
+<tr><th>appendfsync</th><th>刷盘时机</th><th>优点</th><th>缺点</th></tr>
+<tr><td>always</td><td>每条写命令同步刷盘</td><td>几乎不丢数据</td><td>性能影响大</td></tr>
+<tr><td>everysec</td><td>先写缓冲区，每秒刷一次</td><td>性能适中</td><td>最多丢 1 秒数据</td></tr>
+<tr><td>no</td><td>操作系统决定何时刷</td><td>性能最好</td><td>可能丢大量数据</td></tr>
+</table></div>
+<div class="lab">
+  <div class="lab-head"><b>AOF 重写（BGREWRITEAOF）</b><span>点几条写命令，再点“重写”，看文件如何被压缩成最少的命令</span></div>
+  <div class="ctrl" style="margin:0" id="aofBtns">
+    <button class="btn" type="button">SET num 123</button><button class="btn" type="button">SET name jack</button><button class="btn" type="button">SET num 666</button><button class="btn" type="button">INCR num</button><button class="btn" type="button">DEL name</button>
+    <button class="btn pri" id="aofRw" type="button">BGREWRITEAOF</button><button class="btn" id="aofClr" type="button">清空</button>
+  </div>
+  <div class="aof"><div><label>appendonly.aof</label><pre id="aofFile"></pre></div><div><label>内存中的数据</label><pre id="aofMem"></pre></div></div>
+  <p class="out" id="aofOut">同一个 key 被写多次，只有最后一次有意义。重写由子进程根据内存现状生成新文件，期间新命令写入重写缓冲区，完成后追加并替换。</p>
+</div>
+<h3>RDB 与 AOF 对比</h3>
+<div class="tbl"><table>
+<tr><th></th><th>RDB</th><th>AOF</th></tr>
+<tr><td>持久化方式</td><td>定时对整个内存做快照</td><td>记录每一条写命令</td></tr>
+<tr><td>数据完整性</td><td>不完整，两次快照之间会丢</td><td>相对完整，取决于刷盘策略</td></tr>
+<tr><td>文件大小</td><td>压缩二进制，小</td><td>文本命令，大（可重写）</td></tr>
+<tr><td>恢复速度</td><td>快</td><td>慢（要逐条重放）</td></tr>
+<tr><td>恢复优先级</td><td>低</td><td>高：两者都开时，重启优先用 AOF</td></tr>
+<tr><td>资源占用</td><td>fork 时 CPU、内存消耗大</td><td>平时主要是磁盘 IO；重写时也要 fork</td></tr>
+<tr><td>适用</td><td>容灾备份、能容忍分钟级丢失</td><td>数据安全要求高，更常见</td></tr>
+</table></div>
+<div class="tbl"><table>
+<tr><th>业务场景</th><th>选型</th><th>理由</th></tr>
+<tr><td>纯缓存、可接受少量丢失</td><td>仅 RDB（甚至都不开）</td><td>对性能影响小，恢复快</td></tr>
+<tr><td>计数、订单等要安全</td><td>AOF everysec</td><td>最多丢 1 秒</td></tr>
+<tr><td>生产最优解</td><td>RDB + AOF 混合持久化</td><td>RDB 快速全量恢复，AOF 补增量</td></tr>
+</table></div>
+<div class="prose"><p><b>混合持久化（4.0+，<code>aof-use-rdb-preamble yes</code>，5.0 起默认开启）</b>：AOF 重写时先把内存写成 RDB 格式作为文件前半部分，之后的增量命令以 AOF 格式追加。兼得 RDB 的恢复速度与 AOF 的低丢失率。Redis 7.0 起 AOF 拆为多文件（Multi Part AOF：base + incr + manifest），重写不再需要重写缓冲区。</p></div>
+<div class="note"><b class="t">软考问答：数据不能丢、又要快速恢复，怎么配？</b>
+<p>① <code>appendonly yes</code> + <code>appendfsync everysec</code>，兼顾性能与安全，最多丢 1 秒；② 同时开启 RDB（<code>save 900 1</code> 等）用于快速全量恢复；③ 开启混合持久化，定期 BGREWRITEAOF 防止文件过大；④ 重要业务配主从，从节点开 AOF，主节点用 RDB 降低开销。</p></div>
+</section>
+
+<!-- ================= 6 ================= -->
+<section class="ch" id="c6">
+<header><span class="no">06</span><h2>过期删除与内存淘汰</h2></header>
+<p class="prose">key 过期后不会立刻从内存消失。“过期策略”管的是<b>过期的 key 什么时候删</b>，“淘汰策略”管的是<b>内存满了删谁</b>，两者是不同的问题。</p>
+<h3>三种过期删除策略</h3>
+<div class="tbl"><table>
+<tr><th>策略</th><th>做法</th><th>优点</th><th>缺点</th></tr>
+<tr><td>定时删除</td><td>每个 key 一个定时器，到点立刻删</td><td>内存最友好</td><td>极耗 CPU，Redis 不采用</td></tr>
+<tr><td>惰性删除</td><td>访问 key 时才检查，过期就删</td><td>对 CPU 友好</td><td>没人访问的过期 key 一直占内存</td></tr>
+<tr><td>定期删除</td><td>每隔一段时间随机抽一批带 TTL 的 key 检查删除</td><td>平衡 CPU 和内存</td><td>可能漏删，执行时长和频率难定</td></tr>
+</table></div>
+<div class="prose">
+<p>定期删除有两种模式：</p>
+<ul>
+<li><b>SLOW 模式</b>：定时任务，频率由 <code>hz</code> 决定（默认 10，即每秒 10 次），每次不超过 25ms。</li>
+<li><b>FAST 模式</b>：每次事件循环前尝试执行，两次间隔不低于 2ms，每次不超过 1ms。</li>
+</ul>
+<p><b>Redis 的实际做法是“惰性删除 + 定期删除”配合</b>：定期删除批量清理，惰性删除兜底；两者都漏掉的，内存满了由淘汰策略最后处理。</p>
+</div>
+<h3>八种（8.6 起十种）淘汰策略</h3>
+<div class="tbl"><table>
+<tr><th>策略</th><th>范围</th><th>规则</th></tr>
+<tr><td>noeviction</td><td>—</td><td><b>默认</b>。不淘汰，内存满时写命令报 OOM 错误，读不受影响</td></tr>
+<tr><td>volatile-ttl</td><td>设了 TTL 的 key</td><td>剩余 TTL 越小越先淘汰</td></tr>
+<tr><td>allkeys-random / volatile-random</td><td>全部 / 有 TTL</td><td>随机淘汰</td></tr>
+<tr><td>allkeys-lru / volatile-lru</td><td>全部 / 有 TTL</td><td>LRU：最近最少使用，最久没访问的先走</td></tr>
+<tr><td>allkeys-lfu / volatile-lfu</td><td>全部 / 有 TTL</td><td>LFU：最不经常使用，访问频率最低的先走（4.0+）</td></tr>
+<tr><td>allkeys-lrm / volatile-lrm</td><td>全部 / 有 TTL</td><td>Redis 8.6 新增：按“最近最少被修改”淘汰</td></tr>
+</table></div>
+<div class="lab">
+  <div class="lab-head"><b>LRU vs LFU：同样的访问序列，淘汰谁？</b><span>缓存容量 4，点按钮访问 key，满了再访问新 key 会触发淘汰</span></div>
+  <div class="ctrl" style="margin:0" id="lruBtns">
+    <button class="btn" type="button">A</button><button class="btn" type="button">B</button><button class="btn" type="button">C</button><button class="btn" type="button">D</button><button class="btn" type="button">E</button><button class="btn" type="button">F</button>
+    <button class="btn" id="lruDemo" type="button">演示序列 A A A B C D E</button><button class="btn" id="lruReset" type="button">清空</button>
+  </div>
+  <div class="cache-col">
+    <div><h5>LRU · 按最后访问时间（左边最新）</h5><div class="slots" id="lruS"></div><div class="evict" id="lruE"></div></div>
+    <div><h5>LFU · 按访问次数（左边最多）</h5><div class="slots" id="lfuS"></div><div class="evict" id="lfuE"></div></div>
+  </div>
+  <div class="narr"><div class="narr-h"><span>旁白</span></div><p id="lruN">点上面的字母访问对应的 key，或者直接点“演示序列”。</p></div>
+  <p class="out">例：key1 3 秒前访问、key2 9 秒前访问 → LRU 删 key2；key1 最近访问 4 次、key2 访问 9 次 → LFU 删 key1。</p>
+</div>
+<div class="prose">
+<p>实现细节：Redis 的 LRU 是<b>近似 LRU</b>，每次随机采样 <code>maxmemory-samples</code>（默认 5）个 key，淘汰其中最久未访问的；LFU 用 8 位对数计数器记录频率，并随时间衰减，避免“曾经很热”的 key 永远不被淘汰。</p>
+<h4>使用建议</h4>
+<ol>
+<li>有明显冷热区分的纯缓存：优先 <code>allkeys-lru</code>，把最近常用的数据留下。</li>
+<li>访问频率差不多、没有明显冷热：<code>allkeys-random</code>。</li>
+<li>有置顶 / 必须常驻的数据：<code>volatile-lru</code>，常驻数据不设过期时间就不会被淘汰。</li>
+<li>短时间高频访问的数据：<code>allkeys-lfu</code> 或 <code>volatile-lfu</code>。</li>
+<li>金融支付等绝不能丢的：<code>noeviction</code>，宁可写失败。</li>
+</ol>
+</div>
+<div class="note"><b class="t">高频面试题</b>
+<p><b>数据库有 1000 万数据，Redis 只能存 20 万，如何保证都是热点？</b> 用 allkeys-lru，留下来的就是最近常访问的热点数据。</p>
+<p><b>Redis 内存用完了会怎样？</b> 看淘汰策略。默认 noeviction 会直接对写命令报错。注意 64 位系统默认 <code>maxmemory 0</code> 表示不限制，会一直用到系统内存甚至 swap，生产必须显式配置。</p></div>
+</section>
+<!-- ================= 7 ================= -->
+<section class="ch" id="c7">
+<header><span class="no">07</span><h2>分布式锁、事务与并发控制</h2></header>
+<h3>为什么需要分布式锁</h3>
+<p class="prose">常见场景：集群下的定时任务（只让一台执行）、抢单抢券、接口幂等。单机用 <code>synchronized</code> 能防超卖，但服务一旦部署多份，JVM 锁就管不住了。</p>
+<pre><span class="k">public void</span> rushToPurchase() {
+    Integer num = (Integer) redisTemplate.opsForValue().get(<span class="s">"num"</span>); <span class="c">// 查询库存</span>
+    <span class="k">if</span> (num == <span class="k">null</span> || num &lt;= 0) <span class="k">throw new</span> RuntimeException(<span class="s">"优惠券已抢完"</span>);
+    redisTemplate.opsForValue().set(<span class="s">"num"</span>, num - 1);              <span class="c">// 读-改-写，非原子</span>
+}</pre>
+<p class="guide">中间上方是存库存的 Redis；左右是<b>同一份代码</b>部署出来的两个服务实例；中间下方是分布式锁，本质就是 Redis 里的一个 key，<b>谁先写进去谁就持有锁</b>。胶囊表示请求的方向和内容。前 3 步演示问题，后 4 步演示解决。</p>
+<div class="lab" data-stepper>
+  <div class="lab-head"><b>集群部署下的超卖，以及分布式锁如何解决</b><span>Nginx 把请求分给两个实例</span></div>
+  <div class="stage-wrap"><svg class="stage" viewBox="0 0 640 300" role="img" aria-label="分布式锁防止超卖演示">
+    <g data-cls="2:hot|3:|6:ok"><rect class="box" x="245" y="22" width="150" height="66" rx="8" style="stroke:var(--l-red)"/><text x="320" y="46" text-anchor="middle" class="ts">Redis</text><text x="320" y="72" text-anchor="middle" class="tb" data-txt="0:库存 1|2:库存 0 · 卖出 2 ⚠|3:库存 1（重来）|4:库存 0 · 卖出 1|6:库存 0 · 卖出 1 ✓">库存 1</text></g>
+    <rect class="box" x="30" y="122" width="150" height="66" rx="8"/><text x="105" y="150" text-anchor="middle" class="tb">实例 :8080</text><text x="105" y="172" text-anchor="middle" class="ts" data-txt="0:synchronized ✓|3:Redis 锁 ✓|5:释放锁|6:空闲">synchronized ✓</text>
+    <rect class="box" x="460" y="122" width="150" height="66" rx="8"/><text x="535" y="150" text-anchor="middle" class="tb">实例 :8081</text><text x="535" y="172" text-anchor="middle" class="ts" data-txt="0:synchronized ✓|3:加锁失败|4:自旋重试…|6:Redis 锁 ✓">synchronized ✓</text>
+    <g data-s="3" data-cls="3:warn|5:|6:warn"><rect class="box" x="245" y="214" width="150" height="62" rx="8"/><text x="320" y="238" text-anchor="middle" class="ts">分布式锁 key</text><text x="320" y="262" text-anchor="middle" class="tm" data-txt="0:lock = 8080:uuid|5:（无锁）|6:lock = 8081:uuid">lock = 8080:uuid</text></g>
+    <g class="pk" data-only="1" data-tf="0:250,104|1:150,104"><rect x="-38" y="-12" width="76" height="24" rx="12"/><text text-anchor="middle" y="4">读到 1</text></g>
+    <g class="pk" data-only="1" data-tf="0:390,104|1:490,104"><rect x="-38" y="-12" width="76" height="24" rx="12"/><text text-anchor="middle" y="4">读到 1</text></g>
+    <g class="pk r" data-only="2" data-tf="0:150,104|2:250,104"><rect x="-38" y="-12" width="76" height="24" rx="12"/><text text-anchor="middle" y="4">SET 0</text></g>
+    <g class="pk r" data-only="2" data-tf="0:490,104|2:390,104"><rect x="-38" y="-12" width="76" height="24" rx="12"/><text text-anchor="middle" y="4">SET 0</text></g>
+    <g class="pk t" data-only="3" data-tf="0:110,236|3:192,236"><rect x="-50" y="-12" width="100" height="24" rx="12"/><text text-anchor="middle" y="4">SET NX ✓</text></g>
+    <g class="pk r" data-only="3" data-tf="0:530,236|3:448,236"><rect x="-50" y="-12" width="100" height="24" rx="12"/><text text-anchor="middle" y="4">SET NX → nil</text></g>
+    <g class="pk t" data-only="4" data-tf="0:140,104|4:240,104"><rect x="-44" y="-12" width="88" height="24" rx="12"/><text text-anchor="middle" y="4">读 1 → 写 0</text></g>
+    <g class="pk a" data-only="5" data-tf="0:110,236|5:186,236"><rect x="-56" y="-12" width="112" height="24" rx="12"/><text text-anchor="middle" y="4">Lua 比对后 DEL</text></g>
+    <g class="pk t" data-only="6" data-tf="0:530,236|6:448,236"><rect x="-50" y="-12" width="100" height="24" rx="12"/><text text-anchor="middle" y="4">SET NX ✓</text></g>
+    <g class="pk r" data-only="6" data-d="1" data-tf="0:400,104|6:500,104"><rect x="-50" y="-12" width="100" height="24" rx="12"/><text text-anchor="middle" y="4">读到 0 已抢完</text></g>
+  </svg></div>
+  <div class="narr"><div class="narr-h"><span>旁白</span><b class="narr-no"></b></div><ol class="cap">
+    <li>库存为 1。同一份代码部署在 8080、8081 两个 Tomcat 上，各自用 synchronized 加了锁。</li>
+    <li>synchronized 只锁本 JVM：两个实例的线程同时进入临界区，都读到库存 1。</li>
+    <li>两边都判断“库存充足”，扣减后写回 0 —— 1 件库存卖出了 2 件，超卖。</li>
+    <li>改用 Redis 分布式锁：两个实例同时执行 <code>SET lock 实例:uuid NX EX 10</code>，NX 保证只有 8080 成功。</li>
+    <li>8081 返回 nil，进入自旋重试；8080 读库存 1、扣减为 0。</li>
+    <li>8080 释放锁：先比较锁的值是不是自己的 uuid 再删除，用 Lua 保证“比较 + 删除”原子，防止锁过期后误删别人的锁。</li>
+    <li>8081 拿到锁，读到库存 0，返回“已抢完”。只卖出 1 件，正确。</li>
+  </ol></div>
+  <div class="ctrl"><button data-act="prev" type="button">上一步</button><button data-act="next" class="pri" type="button">下一步</button><button data-act="play" type="button">自动播放</button><button data-act="reset" type="button">重置</button><span class="dots"></span><span class="count"></span></div>
+</div>
+<pre><span class="c"># 加锁：NX 互斥，EX 超时自动释放（必须一条命令完成，不能 SETNX 后再 EXPIRE）</span>
+SET lock 8080:uuid NX EX 10
+
+<span class="c"># 解锁：Lua 保证"比较 + 删除"原子</span>
+<span class="k">if</span> redis.call(<span class="s">'GET'</span>, KEYS[1]) == ARGV[1] <span class="k">then return</span> redis.call(<span class="s">'DEL'</span>, KEYS[1]) <span class="k">end return</span> 0
+
+<span class="c"># Redis 8.4+：一条命令完成比较删除，不再需要 Lua</span>
+DELEX lock IFEQ 8080:uuid</pre>
+
+<h3>Redisson：生产级实现</h3>
+<div class="prose"><p>Redisson 底层是 SETNX 思路 + Lua 脚本（保证原子性），加锁、设置过期时间、续期都在 Lua 里完成。它解决了三个问题：</p>
+<ul>
+<li><b>锁的有效期怎么定？</b>业务时长难预估 → <b>看门狗（WatchDog）</b>自动续期。</li>
+<li><b>同一线程能否重入？</b>用 <b>Hash 结构</b>存锁：大 key 是锁名，field 是线程标识，value 是重入次数，加锁 +1、释放 -1，归零才删除，避免自己把自己锁死。</li>
+<li><b>拿不到锁怎么办？</b><code>tryLock(waitTime, leaseTime, unit)</code> 在等待时间内循环重试，比直接失败性能更好。</li>
+</ul></div>
+<p class="guide">黄色进度条是锁<b>还剩多久自动过期</b>（满格 = 30 秒）。下方左边是 Redisson 在后台运行的“看门狗”定时任务，右边是持有锁、正在执行业务的线程。注意进度条什么时候被重新充满，又在什么情况下不再被充满。</p>
+<div class="lab" data-stepper>
+  <div class="lab-head"><b>看门狗续期</b><span>lockWatchdogTimeout 默认 30s，每 30/3 = 10s 续期一次</span></div>
+  <div class="stage-wrap"><svg class="stage" viewBox="0 0 640 220" role="img" aria-label="看门狗续期演示">
+    <text x="30" y="94" class="ts">锁剩余 TTL</text>
+    <rect x="130" y="76" width="440" height="28" rx="6" fill="#4A5870"/>
+    <rect class="bar" x="130" y="76" width="440" height="28" rx="6" fill="var(--l-amber)" data-tf="0:sx1|1:sx0.667|2:sx1|3:sx0.02|4:sx1|5:sx0.02"/>
+    <text x="570" y="64" text-anchor="end" class="tm" data-txt="0:30s|1:20s|2:30s ↻ 续期|3:已释放|4:30s|5:0s 自动过期">30s</text>
+    <line x1="277" y1="70" x2="277" y2="110" class="lane"/><line x1="423" y1="70" x2="423" y2="110" class="lane"/>
+    <text x="130" y="124" class="ts">0</text><text x="277" y="124" class="ts" text-anchor="middle">10s</text><text x="423" y="124" class="ts" text-anchor="middle">20s</text><text x="570" y="124" class="ts" text-anchor="end">30s</text>
+    <g data-cls="2:ok|3:|4:dead"><rect class="box" x="130" y="150" width="200" height="48" rx="8"/><text x="230" y="179" text-anchor="middle">🐕 看门狗 · 每 10s 检查</text></g>
+    <g data-cls="3:ok|4:hot|5:dead"><rect class="box" x="370" y="150" width="200" height="48" rx="8"/><text x="470" y="179" text-anchor="middle" data-txt="0:线程：执行业务中…|3:线程：业务完成 unlock()|4:进程宕机 ✗|5:进程已不存在">线程：执行业务中…</text></g>
+  </svg></div>
+  <div class="narr"><div class="narr-h"><span>旁白</span><b class="narr-no"></b></div><ol class="cap">
+    <li>线程调用 <code>lock()</code> 且不指定 leaseTime，Redisson 设置锁 TTL = 30s，并启动看门狗。</li>
+    <li>业务执行了 10 秒还没结束，TTL 剩 20s。</li>
+    <li>看门狗检查到当前线程仍持有锁 → 把 TTL 重置为 30s。只要业务没完，就会一直续下去。</li>
+    <li>业务完成，<code>unlock()</code> 删除锁并取消看门狗任务。</li>
+    <li>另一种情况：重新加锁后，持锁的进程宕机了。</li>
+    <li>看门狗随进程一起消失，不再续期，锁最多 30s 后自动过期，不会死锁。注意：手动指定了 leaseTime 的锁不会启动看门狗。</li>
+  </ol></div>
+  <div class="ctrl"><button data-act="prev" type="button">上一步</button><button data-act="next" class="pri" type="button">下一步</button><button data-act="play" type="button">自动播放</button><button data-act="reset" type="button">重置</button><span class="dots"></span><span class="count"></span></div>
+</div>
+<pre>RLock lock = redissonClient.getLock(<span class="s">"heimalock"</span>);
+<span class="k">try</span> {
+    <span class="c">// 参数：最大等待时间（期间会重试）；不传 leaseTime 才会启用看门狗</span>
+    <span class="k">boolean</span> isLock = lock.tryLock(10, TimeUnit.SECONDS);
+    <span class="k">if</span> (isLock) { System.out.println(<span class="s">"执行业务..."</span>); }
+} <span class="k">finally</span> { lock.unlock(); }</pre>
+<h3>主从切换会丢锁吗？</h3>
+<div class="prose">
+<p>会。线程 1 在 master 上加锁成功，主从复制是异步的，锁还没同步到 slave，master 就宕机了；slave 被提升为新 master，线程 2 又加锁成功 —— <b>两个线程同时持有同一把锁</b>。</p>
+<p><b>RedLock（红锁）</b>：在 N 个独立的 Redis 实例上依次加锁，至少 N/2+1 个成功才算加锁成功。缺点是实现复杂、性能差、运维繁琐，并且仍有争议（依赖时钟）。如果业务必须强一致，建议用 <b>ZooKeeper / etcd</b> 实现的分布式锁（CP），而 Redis 属于 AP 思路。</p>
+</div>
+<div class="mem"><b class="t">Redisson 分布式锁一句话总结</b><p>SETNX + Lua 保原子；Hash 记录线程与重入次数；WatchDog 自动续期；可控制重试等待；RedLock 解决主从丢锁但性能差；要强一致就用 ZooKeeper。</p></div>
+
+<h3>Redis 事务：MULTI / EXEC / DISCARD / WATCH</h3>
+<div class="tbl"><table>
+<tr><th>命令</th><th>作用</th><th>答题要点</th></tr>
+<tr><td>MULTI</td><td>开启事务，后续命令进入队列</td><td>事务开始标记</td></tr>
+<tr><td>EXEC</td><td>按顺序执行队列中的全部命令</td><td>执行期间不会被其他客户端插队，但不保证经典 ACID</td></tr>
+<tr><td>DISCARD</td><td>放弃事务，清空队列</td><td>—</td></tr>
+<tr><td>WATCH</td><td>监视 key，EXEC 前被改动则事务失败返回 nil</td><td>乐观锁实现</td></tr>
+</table></div>
+<div class="prose"><p>命令入队时有<b>语法错误</b>，整个事务都不执行；EXEC 时某条命令<b>运行出错</b>（例如对字符串执行 INCR），只有这条失败，其余照常执行，<b>不会回滚</b>。所以 Redis 事务的核心价值是“打包顺序执行 + WATCH 乐观并发控制”，复杂逻辑更推荐 Lua 脚本或 7.0 的 Functions。</p></div>
+<p class="guide">两个客户端同时想买最后一件商品。下方的“队列”表示：MULTI 之后发出的命令<b>只是排队，还没执行</b>；直到 EXEC 才真正执行，或者整体被放弃。</p>
+<div class="lab" data-stepper>
+  <div class="lab-head"><b>WATCH 乐观锁：两个客户端抢最后一件库存</b><span>先干再说，提交时校验</span></div>
+  <div class="stage-wrap"><svg class="stage" viewBox="0 0 640 260" role="img" aria-label="WATCH 乐观锁演示">
+    <g data-cls="3:ok"><rect class="box" x="250" y="24" width="140" height="66" rx="8" style="stroke:var(--l-red)"/><text x="320" y="48" text-anchor="middle" class="ts">Redis</text><text x="320" y="74" text-anchor="middle" class="tb" data-txt="0:stock = 1|3:stock = 0">stock = 1</text></g>
+    <rect class="box" x="30" y="104" width="140" height="56" rx="8"/><text x="100" y="128" text-anchor="middle" class="tb">客户端 1</text><text x="100" y="148" text-anchor="middle" class="ts" data-txt="0:—|1:WATCH stock，读到 1|3:EXEC 成功|5:抢到了">—</text>
+    <rect class="box" x="470" y="104" width="140" height="56" rx="8"/><text x="540" y="128" text-anchor="middle" class="tb">客户端 2</text><text x="540" y="148" text-anchor="middle" class="ts" data-txt="0:—|1:WATCH stock，读到 1|4:EXEC → nil|5:重试读到 0：已抢完">—</text>
+    <g data-s="2" data-cls="3:ok"><rect class="box" x="30" y="184" width="140" height="50" rx="8"/><text x="100" y="214" text-anchor="middle" class="tm">队列：DECR stock</text></g>
+    <g data-s="2" data-cls="4:dead"><rect class="box" x="470" y="184" width="140" height="50" rx="8"/><text x="540" y="214" text-anchor="middle" class="tm">队列：DECR stock</text></g>
+    <g class="pk" data-only="1" data-tf="0:290,120|1:220,120"><rect x="-26" y="-12" width="52" height="24" rx="12"/><text text-anchor="middle" y="4">1</text></g>
+    <g class="pk" data-only="1" data-tf="0:350,120|1:420,120"><rect x="-26" y="-12" width="52" height="24" rx="12"/><text text-anchor="middle" y="4">1</text></g>
+    <g class="pk t" data-only="3" data-tf="0:200,120|3:300,120"><rect x="-40" y="-12" width="80" height="24" rx="12"/><text text-anchor="middle" y="4">EXEC ✓</text></g>
+    <g class="pk r" data-only="4" data-tf="0:300,120|4:420,120"><rect x="-44" y="-12" width="88" height="24" rx="12"/><text text-anchor="middle" y="4">nil 失败</text></g>
+  </svg></div>
+  <div class="narr"><div class="narr-h"><span>旁白</span><b class="narr-no"></b></div><ol class="cap">
+    <li>stock = 1，两个客户端都想扣减。</li>
+    <li>两者都执行 <code>WATCH stock</code> 并读到 1，都判断“还有库存”。</li>
+    <li>两者都 <code>MULTI</code>，<code>DECR stock</code> 进入各自的队列，此时还没执行。</li>
+    <li>客户端 1 先 <code>EXEC</code>：stock 自 WATCH 以来没变过 → 执行成功，stock = 0。</li>
+    <li>客户端 2 <code>EXEC</code>：发现 stock 在 WATCH 之后被改过 → 返回 nil，队列里的命令全部不执行。</li>
+    <li>客户端 2 重试：重新 WATCH 读到 0，判定已抢完。Redis 8.4 起单 key 场景还可以直接用 <code>SET key new IFEQ old</code> 做比较并设置（CAS）。</li>
+  </ol></div>
+  <div class="ctrl"><button data-act="prev" type="button">上一步</button><button data-act="next" class="pri" type="button">下一步</button><button data-act="play" type="button">自动播放</button><button data-act="reset" type="button">重置</button><span class="dots"></span><span class="count"></span></div>
+</div>
+<h3>悲观锁 vs 乐观锁</h3>
+<div class="tbl"><table>
+<tr><th>维度</th><th>悲观锁</th><th>乐观锁</th></tr>
+<tr><td>思想</td><td>认为冲突大概率发生，先加锁再操作</td><td>认为冲突小概率发生，提交时校验</td></tr>
+<tr><td>加锁时机</td><td>操作前加锁（阻塞）</td><td>不加锁（非阻塞）</td></tr>
+<tr><td>适用场景</td><td>写多、强一致（秒杀扣减）</td><td>读多写少的读-改-写（点赞、计数）</td></tr>
+<tr><td>Redis 实现</td><td>SET NX EX / Redisson 排他锁</td><td>WATCH + MULTI/EXEC；8.4+ SET IFEQ</td></tr>
+<tr><td>数据库实现</td><td><code>SELECT … FOR UPDATE</code></td><td>version 字段：<code>update … set version=version+1 where version=?</code>，影响行数 0 即冲突重试</td></tr>
+<tr><td>优缺点</td><td>安全但性能低，可能死锁</td><td>性能好，冲突多时重试多</td></tr>
+</table></div>
+<div class="mem"><b class="t">记忆锚点</b><p>悲观锁 = 先锁后干、动辄阻塞（setnx）；乐观锁 = 放手去干、提交把关（WATCH + MULTI）。<br>项目答法：抢券库存强一致、高冲突 → Redisson 排他锁；文章点赞读多写少、冲突低 → WATCH 乐观锁。</p></div>
+<h3>Redis 的线程安全问题</h3>
+<div class="prose"><p><b>服务端</b>：命令由主线程串行执行，单条命令天然原子，不存在线程安全问题（6.0 的多线程只处理网络 IO）。<b>客户端</b>：多个客户端“先 GET 再 SET”这种读-改-写组合不是原子的，会有竞态。解决：尽量用原子命令（INCR、DECR、SETNX、HINCRBY），或用 Lua 脚本把多条命令打包成原子操作。</p></div>
+</section>
+
+<!-- ================= 8 ================= -->
+<section class="ch" id="c8">
+<header><span class="no">08</span><h2>高可用：主从复制、哨兵、分片集群</h2></header>
+<div class="tbl"><table>
+<tr><th>部署模式</th><th>架构</th><th>优点</th><th>缺点</th><th>适用</th></tr>
+<tr><td>单机</td><td>单实例</td><td>简单</td><td>单点故障、容量受限</td><td>开发测试</td></tr>
+<tr><td>主从</td><td>一主多从，读写分离</td><td>读扩展、数据冗余</td><td>主节点故障需人工切换</td><td>读多写少</td></tr>
+<tr><td>哨兵</td><td>主从 + 哨兵监控</td><td>自动故障转移</td><td>写能力受限于单主，可能脑裂</td><td>中小规模生产</td></tr>
+<tr><td>Cluster</td><td>多主多从，数据分片</td><td>水平扩展、高可用</td><td>架构复杂，多 key 操作受限</td><td>海量数据、高并发写</td></tr>
+</table></div>
+
+<h3>主从复制：全量同步与增量同步</h3>
+<div class="prose"><p>单节点并发能力有上限，主从集群实现读写分离：主写从读。同步靠两个标识：</p>
+<ul><li><b>Replication Id（replid）</b>：数据集标记，id 一致说明是同一数据集。每个 master 有唯一 replid，slave 会继承 master 的 replid。</li>
+<li><b>offset</b>：偏移量，随写入 repl_backlog 的数据增多而增大。slave 的 offset 小于 master 的，说明落后了。</li></ul></div>
+<p class="guide">左边竖线代表 master（主节点），右边代表 slave（从节点），胶囊是两者之间传递的消息。记住两个“身份证”：<b>replid</b> 是数据集编号，相同说明从节点“认识”这个主节点；<b>offset</b> 是已经同步到第几条。底部左边是主节点的复制缓冲区，右边是从节点本地数据的状态。</p>
+<div class="lab" data-stepper>
+  <div class="lab-head"><b>主从同步全过程</b><span>前 6 步是全量同步，后 2 步是增量同步</span></div>
+  <div class="stage-wrap"><svg class="stage" viewBox="0 0 640 330" role="img" aria-label="主从全量与增量同步演示">
+    <rect class="box" x="40" y="20" width="200" height="48" rx="8" style="stroke:var(--l-red)"/><text x="140" y="49" text-anchor="middle" class="tb">master</text>
+    <g data-cls="5:ok|6:warn|7:ok"><rect class="box" x="400" y="20" width="200" height="48" rx="8"/><text x="500" y="49" text-anchor="middle" class="tb">slave</text></g>
+    <line class="lane" x1="140" y1="100" x2="140" y2="256"/><line class="lane" x1="500" y1="100" x2="500" y2="256"/>
+    <text x="140" y="88" text-anchor="middle" class="tm">replid=8f3a offset=1000</text>
+    <text x="500" y="88" text-anchor="middle" class="tm" data-txt="0:replid=?  offset=-1|2:replid=8f3a offset=1000|5:replid=8f3a offset=1003|6:replid=8f3a offset=1003|7:replid=8f3a offset=1010">replid=?  offset=-1</text>
+    <g data-only="3"><rect x="70" y="150" width="140" height="30" rx="6" fill="#4A3A12"/><text x="140" y="170" text-anchor="middle" class="tm">BGSAVE 生成 RDB</text></g>
+    <rect class="box" x="40" y="264" width="200" height="54" rx="8"/><text x="140" y="284" text-anchor="middle" class="ts">repl_backlog（环形缓冲区）</text>
+    <rect x="56" y="296" width="168" height="10" rx="5" fill="#4A5870"/><rect class="bar" x="56" y="296" width="168" height="10" rx="5" fill="var(--l-amber)" data-tf="0:sx0.1|3:sx0.35|6:sx0.75"/>
+    <rect class="box" x="400" y="264" width="200" height="54" rx="8"/><text x="500" y="296" text-anchor="middle" data-txt="0:本地：旧数据|4:清空 → 加载 RDB|5:与 master 一致 ✓|6:重启后落后 7 条|7:已补齐 ✓">本地：旧数据</text>
+    <g class="pk" data-only="1" data-tf="0:400,124|1:262,124"><rect x="-56" y="-12" width="112" height="24" rx="12"/><text text-anchor="middle" y="4">PSYNC ? -1</text></g>
+    <g class="pk a" data-only="2" data-tf="0:262,124|2:378,124"><rect x="-80" y="-12" width="160" height="24" rx="12"/><text text-anchor="middle" y="4">FULLRESYNC 8f3a 1000</text></g>
+    <g class="pk v" data-only="4" data-tf="0:240,190|4:390,190"><rect x="-44" y="-12" width="88" height="24" rx="12"/><text text-anchor="middle" y="4">RDB 文件</text></g>
+    <g class="pk t" data-only="5" data-tf="0:250,226|5:380,226"><rect x="-64" y="-12" width="128" height="24" rx="12"/><text text-anchor="middle" y="4">backlog 中的命令</text></g>
+    <g class="pk" data-only="6" data-tf="0:400,124|6:262,124"><rect x="-70" y="-12" width="140" height="24" rx="12"/><text text-anchor="middle" y="4">PSYNC 8f3a 1003</text></g>
+    <g class="pk t" data-only="7" data-tf="0:250,190|7:380,190"><rect x="-80" y="-12" width="160" height="24" rx="12"/><text text-anchor="middle" y="4">CONTINUE + 1004~1010</text></g>
+  </svg></div>
+  <div class="narr"><div class="narr-h"><span>旁白</span><b class="narr-no"></b></div><ol class="cap">
+    <li>slave 执行 <code>replicaof &lt;masterip&gt; &lt;port&gt;</code>，与 master 建立连接。</li>
+    <li>slave 请求同步，带上自己的 replid 和 offset（第一次是 <code>PSYNC ? -1</code>）。</li>
+    <li>master 判断 replid 不一致 → 是第一次同步，回复 FULLRESYNC，把自己的 replid 和 offset 发给 slave 保存。</li>
+    <li>master 执行 bgsave 生成 RDB；生成期间收到的写命令记录到 repl_backlog。</li>
+    <li>master 发送 RDB，slave 清空本地数据，加载 RDB。</li>
+    <li>master 把 backlog 中 RDB 生成期间的命令发给 slave 执行，全量同步完成。之后 master 持续把写命令传播给 slave。</li>
+    <li>slave 重启或断线重连：PSYNC 带上已有的 replid 和 offset=1003。</li>
+    <li>replid 一致 → 不是第一次，回复 CONTINUE，从 backlog 中取 offset 之后的命令补发：增量同步。若断开太久，offset 对应的数据已被环形缓冲区覆盖，只能退回全量同步。</li>
+  </ol></div>
+  <div class="ctrl"><button data-act="prev" type="button">上一步</button><button data-act="next" class="pri" type="button">下一步</button><button data-act="play" type="button">自动播放</button><button data-act="reset" type="button">重置</button><span class="dots"></span><span class="count"></span></div>
+</div>
+<div class="note"><b class="t">软考答题要点</b><p>主从复制实现读写分离（主写从读）与数据冗余，但主节点存在单点故障风险，需要人工介入或配合哨兵自动故障转移。优化：适当调大 repl-backlog-size 减少全量同步；无磁盘复制 repl-diskless-sync；控制单节点内存，减少 RDB 体积。</p></div>
+
+<h3>哨兵（Sentinel）</h3>
+<div class="prose"><ul>
+<li><b>监控</b>：每秒向每个实例发 PING，检查是否按预期工作。</li>
+<li><b>自动故障恢复</b>：master 故障时把一个 slave 提升为 master；故障实例恢复后以新 master 为主。</li>
+<li><b>通知 / 配置中心</b>：充当客户端的服务发现来源，故障转移后把新地址推送给客户端。</li>
+</ul>
+<p><b>主观下线</b>：某个哨兵发现实例在规定时间内未响应。<b>客观下线</b>：超过 quorum 个哨兵都认为它主观下线，quorum 最好超过哨兵数量的一半。</p></div>
+<p class="guide">顶部 S1~S3 是三个哨兵，即专门盯着 Redis 的监控进程；中间是 master，底部是两个 slave（R1、R2），左边是业务客户端。蓝线是客户端读写方向，虚线是数据复制方向，紫色粗框是被选出来干活的领头哨兵，灰掉的表示宕机。</p>
+<div class="lab" data-stepper>
+  <div class="lab-head"><b>哨兵故障转移</b><span>3 个哨兵，quorum = 2</span></div>
+  <div class="stage-wrap"><svg class="stage" viewBox="0 0 640 330" role="img" aria-label="哨兵故障转移演示">
+    <line class="ln flow" x1="140" y1="62" x2="300" y2="150" data-only="0"/><line class="ln flow" x1="320" y1="62" x2="320" y2="150" data-only="0"/><line class="ln flow" x1="500" y1="62" x2="340" y2="150" data-only="0"/>
+    <line class="ln" x1="110" y1="174" x2="255" y2="174" style="stroke:var(--l-blue)" data-e="5"/>
+    <path class="ln" d="M60 196 C 40 328, 380 332, 440 308" style="stroke:var(--l-blue)" data-s="6"/>
+    <line class="ln flow" x1="290" y1="196" x2="180" y2="256" data-e="5"/><line class="ln flow" x1="350" y1="196" x2="460" y2="256" data-e="5"/>
+    <line class="ln flow" x1="420" y1="282" x2="220" y2="282" data-s="6" style="stroke:var(--l-teal)"/>
+    <path class="ln flow" d="M470 256 C 460 220, 400 200, 385 186" data-s="7" style="stroke:var(--l-teal)"/>
+    <g data-cls="2:warn|5:"><rect class="box" x="85" y="20" width="110" height="42" rx="8"/><text x="140" y="38" text-anchor="middle" class="tb">S1</text><text x="140" y="55" text-anchor="middle" class="ts" data-txt="0:监控中|2:主观下线 SDOWN|3:客观下线 ODOWN|5:投票给 S2">监控中</text></g>
+    <g data-cls="3:warn|4:lead|7:"><rect class="box" x="265" y="20" width="110" height="42" rx="8"/><text x="320" y="38" text-anchor="middle" class="tb">S2</text><text x="320" y="55" text-anchor="middle" class="ts" data-txt="0:监控中|3:SDOWN，达到 2 票|4:当选领头哨兵|7:监控中">监控中</text></g>
+    <g><rect class="box" x="445" y="20" width="110" height="42" rx="8"/><text x="500" y="38" text-anchor="middle" class="tb">S3</text><text x="500" y="55" text-anchor="middle" class="ts" data-txt="0:监控中|4:投票给 S2|7:监控中">监控中</text></g>
+    <rect class="box" x="10" y="150" width="100" height="46" rx="8"/><text x="60" y="171" text-anchor="middle" class="tb">客户端</text><text x="60" y="188" text-anchor="middle" class="ts" data-txt="0:写 master|6:写 R2">写 master</text>
+    <g data-cls="1:dead|7:"><rect class="box" x="255" y="150" width="130" height="46" rx="8" style="stroke:var(--l-red)"/><text x="320" y="178" text-anchor="middle" class="tb" data-txt="0:master|1:master ✗ 宕机|7:R2 的 slave">master</text></g>
+    <rect class="box" x="80" y="256" width="140" height="52" rx="8"/><text x="150" y="278" text-anchor="middle" class="tb">R1 slave</text><text x="150" y="297" text-anchor="middle" class="ts">offset 980 · prio 100</text>
+    <g data-cls="5:warn|6:ok"><rect class="box" x="420" y="256" width="140" height="52" rx="8"/><text x="490" y="278" text-anchor="middle" class="tb" data-txt="0:R2 slave|6:R2 新 master">R2 slave</text><text x="490" y="297" text-anchor="middle" class="ts">offset 1000 · prio 100</text></g>
+    <g class="pk a" data-only="6" data-tf="0:320,96|6:120,110"><rect x="-56" y="-12" width="112" height="24" rx="12"/><text text-anchor="middle" y="4">新 master：R2</text></g>
+  </svg></div>
+  <div class="narr"><div class="narr-h"><span>旁白</span><b class="narr-no"></b></div><ol class="cap">
+    <li>正常运行：哨兵每秒 PING 所有实例；客户端写 master，两个 slave 复制数据。</li>
+    <li>master 宕机（进程崩溃或网络故障）。</li>
+    <li>S1 在 down-after-milliseconds 内没收到回复 → 判定 master <b>主观下线</b>。</li>
+    <li>S2 也确认，同意票达到 quorum = 2 → master <b>客观下线</b>，开始故障转移。</li>
+    <li>哨兵之间选举领头哨兵（类 Raft，得票过半），由 S2 负责执行转移。</li>
+    <li>选新主：先排除与 master 断开太久的 slave → 比较 slave-priority，越小越优先 → 相同则比较 offset，越大（数据越新）越优先 → 最后比较 runid，越小越优先。R2 的 offset 更大，胜出。</li>
+    <li>对 R2 执行 <code>replicaof no one</code> 升为 master，让 R1 改为复制 R2，并通知客户端新地址。</li>
+    <li>旧 master 恢复后，被哨兵改为 R2 的 slave。</li>
+  </ol></div>
+  <div class="ctrl"><button data-act="prev" type="button">上一步</button><button data-act="next" class="pri" type="button">下一步</button><button data-act="play" type="button">自动播放</button><button data-act="reset" type="button">重置</button><span class="dots"></span><span class="count"></span></div>
+</div>
+
+<h4>哨兵模式下的脑裂</h4>
+<p class="guide">红色虚线是网络断开的位置，<b>左右两边互相看不到对方</b>。左边是客户端和原来的 master，右边是哨兵和从节点。想象成：公司总部失联了，分公司另选了一个新老板，但老客户还在找旧老板下单。</p>
+<div class="lab" data-stepper>
+  <div class="lab-head"><b>脑裂：两个 master 同时接受写入</b><span>网络分区造成</span></div>
+  <div class="stage-wrap"><svg class="stage" viewBox="0 0 640 260" role="img" aria-label="脑裂演示">
+    <line x1="350" y1="10" x2="350" y2="250" stroke="var(--l-red)" stroke-width="3" stroke-dasharray="8 6" data-e="2"/>
+    <text x="350" y="252" text-anchor="middle" class="ts" data-e="2">网络分区</text>
+    <rect class="box" x="20" y="110" width="110" height="50" rx="8"/><text x="75" y="140" text-anchor="middle" class="tb">客户端</text>
+    <line class="ln flow" x1="130" y1="135" x2="180" y2="135" style="stroke:var(--l-blue)" data-e="3"/>
+    <g data-cls="2:warn|3:hot"><rect class="box" x="180" y="106" width="140" height="58" rx="8" style="stroke:var(--l-red)"/><text x="250" y="130" text-anchor="middle" class="tb" data-txt="0:旧 master|3:降为 slave">旧 master</text><text x="250" y="150" text-anchor="middle" class="ts" data-txt="0:仍在接受写入|2:新写入 x、y、z|3:清空，x、y、z 丢失|4:无合格从节点，拒绝写">仍在接受写入</text></g>
+    <rect class="box" x="420" y="20" width="180" height="44" rx="8"/><text x="510" y="47" text-anchor="middle">Sentinel × 3</text>
+    <g data-cls="1:ok"><rect class="box" x="430" y="150" width="160" height="58" rx="8"/><text x="510" y="176" text-anchor="middle" class="tb" data-txt="0:slave|1:新 master">slave</text><text x="510" y="196" text-anchor="middle" class="ts" data-txt="0:与旧主失联|1:被哨兵提升">与旧主失联</text></g>
+    <path class="ln flow" d="M430 180 C 380 190, 360 170, 320 150" data-s="3" style="stroke:var(--l-teal)"/>
+    <g class="pk a" data-only="2" data-tf="0:60,90|2:200,90"><rect x="-50" y="-12" width="100" height="24" rx="12"/><text text-anchor="middle" y="4">SET x/y/z</text></g>
+    <g class="pk r" data-only="4" data-tf="0:240,90|4:110,90"><rect x="-56" y="-12" width="112" height="24" rx="12"/><text text-anchor="middle" y="4">写入被拒绝</text></g>
+    <g data-only="4"><rect x="20" y="196" width="300" height="50" rx="6" fill="#163E37"/><text x="34" y="216" class="tm">min-replicas-to-write 1</text><text x="34" y="236" class="tm">min-replicas-max-lag 5</text></g>
+  </svg></div>
+  <div class="narr"><div class="narr-h"><span>旁白</span><b class="narr-no"></b></div><ol class="cap">
+    <li>网络分区：旧 master 与哨兵、从节点断开，但客户端还能连上旧 master。</li>
+    <li>哨兵判定 master 客观下线，把 slave 提升为新 master —— 同时出现两个 master，像大脑分裂了。</li>
+    <li>客户端继续往旧 master 写入 x、y、z，这些数据只存在于旧主，新主同步不到。</li>
+    <li>网络恢复：哨兵把旧 master 降为 slave，它清空数据并从新 master 全量同步 —— 分区期间写入的数据全部丢失。</li>
+    <li>对策：设置“至少有 1 个从节点、复制延迟不超过 5 秒”才允许写入。旧主分区后找不到合格从节点，就拒绝写请求，把丢失控制在几秒内。</li>
+  </ol></div>
+  <div class="ctrl"><button data-act="prev" type="button">上一步</button><button data-act="next" class="pri" type="button">下一步</button><button data-act="play" type="button">自动播放</button><button data-act="reset" type="button">重置</button><span class="dots"></span><span class="count"></span></div>
+</div>
+<div class="note"><b class="t">面试：你们用单点还是集群？</b><p>主从（1 主 1 从）+ 哨兵即可。单节点内存一般不超过 10G，不够时给不同服务分配独立的主从。能不用分片集群就不用：维护复杂，节点间心跳与数据通信耗带宽，且跨槽的 Lua、事务、多 key 命令受限。</p></div>
+
+<h3>分片集群（Redis Cluster）</h3>
+<div class="prose"><p>主从和哨兵解决了高可用和高并发读，但解决不了<b>海量数据存储</b>和<b>高并发写</b>。分片集群的特征：</p>
+<ul>
+<li>多个 master，每个保存不同数据；每个 master 可以有多个 slave。</li>
+<li>master 之间通过 PING（Gossip 协议）检测彼此健康，故障时 slave 自动晋升，不需要哨兵。</li>
+<li>客户端访问任意节点，最终都会被转发到正确节点（MOVED / ASK 重定向，智能客户端会缓存槽位表）。</li>
+<li>16384 个哈希槽：<code>CRC16(key) % 16384</code> 决定槽位，每个 master 负责一段。如果 key 含 <code>{}</code>，只用大括号里的部分计算（Hash Tag），可让相关 key 落在同一槽。</li>
+</ul></div>
+<div class="lab">
+  <div class="lab-head"><b>哈希槽计算器（真实 CRC16 算法）</b><span>3 个 master 平分 16384 个槽</span></div>
+  <div class="ctrl" style="margin:0">
+    <input type="text" id="slotIn" value="user:1001" aria-label="输入 key" style="flex:1;min-width:160px">
+    <button class="btn" data-k="name" type="button">name</button>
+    <button class="btn" data-k="{user:1001}.name" type="button">{user:1001}.name</button>
+    <button class="btn" data-k="{user:1001}.age" type="button">{user:1001}.age</button>
+  </div>
+  <div class="slotbar" id="slotBar"><div style="flex:5461;background:var(--l-red)">master A · 0–5460</div><div style="flex:5461;background:var(--l-blue)">master B · 5461–10922</div><div style="flex:5462;background:var(--l-teal)">master C · 10923–16383</div><span class="mk" id="slotMk"></span></div>
+  <p class="out" id="slotOut"></p>
+</div>
+<div class="prose">
+<p><b>为什么是 16384 个槽？</b>节点间心跳要携带自己负责的槽位图，16384 位 = 2KB，在带宽与粒度之间取得平衡；官方建议集群不超过约 1000 个 master。</p>
+<p><b>限制</b>：多 key 命令（MGET、事务、Lua）要求所有 key 在同一槽，用 Hash Tag 解决；只能用 0 号库。Redis 8.4 新增<b>原子槽迁移</b>（<code>CLUSTER MIGRATION</code>）：先把整个槽的数据和增量复制到目标节点，再一次性切换归属，迁移中客户端不再频繁遇到重定向。</p>
+</div>
+
+<h3>一致性哈希（对比哈希槽）</h3>
+<p class="prose">普通取模 <code>hash(key) % N</code> 在节点数变化时几乎所有 key 都要搬家。一致性哈希把节点和数据都映射到一个环上，数据<b>顺时针找最近的节点</b>，增删节点只影响相邻一段。节点少时容易数据倾斜，用<b>虚拟节点</b>打散。</p>
+<div class="lab">
+  <div class="lab-head"><b>一致性哈希环</b><span>点“添加节点 D”，被迁移的 key 会加上白圈</span></div>
+  <div class="ctrl" style="margin:0"><button class="btn pri" id="chAdd" type="button">添加节点 D</button><button class="btn" id="chVir" type="button">开启虚拟节点（每节点 4 个）</button></div>
+  <div class="stage-wrap"><svg class="stage" id="chRing" viewBox="0 0 640 320" style="margin-top:10px" role="img" aria-label="一致性哈希环"></svg></div>
+  <p class="out" id="chOut"></p>
+</div>
+<div class="tbl"><table>
+<tr><th>维度</th><th>哈希槽（Redis Cluster）</th><th>一致性哈希</th></tr>
+<tr><td>寻址</td><td>CRC16(key) % 16384 → 槽 → 节点</td><td>哈希环上顺时针找节点</td></tr>
+<tr><td>节点变化</td><td>按槽重新分配，可精确控制迁移哪些槽</td><td>只迁移相邻一段数据</td></tr>
+<tr><td>均衡</td><td>槽可手动均分</td><td>需要虚拟节点辅助</td></tr>
+<tr><td>代表</td><td>Redis Cluster</td><td>Memcached 客户端分片、Codis 之前的方案、多数分布式缓存</td></tr>
+</table></div>
+</section>
+
+<!-- ================= 9 ================= -->
+<section class="ch" id="c9">
+<header><span class="no">09</span><h2>线程模型与 IO 多路复用</h2></header>
+<h3>Redis 单线程为什么还这么快</h3>
+<div class="prose"><ol>
+<li>完全基于内存，C 语言编写，数据结构经过精心优化。</li>
+<li>命令执行单线程，避免上下文切换和锁竞争，也没有线程安全问题。瓶颈在内存和网络，而不是 CPU。</li>
+<li>使用 IO 多路复用（Linux 下是 epoll），一个线程就能处理成千上万个连接。</li>
+</ol>
+<p>bgsave、bgrewriteaof、UNLINK 等耗时操作在后台子进程 / 线程执行，不阻塞主线程。</p></div>
+<h3>用户空间、内核空间与三种 IO 模型</h3>
+<div class="prose">
+<p>Linux 进程内存分为<b>用户空间</b>（Ring3，只能执行受限命令，访问资源要通过内核接口）和<b>内核空间</b>（Ring0，可调用一切系统资源）。读数据分两步：① 等待数据到达内核缓冲区；② 从内核缓冲区拷贝到用户缓冲区。</p>
+</div>
+<div class="tbl"><table>
+<tr><th>模型</th><th>阶段一：等数据</th><th>阶段二：拷贝</th><th>问题</th></tr>
+<tr><td>阻塞 IO</td><td>阻塞</td><td>阻塞</td><td>一个线程只能守一个连接</td></tr>
+<tr><td>非阻塞 IO</td><td>立即返回 EWOULDBLOCK，循环重试</td><td>阻塞</td><td>忙等，CPU 空转</td></tr>
+<tr><td>IO 多路复用</td><td>一个线程同时监听多个 Socket，就绪才通知</td><td>阻塞</td><td>—，充分利用 CPU</td></tr>
+</table></div>
+<div class="prose"><p>多路复用的三种实现：<b>select / poll</b> 只告诉你“有 Socket 就绪了”，不说是哪个，用户进程要遍历全部 Socket 逐个确认（select 还有 1024 个 fd 上限）；<b>epoll</b> 在通知的同时把已就绪的 Socket 放进就绪列表，直接处理即可，不用遍历。</p></div>
+<div class="lab">
+  <div class="lab-head"><b>select 遍历 vs epoll 就绪列表</b><span>黄色 = 数据到达的 Socket，蓝框 = 线程正在检查</span></div>
+  <p class="guide" style="margin:0 0 12px;color:var(--ink)">8 个格子是 8 个客户端连接（fd 是连接编号），只有一个线程负责处理它们。格子变黄 = 这个客户端发来了数据；蓝框 = 线程此刻正在看哪个连接。对比两种模式下“检查次数”和“处理请求数”的比例。</p><div class="ctrl" style="margin:0"><div class="seg" id="ioMode"><button class="on" data-m="select" type="button">select / poll</button><button data-m="epoll" type="button">epoll</button></div><div class="seg" id="ioSpeed"><button class="on" data-iv="0.9" type="button">慢速</button><button data-iv="0.35" type="button">正常</button></div><button class="btn" id="ioPause" type="button">暂停</button></div>
+  <div class="socks" id="socks"></div>
+  <div class="rq" id="rq"><label>就绪列表：</label></div>
+  <div class="narr"><div class="narr-h"><span>旁白</span></div><p id="ioNarr">…</p></div>
+  <div class="sim-stats"><div>检查 Socket 次数<b id="ioChk">0</b></div><div>处理请求数<b id="ioDone">0</b></div><div>每个请求平均检查<b id="ioAvg">—</b></div><div>模式<b id="ioM">select</b></div></div>
+</div>
+<h3>Redis 网络模型</h3>
+<div class="prose"><p>Redis 用 IO 多路复用 + 事件处理器应对大量 Socket 请求，并把 select、epoll、kqueue 等封装成统一的事件库（ae）：</p>
+<ul>
+<li><b>连接应答处理器</b>：接受新连接。</li>
+<li><b>命令请求处理器</b>：读取并解析命令。6.0 起可用多线程读取、解析请求。</li>
+<li><b>命令回复处理器</b>：写回结果。6.0 起可用多线程写回。</li>
+</ul>
+<p><b>命令执行始终是主线程单线程</b>。6.0 的 IO 线程默认关闭（<code>io-threads</code>）；Redis 8.0 重写了 IO 线程实现，8.4 又把 IO 线程扩展到查询引擎（FT.*），吞吐显著提升。</p></div>
+</section>
+<!-- ================= 10 ================= -->
+<section class="ch" id="c10">
+<header><span class="no">10</span><h2>Redis 做消息队列</h2></header>
+<p class="prose">Redis 有四种方式实现消息传递，可靠性依次增强。选哪个，取决于“消息丢了能不能接受”。</p>
+<div class="tbl"><table>
+<tr><th>方式</th><th>核心命令</th><th>持久化</th><th>ACK / 重试</th><th>多消费者</th><th>适用</th></tr>
+<tr><td>List</td><td>LPUSH + BRPOP；可靠版 BLMOVE 到“处理中”列表</td><td>随 RDB/AOF</td><td>无原生 ACK</td><td>竞争消费，一条只给一人</td><td>简单异步任务</td></tr>
+<tr><td>Pub/Sub</td><td>PUBLISH / SUBSCRIBE / PSUBSCRIBE；7.0 起 SPUBLISH 分片</td><td>不存储，发完即丢</td><td>无</td><td>广播，所有订阅者都收到</td><td>实时通知、配置刷新、聊天室</td></tr>
+<tr><td>ZSet 延时队列</td><td>ZADD score=执行时间戳；ZRANGEBYSCORE 取到期的，Lua 中 ZREM 抢占</td><td>随 RDB/AOF</td><td>需自行实现</td><td>竞争</td><td>订单超时取消、延迟重试</td></tr>
+<tr><td>Stream（5.0+）</td><td>XADD、XREADGROUP、XACK、XPENDING、XAUTOCLAIM</td><td>持久化消息日志</td><td>有 ACK + PEL</td><td>消费组：组内竞争，组间广播</td><td>轻量可靠消息队列</td></tr>
+</table></div>
+<p class="guide">顶部一排是 Stream 中的消息（编号 1-0、2-0、3-0）。中间左边是消费组的进度，右边的 PEL 是“<b>已经发出去、但消费者还没回复处理完</b>”的消息清单。底部是两个消费者。消息框的颜色表示它分给了谁，变绿表示已确认处理完毕。</p>
+<div class="lab" data-stepper>
+  <div class="lab-head"><b>Stream 消费组：消息如何做到不丢</b><span>蓝框 = 投给 c1，紫框 = 投给 c2，绿色 = 已确认</span></div>
+  <div class="stage-wrap"><svg class="stage" viewBox="0 0 640 310" role="img" aria-label="Stream 消费组演示">
+    <text x="20" y="66" class="ts">Stream: orders</text>
+    <g data-cls="2:c1|4:ok"><rect class="box" x="120" y="40" width="90" height="40" rx="6"/><text x="165" y="65" text-anchor="middle" class="tm">1-0</text></g>
+    <g data-cls="2:c1|4:ok"><rect class="box" x="220" y="40" width="90" height="40" rx="6"/><text x="265" y="65" text-anchor="middle" class="tm">2-0</text></g>
+    <g data-cls="2:c2|6:c1|7:ok"><rect class="box" x="320" y="40" width="90" height="40" rx="6"/><text x="365" y="65" text-anchor="middle" class="tm">3-0</text></g>
+    <rect class="box" x="450" y="36" width="170" height="48" rx="8"/><text x="535" y="65" text-anchor="middle">生产者 XADD</text>
+    <g data-s="1"><rect class="box" x="30" y="118" width="210" height="60" rx="8" style="stroke:var(--l-amber)"/><text x="135" y="140" text-anchor="middle" class="tb">消费组 g1</text><text x="135" y="162" text-anchor="middle" class="tm" data-txt="0:last_delivered = 0|2:last_delivered = 3-0">last_delivered = 0</text></g>
+    <g data-s="3"><rect class="box" x="262" y="118" width="358" height="60" rx="8"/><text x="441" y="140" text-anchor="middle" class="ts">PEL 已投递未确认</text><text x="441" y="162" text-anchor="middle" class="tm" data-txt="0:1-0→c1  2-0→c1  3-0→c2|4:3-0→c2|5:3-0→c2（c2 已宕机）|6:3-0→c1|7:（空）">1-0→c1  2-0→c1  3-0→c2</text></g>
+    <g data-s="1" data-cls="2:c1"><rect class="box" x="70" y="232" width="200" height="56" rx="8"/><text x="170" y="256" text-anchor="middle" class="tb">消费者 c1</text><text x="170" y="276" text-anchor="middle" class="ts" data-txt="0:等待|2:处理 1-0、2-0|4:空闲|6:接手 3-0|7:全部完成 ✓">等待</text></g>
+    <g data-s="1" data-cls="2:c2|5:dead"><rect class="box" x="370" y="232" width="200" height="56" rx="8"/><text x="470" y="256" text-anchor="middle" class="tb">消费者 c2</text><text x="470" y="276" text-anchor="middle" class="ts" data-txt="0:等待|2:处理 3-0|5:宕机 ✗">等待</text></g>
+    <g class="pk" data-only="0" data-tf="0:450,100|1:450,100"><rect x="-58" y="-12" width="116" height="24" rx="12"/><text text-anchor="middle" y="4">XADD orders *</text></g>
+    <g class="pk" data-only="2" data-tf="0:190,96|2:170,206"><rect x="-40" y="-12" width="80" height="24" rx="12"/><text text-anchor="middle" y="4">1-0 2-0</text></g>
+    <g class="pk v" data-only="2" data-tf="0:365,96|2:470,206"><rect x="-26" y="-12" width="52" height="24" rx="12"/><text text-anchor="middle" y="4">3-0</text></g>
+    <g class="pk t" data-only="4" data-tf="0:170,214|4:330,200"><rect x="-56" y="-12" width="112" height="24" rx="12"/><text text-anchor="middle" y="4">XACK 1-0 2-0</text></g>
+    <g class="pk a" data-only="6" data-tf="0:440,196|6:230,214"><rect x="-58" y="-12" width="116" height="24" rx="12"/><text text-anchor="middle" y="4">XAUTOCLAIM 3-0</text></g>
+    <g class="pk t" data-only="7" data-tf="0:170,214|7:330,200"><rect x="-44" y="-12" width="88" height="24" rx="12"/><text text-anchor="middle" y="4">XACK 3-0</text></g>
+  </svg></div>
+  <div class="narr"><div class="narr-h"><span>旁白</span><b class="narr-no"></b></div><ol class="cap">
+    <li>生产者 <code>XADD orders * item 1</code> 追加 3 条消息，ID 为“毫秒时间戳-序号”。消息持久保存在 Stream 中，可以反复读、按 ID 回溯。</li>
+    <li><code>XGROUP CREATE orders g1 0</code> 创建消费组，组里记录 last_delivered_id：已经投递到哪条。</li>
+    <li>c1、c2 执行 <code>XREADGROUP GROUP g1 c1 COUNT 2 STREAMS orders &gt;</code> 读新消息：同组内一条消息只投给一个消费者（负载均衡），不同的组则各自完整消费一遍（广播）。</li>
+    <li>投递了但还没确认的消息，记录在 PEL（Pending Entries List）中。</li>
+    <li>c1 处理完执行 <code>XACK</code>，1-0、2-0 从 PEL 移除。</li>
+    <li>c2 处理 3-0 时宕机：3-0 一直留在 PEL，不会丢失。</li>
+    <li>其他消费者用 <code>XAUTOCLAIM</code>（或 XPENDING + XCLAIM）认领空闲超时的 3-0。Redis 8.4 起 XREADGROUP 的 CLAIM 选项能一次读到新消息和超时待处理消息；8.8 新增 XNACK 让消费者主动退回消息。</li>
+    <li>c1 处理后 XACK，所有消息确认完毕：这就是“至少一次”投递。消费端要做幂等。</li>
+  </ol></div>
+  <div class="ctrl"><button data-act="prev" type="button">上一步</button><button data-act="next" class="pri" type="button">下一步</button><button data-act="play" type="button">自动播放</button><button data-act="reset" type="button">重置</button><span class="dots"></span><span class="count"></span></div>
+</div>
+<pre><span class="c"># 生产：MAXLEN ~ 限制长度，防止无限增长</span>
+XADD orders MAXLEN ~ 100000 * orderId 1001 amount 99
+<span class="c"># 消费：阻塞 5 秒等待新消息</span>
+XREADGROUP GROUP g1 c1 COUNT 10 BLOCK 5000 STREAMS orders &gt;
+XACK orders g1 1700000000000-0
+<span class="c"># 查看/认领超时消息</span>
+XPENDING orders g1 - + 10
+XAUTOCLAIM orders g1 c1 60000 0-0 COUNT 10
+<span class="c"># 8.2+：删除时同时处理消费组引用 / 确认并删除</span>
+XACKDEL orders g1 IDS 1 1700000000000-0
+<span class="c"># 8.6+：XADD 幂等（IDMP / IDMPAUTO），生产端重试不产生重复消息</span></pre>
+<h3>Redis 队列 vs 专业 MQ</h3>
+<div class="tbl"><table>
+<tr><th>维度</th><th>Redis（List / Stream）</th><th>Kafka / RabbitMQ / RocketMQ</th></tr>
+<tr><td>定位</td><td>轻量队列，顺手就有</td><td>专业消息中间件</td></tr>
+<tr><td>可靠性</td><td>一般：依赖持久化配置，主从异步复制可能丢消息</td><td>高：多副本、刷盘策略、事务消息</td></tr>
+<tr><td>吞吐 / 堆积</td><td>中，受内存限制，不适合大量堆积</td><td>极高，磁盘存储可海量堆积</td></tr>
+<tr><td>延迟</td><td>极低</td><td>低</td></tr>
+<tr><td>适用</td><td>简单异步、即时榜单、小规模可靠队列</td><td>削峰解耦、可回溯、复杂路由、海量吞吐</td></tr>
+</table></div>
+<div class="note"><b class="t">选型一句话</b><p>轻业务用 Redis；需要可靠投递、长时间堆积、海量吞吐的重业务用 Kafka / RabbitMQ。</p></div>
+</section>
+
+<!-- ================= 11 ================= -->
+<section class="ch" id="c11">
+<header><span class="no">11</span><h2>限流、热点与大 Key、多级缓存、性能排查</h2></header>
+<h3>四种限流算法</h3>
+<div class="tbl"><table>
+<tr><th>算法</th><th>原理</th><th>特点</th><th>Redis 实现</th></tr>
+<tr><td>固定窗口</td><td>单位时间计数，超限拒绝</td><td>简单，窗口交界处可能瞬间放过 2 倍流量</td><td><code>INCR key</code> + <code>EXPIRE key N</code></td></tr>
+<tr><td>滑动窗口</td><td>统计“最近 N 秒”内的请求</td><td>更平滑</td><td>ZSet 存时间戳：ZREMRANGEBYSCORE 删旧 + ZCARD 计数</td></tr>
+<tr><td>令牌桶</td><td>匀速放令牌，请求拿到令牌才放行</td><td>平滑且允许短时突发</td><td>Lua 脚本按时间差补令牌</td></tr>
+<tr><td>漏桶</td><td>请求进桶，匀速流出，满了丢弃</td><td>严格削峰，输出恒定</td><td>Lua / List</td></tr>
+</table></div>
+<div class="lab">
+  <div class="lab-head"><b>令牌桶</b><span>桶容量 10，按设定速率补充令牌</span></div>
+  <div class="ctrl" style="margin:0">
+    <button class="btn pri" id="tbOne" type="button">发 1 个请求</button><button class="btn" id="tbBurst" type="button">突发 15 个请求</button>
+    <label for="tbRate">补充速率 <b id="tbRateV">2</b> 个/秒</label><input type="range" id="tbRate" min="0" max="8" value="2">
+  </div>
+  <div class="bucket" style="margin-top:12px"><div class="bkt" id="tbBkt" aria-label="令牌桶"></div><div class="reqlog" id="tbLog"></div></div>
+</div>
+<pre><span class="c">-- 固定窗口限流 Lua：KEYS[1]=限流key ARGV[1]=上限 ARGV[2]=窗口秒数</span>
+<span class="k">local</span> c = redis.call(<span class="s">'INCR'</span>, KEYS[1])
+<span class="k">if</span> c == 1 <span class="k">then</span> redis.call(<span class="s">'EXPIRE'</span>, KEYS[1], ARGV[2]) <span class="k">end</span>
+<span class="k">if</span> c &gt; tonumber(ARGV[1]) <span class="k">then return</span> 0 <span class="k">end</span>   <span class="c">-- 拒绝</span>
+<span class="k">return</span> 1</pre>
+<div class="note"><b class="t">秒杀 / 防刷</b><p>网关层 Nginx 限流 + 业务层 Redis 限流双层防护；复杂限流逻辑用 Lua 保证原子性。</p></div>
+
+<h3>热点 Key 与大 Key</h3>
+<div class="cols">
+<div class="cell"><h4>热点 Key</h4><p><b>问题</b>：某个 key（秒杀商品）被超高并发访问，集群中单个节点被打满。</p><p><b>发现</b>：<code>redis-cli --hotkeys</code>（需 LFU 策略）、客户端埋点、Redis 8.6 新增的 HOTKEYS 命令。</p><p><b>处理</b>：本地缓存（Caffeine）承接、key 加后缀拆成多份分散到不同节点、读写分离、热点预热。</p></div>
+<div class="cell"><h4>大 Key（bigkey）</h4><p><b>问题</b>：value 太大（如几 MB 的 String、几十万元素的 Hash），读写和删除阻塞主线程、网络拥塞、集群内存不均、迁移慢。</p><p><b>发现</b>：<code>redis-cli --bigkeys</code> / <code>--memkeys</code>、<code>MEMORY USAGE key</code>、离线分析 RDB。</p><p><b>处理</b>：拆分成多个小 key、压缩序列化、用 UNLINK 异步删除、慎用 HGETALL / SMEMBERS，改用 HSCAN / SSCAN。</p></div>
+</div>
+<h3>多级缓存架构</h3>
+<div class="prose"><p>请求依次经过：</p>
+<ol><li><b>CDN</b>：静态资源。</li><li><b>Nginx</b>：页面级缓存 / OpenResty 本地缓存。</li><li><b>进程内本地缓存</b>（Caffeine / Guava）：单机最快，承接热点。</li><li><b>Redis</b>：分布式共享缓存。</li><li><b>数据库</b>：最终数据源。</li></ol>
+<p>一级失效逐级降级，这正是“缓存雪崩用多级缓存兜底”的架构级落法。多级缓存的难点是各级之间的一致性：本地缓存通常设较短 TTL，或通过 MQ / Redis Pub/Sub 广播失效通知。</p></div>
+
+<h3>Redis 变慢了怎么排查</h3>
+<div class="prose"><p>正常响应应在毫秒级（&lt;10ms）。超过 100ms 甚至秒级，按以下顺序排查：</p>
+<ol>
+<li><b>测基线</b>：<code>redis-cli --intrinsic-latency 60</code> 测服务器本身在无压力时的延迟，判断是不是机器太差。</li>
+<li><b>确认真的是 Redis 慢</b>：<code>PING</code>、<code>INFO stats</code>、<code>--latency</code>，排除网络（跨机房、带宽）和客户端连接数过多。</li>
+<li><b>慢查询</b>：<code>SLOWLOG GET</code> 查复杂度高的命令（KEYS、HGETALL、大范围 ZRANGE、SORT），优化命令、拆分大 key。</li>
+<li><b>集中过期</b>：同一时刻大量 key 过期会让主线程长时间删除 → TTL 加随机数。</li>
+<li><b>大 key</b>：<code>--bigkeys</code> 扫描，避免写入大 key，删除用 UNLINK。</li>
+<li><b>持久化与 fork</b>：<code>INFO</code> 里的 latest_fork_usec；AOF 刷盘与重写竞争磁盘 IO 时，可设 <code>no-appendfsync-on-rewrite yes</code>（重写期间暂停 fsync，有丢数据风险），AOF 放 SSD。</li>
+<li><b>系统层面</b>：CPU 绑核、是否使用了 swap（禁用）、关闭透明大页、磁盘 IO。</li>
+<li>仍不行：升级版本或拆分集群。</li>
+</ol></div>
+
+<h3>秒杀 / 高并发系统串讲（论文素材）</h3>
+<div class="prose"><p>把全部考点串成一条链路：</p>
+<ol>
+<li>用户请求先经 <b>Nginx + Redis 令牌桶限流</b>，挡掉超额流量和刷子。</li>
+<li>活动前<b>预热</b>：热点商品、库存、布隆过滤器提前加载进缓存，热点 key 永不过期，防击穿和穿透。</li>
+<li>扣库存用 <b>Lua 原子扣减或 Redis 分布式锁</b>精准放行，防超卖。</li>
+<li>下单请求进入 <b>MQ 削峰</b>，异步落库。</li>
+<li>数据库变更通过 <b>Canal / MQ 异步同步缓存</b>，保证最终一致。</li>
+<li>底层 Redis 采用<b>哨兵或 Cluster</b> 保证高可用，RDB + AOF 混合持久化，多级缓存兜底雪崩。</li>
+</ol></div>
+</section>
+<!-- ================= 12 ================= -->
+<section class="ch" id="c12">
+<header><span class="no">12</span><h2>Redis 8 新特性与向量检索</h2></header>
+<h3>版本演进</h3>
+<ul class="tl">
+<li><b>2.6 / 2.8</b><span>Lua 脚本；哨兵正式可用；PSYNC 部分重同步</span></li>
+<li><b>3.0（2015）</b><span>Redis Cluster 分片集群</span></li>
+<li><b>4.0（2017）</b><span>混合持久化、LFU 淘汰、模块系统、UNLINK 异步删除</span></li>
+<li><b>5.0（2018）</b><span>Stream 数据类型</span></li>
+<li><b>6.0（2020）</b><span>网络 IO 多线程、ACL 权限、RESP3、客户端缓存</span></li>
+<li><b>7.0（2022）</b><span>Functions、Multi-Part AOF、分片 Pub/Sub、listpack 全面替代 ziplist</span></li>
+<li><b>2024 年</b><span>许可证改为 RSALv2 / SSPLv1，社区分叉出 Linux 基金会的 Valkey；7.4 加入 Hash 字段级过期（HEXPIRE 等）</span></li>
+<li class="new"><b>8.0（2025）</b><span>新增 AGPLv3 开源许可选项；Redis Stack 并入 Redis Open Source：JSON、时序、5 种概率结构、查询引擎、Vector Set（beta）；新 IO 线程实现，30+ 项性能优化；新增 HGETDEL / HGETEX / HSETEX</span></li>
+<li class="new"><b>8.2（2025）</b><span>Stream 新命令 XDELEX / XACKDEL；BITOP 新运算；CLUSTER SLOT-STATS；向量索引 SVS-VAMANA 压缩</span></li>
+<li class="new"><b>8.4（2025）</b><span>FT.HYBRID 全文 + 向量混合检索；SET 的 IFEQ / IFNE / IFDEQ / IFDNE 原子比较设置，DELEX、DIGEST、MSETEX；XREADGROUP CLAIM；原子槽迁移；缓存场景吞吐较 8.2 提升 30%+</span></li>
+<li class="new"><b>8.6（2026）</b><span>XADD 幂等（IDMP / IDMPAUTO）；volatile-lrm / allkeys-lrm 淘汰策略；HOTKEYS 热点检测命令</span></li>
+<li class="new"><b>8.8（2026）</b><span>新数据结构 Array；Stream 新命令 XNACK；ZUNION / ZINTER 新增 COUNT 聚合</span></li>
+</ul>
+<div class="warn"><b class="t">关于版本信息</b><p>以上 8.x 内容整理自 Redis 官方发布说明，部分命令在后续版本可能调整（Vector Set 在 8.0 标为 beta）。考试以教材为准，生产使用前请查阅对应版本的官方文档。</p></div>
+
+<h3>向量检索：Redis 进入 AI 场景</h3>
+<div class="prose">
+<p>大模型把文字、图片等转换成一串数字，叫<b>向量（Embedding）</b>，意思相近的内容向量也相近。“找最相似的 K 个”就是向量检索，常用于语义搜索、RAG 召回、推荐、<b>语义缓存</b>（问法不同但意思相同的问题直接复用 LLM 的回答，省钱又快）。</p>
+<p>Redis 提供两套方案：</p>
+<ul>
+<li><b>Vector Set（8.0 新类型）</b>：像 ZSet 一样简单，元素关联一个向量而不是 score。由 Redis 作者 antirez 设计，基于 HNSW 算法，支持量化（默认 int8，也可 BIN 二值化或不量化）和按属性过滤。</li>
+<li><b>Redis 查询引擎（原 RediSearch）</b>：在 Hash / JSON 上建向量索引，支持 FLAT（精确）/ HNSW / SVS-VAMANA，能与全文、数值、地理条件组合；8.4 的 <code>FT.HYBRID</code> 用 RRF 等方法融合关键词与语义排名。</li>
+</ul>
+</div>
+<div class="lab">
+  <div class="lab-head"><b>向量相似度检索（二维示意）</b><span>点击画布任意位置作为查询向量，或点下方预设词</span></div>
+  <div class="ctrl" style="margin:0">
+    <button class="btn" data-q="小狗" type="button">查“小狗”</button><button class="btn" data-q="高铁" type="button">查“高铁”</button><button class="btn" data-q="樱桃" type="button">查“樱桃”</button><button class="btn" data-q="数据库" type="button">查“数据库”</button>
+    <label for="vk">K = <b id="vkV">3</b></label><input type="range" id="vk" min="1" max="6" value="3">
+  </div>
+  <div class="stage-wrap"><canvas id="vec" class="stage" width="760" height="360" style="margin-top:10px;cursor:crosshair" aria-label="向量空间示意图"></canvas></div>
+  <pre id="vecCmd" style="background:var(--lab2)"></pre>
+  <p class="out">真实 Embedding 有几百到几千维，这里压到二维方便看。距离越近越相似；HNSW 像“多层高速公路”：上层稀疏用来快速跳到目标附近，下层稠密用来精细查找，所以是近似最近邻（ANN），用极少的召回损失换来对数级的查询速度。</p>
+</div>
+<pre><span class="c"># Vector Set：添加向量（可带属性），按向量或按已有元素查相似</span>
+VADD items VALUES 3 0.12 0.88 0.31 "doc:1" SETATTR '{"type":"news","year":2026}'
+VSIM items VALUES 3 0.10 0.90 0.30 COUNT 5 WITHSCORES FILTER '.year &gt;= 2025'
+VSIM items ELE "doc:1" COUNT 5
+VCARD items · VDIM items · VEMB items "doc:1" · VREM items "doc:1"
+
+<span class="c"># 查询引擎：在 Hash 上建 HNSW 向量索引，KNN 查询</span>
+FT.CREATE idx ON HASH PREFIX 1 doc: SCHEMA title TEXT emb VECTOR HNSW 6 TYPE FLOAT32 DIM 768 DISTANCE_METRIC COSINE
+FT.SEARCH idx "*=&gt;[KNN 5 @emb $q AS score]" PARAMS 2 q &lt;二进制向量&gt; SORTBY score DIALECT 2</pre>
+<h3>其他值得掌握的新命令</h3>
+<div class="tbl"><table>
+<tr><th>版本</th><th>命令 / 特性</th><th>解决什么</th></tr>
+<tr><td>7.4</td><td>HEXPIRE / HTTL / HPERSIST</td><td>Hash 单个字段可以过期，购物车某商品、会话某属性单独失效</td></tr>
+<tr><td>8.0</td><td>HGETDEL / HGETEX / HSETEX</td><td>读后删除、读时设置过期、写时设置过期，一条命令完成</td></tr>
+<tr><td>8.4</td><td>SET … IFEQ / IFNE / IFDEQ / IFDNE、DELEX、DIGEST</td><td>原子比较并设置 / 删除：乐观锁、安全释放分布式锁不再需要 Lua</td></tr>
+<tr><td>8.4</td><td>MSETEX</td><td>批量设置多个 key 并统一设置过期</td></tr>
+<tr><td>8.4</td><td>CLUSTER MIGRATION</td><td>原子槽迁移，扩缩容更平滑</td></tr>
+<tr><td>8.6</td><td>HOTKEYS、volatile-lrm / allkeys-lrm</td><td>实时发现热点 key；按最近修改时间淘汰</td></tr>
+<tr><td>8.2 → 8.8</td><td>XDELEX、XACKDEL、XREADGROUP CLAIM、XADD IDMP、XNACK</td><td>Stream 消费组管理更省心，生产端幂等</td></tr>
+</table></div>
+<div class="note"><b class="t">Valkey 是什么</b><p>2024 年 Redis 改为非开源许可后，AWS、Google、Oracle 等在 Linux 基金会下从 7.2.4 分叉出 Valkey（BSD 许可），协议与命令兼容。2025 年 Redis 8 又增加了 AGPLv3 选项。选型时注意许可证对商业分发的影响。</p></div>
+</section>
+
+<!-- ================= 13 ================= -->
+<section class="ch" id="c13">
+<header><span class="no">13</span><h2>分布式理论：NoSQL、CAP、BASE、分布式事务</h2></header>
+<h3>四类 NoSQL</h3>
+<div class="tbl"><table>
+<tr><th>类型</th><th>代表</th><th>数据模型</th><th>典型场景</th></tr>
+<tr><td>键值</td><td>Redis、Memcached</td><td>key-value</td><td>缓存、会话、计数器</td></tr>
+<tr><td>文档</td><td>MongoDB、CouchDB</td><td>JSON / BSON 半结构化</td><td>灵活 schema、内容管理</td></tr>
+<tr><td>列式</td><td>HBase、Cassandra</td><td>列族宽表</td><td>海量数据分析、稀疏数据</td></tr>
+<tr><td>图</td><td>Neo4j</td><td>节点 + 边</td><td>社交关系、推荐、知识图谱</td></tr>
+</table></div>
+<div class="note"><b class="t">软考选型答题范式</b><p>先判断属于哪一类 NoSQL，再从读写特性、数据模型、一致性需求、扩展性、运维成本五个维度对比。补充：向量数据库（Milvus、Redis 向量检索）已成为第五类常见选型。</p></div>
+<h3>CAP 定理</h3>
+<div class="prose"><p>分布式系统中一致性（C）、可用性（A）、分区容错性（P）不可兼得。网络分区不可避免，所以实际是 <b>CP 或 AP 二选一</b>：</p>
+<ul><li><b>CP</b>：放弃可用性保一致 —— ZooKeeper、etcd、HBase，银行转账。</li>
+<li><b>AP</b>：放弃强一致保可用 —— 大部分缓存场景、Redis、购物车、非核心展示数据。</li></ul>
+<p>Redis 默认主从异步复制，通常归为 <b>AP</b>（可用性优先、最终一致）。可以用 <code>WAIT</code> 命令等待指定数量的从节点确认，提高一致性，但仍不能保证强一致。</p></div>
+<h3>BASE 理论</h3>
+<div class="prose"><p><b>B</b>asically Available（基本可用）+ <b>S</b>oft state（软状态）+ <b>E</b>ventually consistent（最终一致）。BASE 是 AP 的延伸，也是“缓存允许短暂不一致”的理论依据，与第 4 章的双写一致性方案呼应。</p>
+<p>一致性强度从强到弱：强一致 → 顺序一致 → 因果一致 → 最终一致 → 弱一致。讲清“Redis 默认提供最终一致”即可命中考点。</p></div>
+<h3>分布式事务方案</h3>
+<div class="tbl"><table>
+<tr><th>方案</th><th>一致性</th><th>原理</th><th>适用</th></tr>
+<tr><td>2PC</td><td>强一致</td><td>准备 + 提交 / 回滚，协调者统一决策</td><td>参与者少、要求强一致；有同步阻塞、协调者单点问题</td></tr>
+<tr><td>3PC</td><td>较 2PC 改进</td><td>增加“预提交”阶段和超时机制，减少阻塞</td><td>改进单点 / 阻塞，但仍可能不一致</td></tr>
+<tr><td>TCC</td><td>最终一致</td><td>Try 预留资源 → Confirm 确认 / Cancel 补偿</td><td>可逆的分布式业务，代码侵入大</td></tr>
+<tr><td>可靠消息（MQ）</td><td>最终一致</td><td>本地事务 + 发消息 + 消费重试</td><td>与缓存双写的 MQ / Canal 方案同源</td></tr>
+<tr><td>Saga</td><td>最终一致</td><td>长事务拆成多个本地事务，失败时逆序补偿</td><td>长流程业务</td></tr>
+</table></div>
+</section>
+
+<!-- ================= 14 ================= -->
+<section class="ch" id="c14">
+<header><span class="no">14</span><h2>勘误与考前速记</h2></header>
+<h3>原资料中需要澄清的地方</h3>
+<div class="warn"><b class="t">整理时发现的问题</b>
+<p>① Memcached 是<b>多线程</b>的，原表格写“单线程”不准确；“Redis 比 Memcached 快 10 倍”缺乏依据，两者简单 KV 性能接近。</p>
+<p>② 两份资料的淘汰建议冲突（“90% 场景选 volatile-lru”与“优先 allkeys-lru”）：纯缓存优先 allkeys-lru；缓存和必须常驻的数据混在一起时用 volatile-lru。</p>
+<p>③ Cluster 并非完全不支持事务、Lua、MGET：只要所有 key 在同一个槽（用 Hash Tag）就可以使用。</p>
+<p>④ 定期删除“每天抽 10 分钟”是比喻，实际是 hz=10（每秒 10 次）、每次不超过 25ms。</p>
+<p>⑤ 主从同步里“缓冲区是一个日志文件”不准确：repl_backlog 是主节点<b>内存中的环形缓冲区</b>。</p>
+<p>⑥ Redisson 的锁底层是 Lua + Hash（HINCRBY 记录重入次数），语义上等同 SET NX，而不是直接调用 SETNX 命令。</p>
+<p>⑦ LRU 通译为“最近最少使用”（按最后访问时间），LFU 为“最不经常使用”（按访问频率）。</p>
+<p>⑧ 排查 AOF 导致的变慢时，把 appendfsync 改为 no 会大幅增加丢数据风险，应先评估业务能否接受。</p>
+</div>
+<h3>速记卡</h3>
+<div class="cols">
+<div class="cell"><h4>为什么快</h4><p>内存 + 单线程无锁 + IO 多路复用（epoll）。</p></div>
+<div class="cell"><h4>缓存三兄弟</h4><p>穿透：布隆 / 空值；击穿：互斥锁 / 逻辑过期；雪崩：随机 TTL / 集群 / 降级 / 多级缓存。</p></div>
+<div class="cell"><h4>双写一致</h4><p>允许延迟：先改库再删缓存 + MQ / Canal；强一致：Redisson 读写锁。</p></div>
+<div class="cell"><h4>持久化</h4><p>RDB 快照恢复快会丢；AOF everysec 最多丢 1 秒；生产用混合持久化。</p></div>
+<div class="cell"><h4>过期与淘汰</h4><p>惰性 + 定期删除；默认 noeviction；纯缓存 allkeys-lru。</p></div>
+<div class="cell"><h4>分布式锁</h4><p>SET NX EX + Lua 释放；Redisson 看门狗 30s / 10s 续期、Hash 可重入；红锁 N/2+1；强一致选 ZooKeeper。</p></div>
+<div class="cell"><h4>事务</h4><p>MULTI 排队、EXEC 执行、不回滚；WATCH = 乐观锁。</p></div>
+<div class="cell"><h4>高可用</h4><p>主从：replid + offset，全量 / 增量；哨兵：SDOWN → ODOWN → 选领头 → 选新主；脑裂：min-replicas。</p></div>
+<div class="cell"><h4>Cluster</h4><p>16384 槽，CRC16(key) % 16384，Hash Tag 让 key 同槽，MOVED / ASK 重定向。</p></div>
+<div class="cell"><h4>消息队列</h4><p>List 简单无 ACK；Pub/Sub 不持久；Stream 消费组 + ACK + PEL。</p></div>
+<div class="cell"><h4>CAP</h4><p>Redis 是 AP + 最终一致（BASE）；ZooKeeper 是 CP。</p></div>
+<div class="cell"><h4>Redis 8</h4><p>开源回归 AGPL；内置 JSON / 时序 / 布隆 / 向量集合；8.4 混合检索与原子 CAS。</p></div>
+</div>
+<p class="foot">内容整理自《Redis 的基础理论知识（补充强化版）》《Redis 常见场景详解（补充强化版）》，并补充了底层编码、Stream 消息队列、Redis 8.x 新特性与向量检索等内容。动画为原理示意，数值经过简化。</p>
+</section>
+</main>
+</div>
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const RM=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const C={red:'#F25A4F',teal:'#3CC4AA',amber:'#EDB53C',blue:'#73A0F5',violet:'#B494F2'};
+
+/* ---------- nav ---------- */
+$('#tocM').innerHTML=$('#toc').innerHTML;
+$$('#tocM a').forEach(a=>a.addEventListener('click',()=>$('.mobile-nav').open=false));
+const links=$$('#toc a');
+const secs=$$('section.ch');
+function spy(){
+  let id=secs[0].id;
+  if(innerHeight+scrollY>=document.documentElement.scrollHeight-4)id=secs[secs.length-1].id;
+  else secs.forEach(s=>{if(s.getBoundingClientRect().top<=innerHeight*0.4)id=s.id;});
+  const all=$$('.toc a');all.forEach(a=>a.classList.toggle('cur',a.getAttribute('href')==='#'+id));
+}
+let spyRaf=0;addEventListener('scroll',()=>{if(!spyRaf)spyRaf=requestAnimationFrame(()=>{spyRaf=0;spy();});},{passive:true});
+addEventListener('resize',spy);spy();
+$('#themeBtn').addEventListener('click',()=>{
+  const r=document.documentElement;const dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+  r.dataset.theme=dark?'light':'dark';
+});
+
+/* ---------- helpers ---------- */
+function loop(el,fn,startPaused){
+  const st={run:!startPaused,vis:false};let last=performance.now();
+  new IntersectionObserver(es=>{st.vis=es[0].isIntersecting}).observe(el);
+  function f(t){const dt=Math.min(.05,(t-last)/1000);last=t;if(st.run&&st.vis)fn(dt);requestAnimationFrame(f);}
+  requestAnimationFrame(f);return st;
+}
+function canvas2d(cv,W,H){const d=Math.min(2,window.devicePixelRatio||1);cv.width=W*d;cv.height=H*d;const c=cv.getContext('2d');c.setTransform(d,0,0,d,0,0);return c;}
+function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
+function fnv(s){let h=2166136261;for(const ch of s){h^=ch.codePointAt(0);h=Math.imul(h,16777619)>>>0;}h^=h>>>13;h=Math.imul(h,0x5bd1e995)>>>0;h^=h>>>15;return h>>>0;}
+function djb(s){let h=5381;for(const ch of s){h=(Math.imul(h,33)^ch.codePointAt(0))>>>0;}return h;}
+function pauseBtn(btn,st){btn.textContent=st.run?'暂停':'继续';btn.addEventListener('click',()=>{st.run=!st.run;btn.textContent=st.run?'暂停':'继续';});}
+
+/* ---------- stepper engine ---------- */
+function parseMap(s){return s.split('|').map(p=>{const i=p.indexOf(':');return [+p.slice(0,i),p.slice(i+1)]}).sort((a,b)=>a[0]-b[0]);}
+function pick(m,i){let v=null;for(const [k,x] of m){if(k<=i)v=x;else break;}return v;}
+function tf(v){if(v==null)return '';if(v.startsWith('sx'))return 'scaleX('+v.slice(2)+')';const [x,y]=v.split(',');return 'translate('+x+'px,'+y+'px)';}
+function tfx(v){if(!v||v.startsWith('sx'))return null;return +v.split(',')[0];}
+$$('[data-stepper]').forEach(lab=>{
+  const svg=lab.querySelector('svg'),wrap=svg.closest('.stage-wrap'),VB=(svg.viewBox&&svg.viewBox.baseVal.width)||640;
+  const caps=[...lab.querySelectorAll('.cap li')],n=caps.length;
+  const ctrl=lab.querySelector('.ctrl'),dots=lab.querySelector('.dots'),count=lab.querySelector('.count'),playB=lab.querySelector('[data-act=play]'),no=lab.querySelector('.narr-no');
+  const sp=document.createElement('div');sp.className='seg';sp.innerHTML='<button type="button" data-sp="1.6" class="on">慢速</button><button type="button" data-sp="0.8">正常</button>';ctrl.insertBefore(sp,dots);
+  const all=document.createElement('details');all.className='allsteps';all.innerHTML='<summary>查看全部步骤文字</summary><ol>'+caps.map(c=>'<li>'+c.innerHTML+'</li>').join('')+'</ol>';lab.appendChild(all);
+  dots.innerHTML='<i></i>'.repeat(n);const di=[...dots.children];
+  const items=[...svg.querySelectorAll('[data-s],[data-e],[data-only],[data-tf],[data-cls],[data-txt]')].map(el=>{
+    const d=el.dataset,o={el,d:+(d.d||0)};
+    if(d.s!=null)o.s=+d.s; if(d.e!=null)o.e=+d.e; if(d.only)o.only=d.only.split(',').map(Number);
+    if(d.tf)o.tf=parseMap(d.tf);
+    if(d.cls){o.cls=parseMap(d.cls);o.all=[...new Set(o.cls.map(x=>x[1]).join(' ').split(' ').filter(Boolean))];}
+    if(d.txt)o.txt=parseMap(d.txt);return o;});
+  const hasVis=o=>o.s!=null||o.e!=null||o.only;
+  const isVis=(o,k)=>{let v=true;if(o.s!=null)v=k>=o.s;if(o.e!=null&&k>o.e)v=false;if(o.only)v=o.only.includes(k);return v;};
+  let i=0,prev=0,timer=null,pend=null,dur=1.6,moveX=null;
+  function focusX(x){if(!wrap||wrap.scrollWidth<=wrap.clientWidth+2)return;const sc=svg.clientWidth/VB;wrap.scrollTo({left:Math.max(0,x*sc-wrap.clientWidth/2),behavior:'smooth'});}
+  function apply(flash,k){if(k==null)k=i;
+    const changed=[];
+    items.forEach(o=>{
+      if(o.cls){const c=pick(o.cls,k)||'';if(c!==o.cur){o.all.forEach(x=>o.el.classList.remove(x));c.split(' ').filter(Boolean).forEach(x=>o.el.classList.add(x));if(o.cur!==undefined)changed.push(o.el);o.cur=c;}}
+      if(o.txt){const t=pick(o.txt,k);if(t!=null&&o.el.textContent!==t){o.el.textContent=t;changed.push(o.el.closest('g')||o.el);}}
+    });
+    if(flash){changed.forEach(el=>{el.classList.remove('flash');void el.getBoundingClientRect();el.classList.add('flash');});
+      if(changed.length&&moveX==null){try{const b=changed[0].getBBox();focusX(b.x+b.width/2);}catch(e){}}}
+  }
+  function render(anim){
+    if(pend){clearTimeout(pend);pend=null;apply(false,prev);}
+    const fwd=anim&&i>prev;lab.style.setProperty('--dur',dur+'s');
+    let maxD=0,moving=false,mx0=null,mx1=null;moveX=null;
+    items.forEach(o=>{
+      const v=isVis(o,i);
+      if(hasVis(o))o.el.classList.toggle('off',!v);
+      if(o.tf){const val=pick(o.tf,i);
+        if(val!==o.lastT){o.lastT=val;o.el.style.transitionDelay=((fwd&&o.d)?o.d*dur:0)+'s';o.el.style.transform=tf(val);
+          if(v&&fwd){moving=true;maxD=Math.max(maxD,o.d);const x=tfx(val);if(x!=null){mx0=mx0==null?x:Math.min(mx0,x);mx1=mx1==null?x:Math.max(mx1,x);}}}}
+    });
+    if(mx0!=null){moveX=(mx0+mx1)/2;focusX(moveX);}
+    caps.forEach((c,k)=>c.classList.toggle('cur',k===i));di.forEach((d,k)=>d.classList.toggle('cur',k===i));
+    count.textContent=(i+1)+' / '+n;if(no)no.textContent='第 '+(i+1)+' / '+n+' 步';
+    const wait=(moving&&fwd)?dur*(1+maxD)*1000*.92:0;
+    if(wait)pend=setTimeout(()=>{pend=null;apply(true);},wait);else apply(anim);
+    prev=i;return wait;
+  }
+  function stop(){clearTimeout(timer);timer=null;playB.textContent='自动播放';}
+  function schedule(wait){const read=Math.max(3500,caps[i].textContent.length*130);
+    timer=setTimeout(()=>{if(i>=n-1){stop();return;}i++;schedule(render(true));},wait+read);}
+  ctrl.addEventListener('click',e=>{
+    const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.sp){dur=+b.dataset.sp;[...sp.children].forEach(x=>x.classList.toggle('on',x===b));return;}
+    const a=b.dataset.act;if(!a)return;
+    if(a==='next'){stop();if(i<n-1){i++;render(true);}} else if(a==='prev'){stop();if(i>0){i--;render(true);}} else if(a==='reset'){stop();i=0;render(true);}
+    else if(a==='play'){ if(timer){stop();return;} let w=0;if(i>=n-1){i=0;render(true);} playB.textContent='暂停';schedule(w);}
+  });
+  svg.classList.add('init');render(false);requestAnimationFrame(()=>requestAnimationFrame(()=>svg.classList.remove('init')));
+});
+
+/* ---------- hero: cache-aside ---------- */
+(function(){
+  const svg=$('#hero'),dotsG=$('#heroDots'),keysG=$('#heroKeys'),NS='http://www.w3.org/2000/svg';
+  const mk=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;};
+  const K=10,cached=new Array(K).fill(0),sq=[];
+  for(let k=0;k<K;k++){const r=mk('rect',{x:340+(k%5)*19,y:96+Math.floor(k/5)*24,width:14,height:14,rx:3});keysG.appendChild(r);sq.push(r);}
+  const t2=mk('text',{x:385,y:164,'text-anchor':'middle',class:'ts'});t2.textContent='k1~k10 是否在缓存中';keysG.appendChild(t2);
+  const ring=mk('circle',{r:11,fill:'none',stroke:C.amber,'stroke-width':2.5});const lb=mk('text',{'text-anchor':'middle',class:'tm',style:'fill:'+C.amber+';font-weight:600'});
+  svg.appendChild(ring);svg.appendChild(lb);
+  const narr=$('#heroNarr'),say=h=>{narr.innerHTML=h;};
+  let T=0,acc=0,parts=[],recent=[],tracked=null,cool=.3;
+  function spawn(){
+    const k=Math.min(K-1,Math.floor(Math.pow(Math.random(),1.8)*K)),y=58+Math.random()*104;
+    const el=mk('circle',{r:5,fill:C.blue});dotsG.appendChild(el);
+    const p={el,k,y,x:150,tg:316,ph:'go',lab:'k'+(k+1)};parts.push(p);
+    if(!tracked&&cool<=0){tracked=p;say('<b>'+p.lab+'</b>：用户要读 '+p.lab+' 的数据，请求先发往 Redis…');}
+  }
+  const st=loop(svg,dt=>{
+    T+=dt;acc+=dt;cool-=dt;if(acc>1.1){acc=0;spawn();}
+    for(const p of parts){
+      const v=120*dt,me=p===tracked,L='<b>'+p.lab+'</b>';
+      if(Math.abs(p.tg-p.x)<=v){p.x=p.tg;
+        if(p.ph==='go'){
+          if(cached[p.k]>T){p.ph='hit';p.tg=150;p.el.setAttribute('fill',C.teal);recent.push(1);if(me)say(L+'：Redis 里正好有 '+p.lab+' → <span class="g">缓存命中</span>，直接原路返回。内存读取，非常快。');}
+          else {p.ph='db';p.tg=606;p.el.setAttribute('fill',C.amber);recent.push(0);if(me)say(L+'：Redis 里没有 '+p.lab+'（第一次查，或者已过期）→ <span class="a">未命中</span>，只能继续去 MySQL 查。');}
+        } else if(p.ph==='db'){p.ph='wb';p.tg=456;if(me)say(L+'：MySQL 查到了数据（磁盘读取，比内存慢得多），把数据带回来…');}
+        else if(p.ph==='wb'){cached[p.k]=T+9+Math.random()*5;p.ph='ret';p.tg=150;p.el.setAttribute('fill',C.teal);if(me)say(L+'：把数据写入 Redis，并设置过期时间（中间对应的小方块变绿）。返回给用户后，下次再查 '+p.lab+' 就能直接命中了。');}
+        else {p.dead=true;p.el.remove();if(me){tracked=null;cool=2;}}
+      } else p.x+=Math.sign(p.tg-p.x)*v;
+      p.el.setAttribute('cx',p.x.toFixed(1));p.el.setAttribute('cy',p.y.toFixed(1));
+    }
+    parts=parts.filter(p=>!p.dead);if(recent.length>40)recent=recent.slice(-40);
+    sq.forEach((r,k)=>{r.setAttribute('fill',cached[k]>T?C.teal:'#4A5870');r.setAttribute('stroke',tracked&&tracked.k===k?C.amber:'none');r.setAttribute('stroke-width',2);});
+    if(tracked){ring.setAttribute('cx',tracked.x);ring.setAttribute('cy',tracked.y);lb.setAttribute('x',tracked.x);lb.setAttribute('y',tracked.y-16);lb.textContent=tracked.lab;ring.style.opacity=lb.style.opacity=1;}
+    else ring.style.opacity=lb.style.opacity=0;
+    const hr=recent.length?Math.round(recent.reduce((a,b)=>a+b,0)/recent.length*100):0;
+    $('#heroStat').textContent='最近 40 次命中率 '+hr+'%（缓存越“热”越高）';
+  },RM);
+  pauseBtn($('#heroToggle'),st);
+})();
+
+/* ---------- cache trio simulator ---------- */
+(function(){
+  const cv=$('#trio'),H=300,SPD=200,RATE=8,LIM=4,MAXR=10;let W,X,ctx;
+  function layout(){W=cv.parentElement.clientWidth<560?480:760;ctx=canvas2d(cv,W,H);X={cR:W*.14,gL:W*.23,gR:W*.27,rL:W*.38,rR:W*.54,dL:W*.79};}
+  layout();
+  let mode='pen',protect=false,ts=.5,T=0,acc=0,parts=[],dbT=[],S,hot,keys,tracked=null,cool=0,evtT=0,prevExp=0,over=false;
+  const nar=$('#trioNarr'),ev=$('#trioEvt');
+  const tips={
+    pen:['场景：攻击者用伪造的 id 不断请求（约占 70%）。这些 id 在缓存和数据库里都没有，空结果不会被缓存，所以每一次都会打到数据库。','防护：在 Redis 前加布隆过滤器，判定“一定不存在”的 id 直接拒绝，只有真实存在的 id 能通过。'],
+    brk:['场景：所有请求都在查同一个热点商品，它的缓存每隔一段时间过期一次。过期瞬间，所有并发请求一起未命中、一起查库。','防护：互斥锁。只有第一个未命中的请求拿到锁去查库重建（黄色），其余请求原地等待（紫色），重建好后直接读缓存。'],
+    ava:['场景：16 个 key 设置了相同的过期时间，到点集体过期（Redis 内的方块一起变红），请求洪峰周期性地砸向数据库。','防护：过期时间加随机值，方块会在不同时刻零星变红，数据库只承受少量回源请求。']};
+  function event(h){ev.innerHTML=h;ev.classList.add('show');evtT=5;}
+  function reset(){
+    parts=[];dbT=[];S={req:0,hit:0,db:0,blk:0};T=0;tracked=null;cool=.3;over=false;evtT=0;ev.classList.remove('show');prevExp=0;
+    hot={cached:true,exp:6,lock:false};
+    keys=Array.from({length:16},()=>protect?3+Math.random()*8:8);
+    nar.textContent='等待下一个请求…';
+    $('#trioTip').textContent=tips[mode][protect?1:0];
+    $('#trioProtect').textContent=protect?'关闭防护':'开启防护';$('#trioProtect').classList.toggle('on',protect);
+  }
+  function N(p,k){
+    if(p!==tracked)return;const L='<b>'+p.lbl+'</b>';let t='';
+    switch(k){
+      case 'spawn': t=mode==='pen'?(p.exists?L+' 是真实存在的商品，用户正常查询。':L+' 是攻击者伪造的、<span class="r">数据库里根本不存在</span>的 id。'):mode==='brk'?L+'：又一个查询热点商品的请求。':L+'：查询 '+p.lbl+' 的请求。';
+        t+=(mode==='pen'&&protect)?' 先经过布隆过滤器…':' 先去 Redis 找…';break;
+      case 'pass': t=L+'：布隆过滤器判断“可能存在” → 放行，去 Redis 查。';break;
+      case 'block': t=L+'：布隆过滤器判断“<span class="g">一定不存在</span>” → 直接拒绝，Redis 和数据库完全没被打扰。';break;
+      case 'hit': t=L+'：Redis 里有 → <span class="g">命中</span>，直接返回。';break;
+      case 'miss': t=mode==='pen'?L+'：Redis 里当然没有它 → <span class="a">未命中</span>，只好去查 MySQL。':mode==='brk'?L+'：热点 key 已过期 → <span class="a">未命中</span>，没有任何保护，直接去查 MySQL（此刻很多请求都在这么做）。':L+'：'+p.lbl+' 已过期 → <span class="a">未命中</span>，去查 MySQL。';break;
+      case 'lock': t=L+'：缓存没了，它<span class="a">抢到了互斥锁</span> → 由它一个去查数据库、重建缓存。';break;
+      case 'wait': t=L+'：缓存没了，但锁已经被别的请求拿走 → <span class="v">原地等待</span>，不去打扰数据库。';break;
+      case 'wake': t=L+'：缓存已重建好 → 等待结束，直接从 Redis 读到数据返回 <span class="g">✓</span>';break;
+      case 'db': t=(mode==='pen'&&!p.exists)?L+'：MySQL 也查不到 → 只能返回空。<span class="r">空结果不会写入缓存</span>，所以下一次同样的请求还会打到数据库。':L+'：MySQL 查到数据，带回去写入 Redis。';break;
+      case 'null': t=L+'：把“查无此数据”返回给用户。这一趟白白消耗了一次数据库查询。';break;
+      case 'wb': t=mode==='brk'?L+'：已写回 Redis'+(p.lock?'，并释放锁，等待的请求马上就能命中。':'。（同一时刻还有很多请求在重复做同样的事。）'):L+'：已写回 Redis，'+(protect?'过期时间 = 基础时间 + 随机值，以后不会和其他 key 同时过期。':'过期时间又对齐到同一时刻 → 下一轮还会和其他 key 集体过期。');break;
+    }
+    nar.innerHTML=t;
+  }
+  function hit(p,silent){p.col=C.teal;p.tg='c';S.hit++;if(!silent)N(p,'hit');}
+  function lookup(p){
+    if(mode==='pen'){ if(p.exists)hit(p); else {p.tg='d';N(p,'miss');} }
+    else if(mode==='brk'){
+      if(hot.cached)hit(p);
+      else if(protect){ if(!hot.lock){hot.lock=true;p.lock=true;p.col=C.amber;p.tg='d';N(p,'lock');} else {p.wait=true;p.col=C.violet;S.blk++;N(p,'wait');} }
+      else {p.tg='d';N(p,'miss');}
+    } else { if(keys[p.key]>T)hit(p); else {p.tg='d';N(p,'miss');} }
+  }
+  function writeBack(p){
+    if(mode==='brk'){ if(!hot.cached){hot.cached=true;hot.exp=T+8;} if(p.lock)hot.lock=false;N(p,'wb'); }
+    else if(mode==='ava'){ keys[p.key]=protect?T+5+Math.random()*6:(Math.floor(T/8)+1)*8;N(p,'wb'); }
+    else if(!p.exists)N(p,'null');
+  }
+  function tx(tg){return {g:X.gL-5,r:X.rL-5,d:X.dL-5,rb:X.rR+5,c:X.cR+5}[tg];}
+  function spawn(){
+    S.req++;const ex=Math.random()<.3,key=Math.floor(Math.random()*16);
+    const p={x:X.cR+5,y:80+Math.random()*(H-110),col:C.blue,exists:ex,key};
+    p.lbl=mode==='pen'?(ex?'id='+(1000+Math.floor(Math.random()*9000)):'id=-'+(1+Math.floor(Math.random()*999))):mode==='brk'?'热点商品':'key'+(key+1);
+    p.tg=(mode==='pen'&&protect)?'g':'r';parts.push(p);
+    if(!tracked&&cool<=0){tracked=p;N(p,'spawn');}
+  }
+  function arrive(p){
+    switch(p.tg){
+      case 'g': if(p.exists){p.tg='r';N(p,'pass');} else {p.col=C.red;p.tg='c';S.blk++;N(p,'block');} break;
+      case 'r': lookup(p); break;
+      case 'd': S.db++;dbT.push(T);p.dwell=.5;if(mode==='pen'&&!p.exists)p.col=C.red;else if(!p.lock)p.col=C.amber;p.tg='rb';N(p,'db'); break;
+      case 'rb': writeBack(p);if(!(mode==='pen'&&!p.exists))p.col=C.teal;p.tg='c'; break;
+      case 'c': p.dead=true;if(p===tracked){tracked=null;cool=2.2;}
+    }
+  }
+  function step(rdt){
+    const dt=rdt*ts;T+=dt;acc+=dt;cool-=rdt;evtT-=rdt;if(evtT<=0)ev.classList.remove('show');
+    while(acc>1/RATE){acc-=1/RATE;spawn();}
+    if(mode==='brk'&&hot.cached&&T>=hot.exp){hot.cached=false;event('⚠ 热点 key 过期了！'+(protect?'只有抢到锁的一个请求会去查库，其余请求原地等待。':'在缓存重建完成之前，所有请求都会未命中，一起冲向数据库。'));}
+    if(mode==='ava'){const ex=keys.filter(e=>e<=T).length;if(!protect&&ex-prevExp>=8)event('⚠ '+ex+' 个 key 在同一时刻过期！接下来访问它们的请求都要去查数据库。');prevExp=ex;}
+    for(const p of parts){
+      if(p.wait){ if(hot.cached){p.wait=false;hit(p,true);N(p,'wake');} continue; }
+      if(p.dwell>0){p.dwell-=dt;continue;}
+      const target=tx(p.tg),v=SPD*dt;
+      if(Math.abs(target-p.x)<=v){p.x=target;arrive(p);} else p.x+=Math.sign(target-p.x)*v;
+    }
+    parts=parts.filter(p=>!p.dead);dbT=dbT.filter(t=>T-t<1);
+    const rate=dbT.length;if(rate>LIM&&!over){over=true;event('⚠ 数据库每秒收到 '+rate+' 次查询，超过承受上限 '+LIM+' 次 → 响应变慢，严重时宕机。');} if(rate<=LIM-1)over=false;
+    draw();
+    $('#sReq').textContent=S.req;$('#sHit').textContent=S.hit;$('#sDb').textContent=S.db;$('#sBlk').textContent=S.blk;
+  }
+  function col(x,label,sub,stroke){ctx.fillStyle=css('--lab3');rr(ctx,x[0],20,x[1]-x[0],H-40,10);ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle=stroke||'#51617A';ctx.stroke();
+    ctx.fillStyle='#E7ECF2';ctx.font='700 14px "Noto Sans SC",sans-serif';ctx.textAlign='center';ctx.fillText(label,(x[0]+x[1])/2,44);
+    if(sub){ctx.fillStyle='#95A2B4';ctx.font='11.5px "Noto Sans SC",sans-serif';ctx.fillText(sub,(x[0]+x[1])/2,62);}}
+  function draw(){
+    ctx.fillStyle=css('--lab2');ctx.fillRect(0,0,W,H);
+    col([20,X.cR],'用户','发起请求');
+    if(mode==='pen'&&protect)col([X.gL-12,X.gR+12],'布隆','过滤器',C.amber);
+    col([X.rL,X.rR],'Redis','',C.red);
+    const rate=dbT.length,ov=rate>LIM;
+    col([X.dL,W-20],'MySQL',ov?'过载！':'正常',ov?C.red:C.blue);
+    ctx.textAlign='center';const cx=(X.rL+X.rR)/2;
+    if(mode==='pen'){ctx.fillStyle='#95A2B4';ctx.font='11.5px sans-serif';ctx.fillText('只缓存真实数据',cx,62);}
+    if(mode==='brk'){
+      ctx.fillStyle=hot.cached?C.teal:C.red;rr(ctx,cx-35,74,70,30,6);ctx.fill();ctx.fillStyle='#0B1424';ctx.font='600 12px sans-serif';ctx.fillText(hot.cached?'热点 key':'已过期',cx,94);
+      const left=hot.cached?Math.max(0,hot.exp-T)/8:0;ctx.fillStyle='#4A5870';ctx.fillRect(cx-30,112,60,6);ctx.fillStyle=C.amber;ctx.fillRect(cx-30,112,60*left,6);
+      ctx.fillStyle='#95A2B4';ctx.font='11px sans-serif';ctx.fillText(hot.lock?'锁：重建中':'剩余过期时间',cx,134);
+    }
+    if(mode==='ava'){
+      for(let k=0;k<16;k++){const ok=keys[k]>T;ctx.fillStyle=ok?C.teal:C.red;rr(ctx,cx-37+(k%4)*20,76+Math.floor(k/4)*20,14,14,3);ctx.fill();}
+      ctx.fillStyle='#95A2B4';ctx.font='11px sans-serif';ctx.fillText(W<600?'绿=在 红=过期':'绿=在缓存 红=已过期',cx,172);
+    }
+    const dc=(X.dL+W-20)/2,mh=150,mx=dc-10,my=H-40-mh-10;ctx.fillStyle='#4A5870';rr(ctx,mx,my,20,mh,4);ctx.fill();
+    const f=Math.min(1,rate/MAXR);if(f>0){ctx.fillStyle=ov?C.red:C.teal;rr(ctx,mx,my+mh*(1-f),20,Math.max(4,mh*f),4);ctx.fill();}
+    const ly=my+mh*(1-LIM/MAXR);ctx.strokeStyle=C.amber;ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(mx-8,ly);ctx.lineTo(mx+28,ly);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#E7ECF2';ctx.font='600 12px "JetBrains Mono",monospace';ctx.textAlign='center';ctx.fillText(rate+' 次/秒',dc,H-34);
+    for(const p of parts){ctx.fillStyle=p.col;ctx.beginPath();ctx.arc(p.x,p.y+(p.wait?Math.sin(T*8+p.y)*3:0),p.wait?4:4.5,0,7);ctx.fill();}
+    if(tracked){const p=tracked,y=p.y+(p.wait?Math.sin(T*8+p.y)*3:0);
+      ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(p.x,y,9,0,7);ctx.stroke();
+      ctx.font='600 12px "Noto Sans SC",sans-serif';const w=ctx.measureText(p.lbl).width+12,lx=Math.min(W-w-4,Math.max(4,p.x-w/2));
+      ctx.fillStyle='rgba(12,17,23,.88)';rr(ctx,lx,y-34,w,20,10);ctx.fill();ctx.fillStyle='#fff';ctx.textAlign='left';ctx.fillText(p.lbl,lx+6,y-20);}
+  }
+  $('#trioMode').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;mode=b.dataset.m;$$('#trioMode button').forEach(x=>x.classList.toggle('on',x===b));reset();draw();});
+  $('#trioProtect').addEventListener('click',()=>{protect=!protect;reset();draw();});
+  $('#trioSpeed').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;ts=+b.dataset.ts;$$('#trioSpeed button').forEach(x=>x.classList.toggle('on',x===b));});
+  reset();
+  let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{const w=W;layout();if(w!==W)reset();draw();},200);});
+  const st=loop(cv,step,RM);draw();pauseBtn($('#trioPause'),st);
+})();
+
+/* ---------- bloom filter ---------- */
+(function(){
+  const M=20,bits=new Array(M).fill(0),added=new Set();
+  $('#bfBits').innerHTML='<div></div>'.repeat(M);$('#bfIdx').innerHTML=Array.from({length:M},(_,i)=>'<span>'+i+'</span>').join('');
+  const cells=[...$('#bfBits').children];
+  const idx=s=>{const a=fnv(s),b=djb(s);return [0,1,2].map(i=>(a+i*b)%M);};
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));let tok=0;
+  function show(q){cells.forEach((c,i)=>{c.classList.toggle('on',!!bits[i]);c.classList.toggle('q',q.includes(i));c.textContent=bits[i];});}
+  function addedTxt(){return '已添加：'+(added.size?[...added].join('、'):'（无）')+'。';}
+  async function run(isAdd){
+    const s=$('#bfIn').value.trim();if(!s)return;const my=++tok,q=idx(s),lines=[];
+    const out=()=>{$('#bfOut').innerHTML=addedTxt()+'<br><b>'+(isAdd?'添加 ':'查询 ')+s+'</b>：<br>'+lines.join('<br>');};
+    show([]);out();
+    for(let j=0;j<3;j++){
+      await sleep(RM?0:750);if(my!==tok)return;
+      if(isAdd){bits[q[j]]=1;lines.push('hash'+(j+1)+'('+s+') % 20 = <b>'+q[j]+'</b> → 把第 '+q[j]+' 位置为 1');}
+      else{const b=bits[q[j]];lines.push('hash'+(j+1)+'('+s+') % 20 = <b>'+q[j]+'</b> → 第 '+q[j]+' 位是 '+(b?'1 ✓':'<span class="g">0</span>'));
+        if(!b){show(q.slice(0,j+1));lines.push('→ 只要有一位是 0，就说明它<span class="g">一定没被添加过</span>：直接返回，不查 Redis 和数据库。');out();return;}}
+      show(q.slice(0,j+1));out();
+    }
+    await sleep(RM?0:500);if(my!==tok)return;
+    if(isAdd){added.add(s);lines.push('→ 完成。以后查询它时，这 3 位都是 1。');}
+    else if(added.has(s))lines.push('→ 3 位全是 1：<b>可能存在</b>（确实添加过），放行去查缓存。');
+    else lines.push('→ 3 位全是 1：判断为可能存在，<span class="r">但它其实从没被添加过 —— 这就是误判！</span>这 3 位是被别的元素恰好置成 1 的。');
+    out();
+  }
+  $('#bfAdd').addEventListener('click',()=>run(true));
+  $('#bfQ').addEventListener('click',()=>run(false));
+  $('#bfReset').addEventListener('click',()=>{tok++;bits.fill(0);added.clear();show([]);$('#bfOut').textContent=addedTxt();});
+  $('#bfIn').addEventListener('keydown',e=>{if(e.key==='Enter')$('#bfQ').click();});
+  show([]);
+})();
+
+/* ---------- AOF rewrite ---------- */
+(function(){
+  let log=[],mem=new Map();
+  function render(){$('#aofFile').textContent=log.length?log.map((l,i)=>(i+1+'').padStart(2)+'  '+l).join('\n'):'（空）';
+    $('#aofMem').textContent=mem.size?[...mem].map(([k,v])=>k+' = '+v).join('\n'):'（空）';}
+  $('#aofBtns').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.id)return;const c=b.textContent.split(' ');
+    if(c[0]==='SET')mem.set(c[1],c[2]);else if(c[0]==='INCR')mem.set(c[1],String((parseInt(mem.get(c[1]))||0)+1));else if(c[0]==='DEL'){if(!mem.has(c[1])){$('#aofOut').textContent='name 不存在，DEL 不改变数据，也不会写入 AOF。';return;}mem.delete(c[1]);}
+    log.push(b.textContent);render();});
+  $('#aofRw').addEventListener('click',()=>{const before=log.length;log=[...mem].map(([k,v])=>'SET '+k+' '+v);if(log.length>1)log=['MSET '+[...mem].map(([k,v])=>k+' '+v).join(' ')];render();
+    $('#aofOut').textContent='重写完成：'+before+' 条命令 → '+log.length+' 条，数据完全相同。开启混合持久化时，这部分会以 RDB 二进制格式写在文件开头。';});
+  $('#aofClr').addEventListener('click',()=>{log=[];mem.clear();render();});
+  render();
+})();
+
+/* ---------- LRU vs LFU ---------- */
+(function(){
+  const CAP=4;let lru=[],lfu=new Map(),tick=0,timer=null;
+  function slots(el,arr,cur,isNew){el.innerHTML=Array.from({length:CAP},(_,i)=>{const it=arr[i];if(!it)return '<div class="slot empty">·<small>空</small></div>';
+    return '<div class="slot'+(it.k===cur?(isNew?' new':' hit'):'')+'">'+it.k+'<small>'+it.sub+'</small></div>';}).join('');}
+  function access(k){
+    tick++;let ev1='',ev2='',n1=!lru.includes(k),n2=!lfu.has(k),full=lru.length>=CAP;
+    if(!n1)lru.splice(lru.indexOf(k),1);else if(full)ev1=lru.pop();lru.unshift(k);
+    if(!n2){const o=lfu.get(k);o.c++;o.t=tick;} else { if(lfu.size>=CAP){let w=null;for(const [kk,o] of lfu){if(!w||o.c<w[1].c||(o.c===w[1].c&&o.t<w[1].t))w=[kk,o];}ev2=w[0];lfu.delete(w[0]);} lfu.set(k,{c:1,t:tick}); }
+    slots($('#lruS'),lru.map((x,i)=>({k:x,sub:i===0?'最近':'第 '+(i+1)+' 近'})),k,n1);
+    slots($('#lfuS'),[...lfu].sort((a,b)=>b[1].c-a[1].c||b[1].t-a[1].t).map(([x,o])=>({k:x,sub:'访问 '+o.c+' 次'})),k,n2);
+    $('#lruE').textContent=ev1?'淘汰 '+ev1+'：它最久没被访问':'';$('#lfuE').textContent=ev2?'淘汰 '+ev2+'：访问次数最少（同次数淘汰更早的）':'';
+    let t='访问 <b>'+k+'</b>：';
+    if(!n1)t+='已在缓存中 → <span class="g">命中</span>。LRU 把它挪到最前面（最近用过）；LFU 把它的访问次数 +1。';
+    else if(!ev1)t+='不在缓存中，还有空位 → 直接放入。';
+    else t+='不在缓存中，且缓存已满（4 个）→ 必须淘汰一个。<span class="r">LRU 淘汰 '+ev1+'</span>（最久没访问），<span class="r">LFU 淘汰 '+ev2+'</span>（访问次数最少）。'+(ev1!==ev2?'两种算法选了不同的 key！':'');
+    $('#lruN').innerHTML=t;
+  }
+  function clear(){clearInterval(timer);lru=[];lfu.clear();tick=0;slots($('#lruS'),[],null);slots($('#lfuS'),[],null);$('#lruE').textContent='';$('#lfuE').textContent='';$('#lruN').textContent='点上面的字母访问对应的 key，或者直接点“演示序列”。';}
+  $('#lruBtns').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.id)return;clearInterval(timer);access(b.textContent);});
+  $('#lruReset').addEventListener('click',clear);
+  $('#lruDemo').addEventListener('click',()=>{clear();const seq='AAABCDE'.split('');let i=0;access(seq[i++]);timer=setInterval(()=>{access(seq[i++]);if(i>=seq.length)clearInterval(timer);},2200);});
+  clear();
+})();
+
+/* ---------- hash slot ---------- */
+(function(){
+  function crc16(bytes){let c=0;for(const b of bytes){c^=b<<8;for(let i=0;i<8;i++)c=(c&0x8000)?((c<<1)^0x1021)&0xffff:(c<<1)&0xffff;}return c;}
+  const esc=s=>s.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+  function calc(){
+    const k=$('#slotIn').value;let part=k,html=esc(k),tag=false;
+    const s=k.indexOf('{');if(s>-1){const e=k.indexOf('}',s+1);if(e>s+1){part=k.slice(s+1,e);tag=true;html=esc(k.slice(0,s+1))+'<mark>'+esc(part)+'</mark>'+esc(k.slice(e));}}
+    const crc=crc16(new TextEncoder().encode(part)),slot=crc%16384,node=slot<=5460?'A':slot<=10922?'B':'C';
+    $('#slotMk').style.left='calc('+(slot/16384*100).toFixed(2)+'% - 1px)';
+    $('#slotOut').innerHTML='<span class="kv">key = '+html+'</span><br>参与计算：<b>'+esc(part)+'</b>'+(tag?'（Hash Tag：只用大括号内的部分）':'（没有有效的 {}，用整个 key）')+
+      '<br>CRC16 = <b>0x'+crc.toString(16).toUpperCase().padStart(4,'0')+'</b>（'+crc+'） → '+crc+' % 16384 = <b>槽 '+slot+'</b> → <b>master '+node+'</b>';
+  }
+  $('#slotIn').addEventListener('input',calc);
+  $$('[data-k]').forEach(b=>b.addEventListener('click',()=>{$('#slotIn').value=b.dataset.k;calc();}));
+  calc();
+})();
+
+/* ---------- consistent hashing ---------- */
+(function(){
+  const svg=$('#chRing'),NS='http://www.w3.org/2000/svg',cx=170,cy=160,R=120;
+  const colr={A:C.red,B:C.blue,C:C.teal,D:C.amber};
+  const keys=Array.from({length:24},(_,i)=>'key'+(i+1));
+  let withD=false,vir=false;
+  const ang=s=>(fnv(s)%36000)/100;
+  function points(names){const p=[];names.forEach(n=>{if(vir)for(let v=0;v<4;v++)p.push({n,a:ang(n+'#vn'+v)});else p.push({n,a:ang('node-'+n)});});return p.sort((a,b)=>a.a-b.a);}
+  function owner(pts,a){for(const p of pts)if(p.a>=a)return p.n;return pts[0].n;}
+  function pos(a,r){const t=(a-90)*Math.PI/180;return [cx+r*Math.cos(t),cy+r*Math.sin(t)];}
+  function el(tag,at,txt){const e=document.createElementNS(NS,tag);for(const k in at)e.setAttribute(k,at[k]);if(txt!=null)e.textContent=txt;svg.appendChild(e);return e;}
+  function draw(){
+    svg.innerHTML='';
+    const base=points(['A','B','C']),cur=points(withD?['A','B','C','D']:['A','B','C']);
+    el('circle',{cx,cy,r:R,fill:'none',stroke:'#4A5870','stroke-width':10});
+    let moved=0;const cnt={A:0,B:0,C:0,D:0};
+    keys.forEach(k=>{const a=ang(k),o0=owner(base,a),o=owner(cur,a);cnt[o]++;const mv=o!==o0;if(mv)moved++;
+      const [x,y]=pos(a,R-24);el('circle',{cx:x,cy:y,r:5.5,fill:colr[o],stroke:mv?'#fff':'none','stroke-width':2.5});});
+    cur.forEach(p=>{const [x,y]=pos(p.a,R);el('circle',{cx:x,cy:y,r:vir?7:11,fill:colr[p.n],stroke:'#1C2430','stroke-width':2});
+      if(!vir){const [lx,ly]=pos(p.a,R+24);el('text',{x:lx,y:ly+5,'text-anchor':'middle',class:'tb'},p.n);}});
+    el('text',{x:cx,y:cy-4,'text-anchor':'middle',class:'ts'},'数据顺时针');el('text',{x:cx,y:cy+14,'text-anchor':'middle',class:'ts'},'找最近的节点');
+    const names=withD?['A','B','C','D']:['A','B','C'];
+    el('text',{x:360,y:46,class:'tb'},'每个节点分到的 key');
+    names.forEach((n,i)=>{const y=74+i*36;el('text',{x:360,y:y+14,class:'tb'},n);el('rect',{x:384,y,width:220,height:18,rx:4,fill:'#4A5870'});
+      el('rect',{x:384,y,width:Math.max(2,220*cnt[n]/24),height:18,rx:4,fill:colr[n]});el('text',{x:612,y:y+14,class:'tm'},cnt[n]);});
+    let modMoved=0;keys.forEach(k=>{const h=djb(k);if(h%3!==h%4)modMoved++;});
+    $('#chOut').innerHTML=withD?'一致性哈希：添加 D 后只迁移 <b>'+moved+' / 24</b> 个 key（白圈），都来自 D 逆时针方向的那一段。<br>如果用 hash % N（3 → 4）：要迁移 <b>'+modMoved+' / 24</b> 个 key。':
+      '当前 3 个节点。'+(vir?'虚拟节点让每个物理节点在环上出现 4 次，分布更均匀。':'节点少时环上分布不均，可以看看右边柱状图是否倾斜，再打开虚拟节点对比。');
+  }
+  $('#chAdd').addEventListener('click',()=>{withD=!withD;$('#chAdd').textContent=withD?'移除节点 D':'添加节点 D';draw();});
+  $('#chVir').addEventListener('click',()=>{vir=!vir;$('#chVir').classList.toggle('on',vir);$('#chVir').textContent=vir?'关闭虚拟节点':'开启虚拟节点（每节点 4 个）';draw();});
+  draw();
+})();
+
+/* ---------- IO multiplexing ---------- */
+(function(){
+  const N=8,box=$('#socks');box.innerHTML=Array.from({length:N},(_,i)=>'<div class="sock">fd '+(i+3)+'</div>').join('');
+  const s=[...box.children],ready=new Array(N).fill(false);let mode='select',ptr=-1,q=[],chk=0,done=0,acc=0,iv=.9;
+  const say=h=>{$('#ioNarr').innerHTML=h;};
+  function rq(){$('#rq').innerHTML='<label>'+(mode==='epoll'?'就绪列表（内核维护）：':'select/poll 没有就绪列表，只能逐个检查')+'</label>'+(mode==='epoll'?q.map(i=>'<span>fd '+(i+3)+'</span>').join(''):'');}
+  function stats(){$('#ioChk').textContent=chk;$('#ioDone').textContent=done;$('#ioAvg').textContent=done?(chk/done).toFixed(1):'—';$('#ioM').textContent=mode;}
+  function reset(){ready.fill(false);q=[];ptr=-1;chk=0;done=0;s.forEach(x=>x.className='sock');rq();stats();
+    say(mode==='select'?'select/poll 模式：内核只告诉线程“有连接就绪了”，不说是哪个，线程只能从 fd 3 开始挨个检查。':'epoll 模式：哪个连接来了数据，内核就把它放进就绪列表，线程只处理列表里的连接。');}
+  function tick(){
+    let m1='';
+    if(Math.random()<.3){const free=[...Array(N).keys()].filter(i=>!ready[i]);if(free.length){const i=free[Math.floor(Math.random()*free.length)];ready[i]=true;s[i].classList.add('ready');m1='fd '+(i+3)+' 的客户端发来了数据（变黄）。';if(mode==='epoll'){q.push(i);rq();m1+='内核立刻把它放进就绪列表。';}}}
+    s.forEach(x=>x.classList.remove('scan','done'));let m2;
+    if(mode==='select'){ptr=(ptr+1)%N;chk++;s[ptr].classList.add('scan');
+      if(ready[ptr]){ready[ptr]=false;done++;s[ptr].classList.remove('ready');s[ptr].classList.add('done');m2='线程检查 fd '+(ptr+3)+'：<span class="g">有数据</span> → 读取并处理。';}
+      else m2='线程检查 fd '+(ptr+3)+'：没有数据，<span class="r">白检查了一次</span>。';}
+    else if(q.length){const i=q.shift();chk++;done++;ready[i]=false;s[i].classList.remove('ready');s[i].classList.add('scan','done');rq();m2='线程从就绪列表取出 fd '+(i+3)+' → <span class="g">直接处理</span>，一次都没白跑。';}
+    else m2='就绪列表是空的 → 线程在 epoll_wait 里休眠等待，<span class="g">不消耗 CPU</span>。';
+    say((m1?m1+'<br>':'')+m2);stats();
+  }
+  const st=loop(box,dt=>{acc+=dt;if(acc>iv){acc=0;tick();}},RM);
+  pauseBtn($('#ioPause'),st);
+  $('#ioMode').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;mode=b.dataset.m;$$('#ioMode button').forEach(x=>x.classList.toggle('on',x===b));reset();});
+  $('#ioSpeed').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;iv=+b.dataset.iv;$$('#ioSpeed button').forEach(x=>x.classList.toggle('on',x===b));});
+  reset();
+})();
+
+/* ---------- mobile swipe hint ---------- */
+const hints=$$('.stage-wrap').map(w=>{const p=document.createElement('p');p.className='swipe';p.textContent='← 图示可左右滑动查看，横屏更清楚 →';w.after(p);return [w,p];});
+function chkHints(){hints.forEach(([w,p])=>{p.hidden=!(w.scrollWidth>w.clientWidth+2);});}
+chkHints();let hz;addEventListener('resize',()=>{clearTimeout(hz);hz=setTimeout(chkHints,250);});
+
+/* ---------- token bucket ---------- */
+(function(){
+  const CAP=10,bkt=$('#tbBkt'),logEl=$('#tbLog');let tokens=CAP,rate=2,n=0,t0=performance.now();
+  function render(){const want=Math.floor(tokens);while(bkt.children.length<want){const d=document.createElement('div');d.className='tok';bkt.appendChild(d);}while(bkt.children.length>want)bkt.lastChild.remove();}
+  function log(ok){n++;const t=((performance.now()-t0)/1000).toFixed(1);const p=document.createElement('div');p.className=ok?'ok':'no';
+    p.textContent='+'+t+'s  请求 #'+n+'  '+(ok?'✓ 放行':'✗ 拒绝（桶空）')+'  剩余 '+Math.floor(tokens);logEl.prepend(p);while(logEl.children.length>60)logEl.lastChild.remove();}
+  function req(){if(tokens>=1){tokens-=1;render();log(true);}else log(false);}
+  setInterval(()=>{tokens=Math.min(CAP,tokens+rate*.1);render();},100);
+  $('#tbOne').addEventListener('click',req);
+  $('#tbBurst').addEventListener('click',()=>{let i=0;const t=setInterval(()=>{req();if(++i>=15)clearInterval(t);},70);});
+  $('#tbRate').addEventListener('input',e=>{rate=+e.target.value;$('#tbRateV').textContent=rate;});
+  render();
+})();
+
+/* ---------- vector search ---------- */
+(function(){
+  const cv=$('#vec');let W,H,ctx;
+  function layout(){const nar=cv.parentElement.clientWidth<560;W=nar?480:760;H=nar?420:360;ctx=canvas2d(cv,W,H);}
+  layout();
+  const G=[['水果',C.red,[['苹果',.17,.22],['香蕉',.27,.31],['橙子',.13,.33],['葡萄',.29,.17],['西瓜',.21,.40]]],
+           ['动物',C.teal,[['猫',.70,.19],['狗',.79,.27],['兔子',.69,.33],['老虎',.86,.18],['熊猫',.82,.38]]],
+           ['交通',C.blue,[['汽车',.20,.69],['地铁',.31,.78],['自行车',.14,.82],['飞机',.34,.64],['火车',.27,.88]]],
+           ['技术',C.violet,[['Redis',.71,.68],['MySQL',.81,.75],['Kafka',.68,.83],['MongoDB',.86,.64],['向量数据库',.79,.87]]]];
+  const items=[];G.forEach(([g,c,a])=>a.forEach(([n,x,y])=>items.push({n,x,y,c})));
+  const preset={'小狗':[.77,.23],'高铁':[.30,.84],'樱桃':[.22,.20],'数据库':[.78,.71]};
+  let q={n:'小狗',x:.77,y:.23},K=3;
+  function draw(){
+    ctx.fillStyle=css('--lab2');ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle='rgba(149,162,180,.12)';ctx.lineWidth=1;for(let i=1;i<10;i++){ctx.beginPath();ctx.moveTo(i*W/10,0);ctx.lineTo(i*W/10,H);ctx.stroke();ctx.beginPath();ctx.moveTo(0,i*H/10);ctx.lineTo(W,i*H/10);ctx.stroke();}
+    const qx=q.x*W,qy=q.y*H;
+    const res=items.map(it=>({it,d:Math.hypot(it.x*W-qx,it.y*H-qy)})).sort((a,b)=>a.d-b.d).slice(0,K);
+    const diag=Math.hypot(W,H);
+    res.forEach((r,i)=>{ctx.strokeStyle=C.amber;ctx.globalAlpha=1-i*.12;ctx.lineWidth=2.5-i*.3;ctx.setLineDash([6,4]);ctx.beginPath();ctx.moveTo(qx,qy);ctx.lineTo(r.it.x*W,r.it.y*H);ctx.stroke();});
+    ctx.setLineDash([]);ctx.globalAlpha=1;
+    if(res.length){ctx.strokeStyle='rgba(237,181,60,.35)';ctx.beginPath();ctx.arc(qx,qy,res[res.length-1].d,0,7);ctx.stroke();}
+    ctx.font='13px "Noto Sans SC",sans-serif';ctx.textAlign='left';
+    items.forEach(it=>{const x=it.x*W,y=it.y*H,top=res.some(r=>r.it===it);ctx.fillStyle=it.c;ctx.beginPath();ctx.arc(x,y,top?7:5,0,7);ctx.fill();
+      if(top){ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();}ctx.fillStyle=top?'#fff':'#B9C3D0';ctx.fillText(it.n,x+10,y+4);});
+    ctx.fillStyle='#fff';ctx.beginPath();for(let i=0;i<10;i++){const r=i%2?5:11,a=i*Math.PI/5-Math.PI/2;ctx.lineTo(qx+r*Math.cos(a),qy+r*Math.sin(a));}ctx.closePath();ctx.fill();
+    ctx.font='600 13px "Noto Sans SC",sans-serif';const lw=ctx.measureText('查询：'+q.n).width+14,lx=Math.min(W-lw-4,qx+12),ly=Math.max(4,qy-36);ctx.fillStyle='rgba(12,17,23,.85)';rr(ctx,lx,ly,lw,22,11);ctx.fill();ctx.fillStyle=C.amber;ctx.fillText('查询：'+q.n,lx+7,ly+15);
+    ctx.font='11.5px "Noto Sans SC",sans-serif';ctx.fillStyle='#95A2B4';G.forEach(([g,c],i)=>{ctx.fillStyle=c;ctx.fillRect(14+i*70,H-22,10,10);ctx.fillStyle='#95A2B4';ctx.fillText(g,28+i*70,H-13);});
+    $('#vecCmd').textContent='VSIM items VALUES 2 '+q.x.toFixed(2)+' '+q.y.toFixed(2)+' COUNT '+K+' WITHSCORES\n'+
+      res.map((r,i)=>(i+1)+') "'+r.it.n+'"  相似度≈'+(1-r.d/diag*1.6).toFixed(3)).join('\n');
+  }
+  cv.addEventListener('click',e=>{const b=cv.getBoundingClientRect();q={n:'自定义点',x:(e.clientX-b.left)/b.width,y:(e.clientY-b.top)/b.height};draw();});
+  $$('[data-q]').forEach(b=>b.addEventListener('click',()=>{const p=preset[b.dataset.q];q={n:b.dataset.q,x:p[0],y:p[1]};draw();}));
+  $('#vk').addEventListener('input',e=>{K=+e.target.value;$('#vkV').textContent=K;draw();});
+  draw();
+  let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{layout();draw();},200);});
+  new MutationObserver(draw).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+})();
+})();
+</script>
+</body>
+</html>
