@@ -556,6 +556,12 @@ dialog{max-height:calc(100dvh - 2rem);overflow:auto;overscroll-behavior:contain}
 #stage>*,dialog .dos{zoom:var(--fz,1)}
 .cells{max-width:100%}.cells .cell{flex:1 1 0;min-width:0;max-width:7.5rem}.cells .cell .ch{font-size:min(clamp(2.2rem,7vw,4.2rem),calc((100vw - 3rem) / 5 / var(--fz,1) * .6))}
 @media (max-width:599px){.fspop{position:fixed;left:.6rem;right:.6rem;top:calc(env(safe-area-inset-top,0px) + 3.4rem);justify-content:center;flex-wrap:wrap}#fsbtn{padding:.3rem .5rem}}
+.head .cpall{margin-left:auto;font-size:.85rem;padding:.25rem .75rem;align-self:center}
+.cprow{margin:-.6rem 0 1.2rem;text-align:center}
+.cprow .cpall{font-size:.9rem}
+#toast{position:fixed;z-index:40;left:50%;bottom:calc(var(--footh,4.5rem) + 1rem + env(safe-area-inset-bottom,0px));transform:translate(-50%,1rem);background:var(--ink);color:var(--paper);padding:.55rem 1.1rem;border-radius:999px;font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:calc(100vw - 2rem);text-align:center}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+@media (max-width:599px){.head .cpall{margin-left:0}}
 </style>
 </head>
 <body data-mode="explain">
@@ -2324,7 +2330,7 @@ return {P,COVER,LINKS,QUIZ,ARCH:null,ARCH_LAYERS,FIGCAP,KEY};
 /* ---------- essay pages ---------- */
 function deriveHTML(E,D){
   return `<div class="slide wide"><div>
-  <div class="head"><span class="pos">${D.src}</span><h2>题目与论点推导</h2></div>
+  <div class="head"><span class="pos">${D.src}</span><h2>题目与论点推导</h2>${copyBtn(E)}</div>
   <div class="map">
    <div class="panel stem"><h3>题目要求</h3><p style="margin:0 0 .4rem;font-weight:700">${E.COVER.title}</p><ol>${D.stem.map(s=>`<li>${s}</li>`).join("")}</ol><p class="note">项目：${D.project}</p></div>
    <div class="panel"><h3>五步推导</h3><ul class="judge">
@@ -2342,7 +2348,7 @@ function mapHTML(E,c){
   const C=E.COVER,total=E.P.reduce((a,p)=>a+p.words,0);
   return `<div class="slide wide"><div class="cover">
   <div class="pos" style="display:inline-block">${C.kicker}</div>
-  <h1 class="q">${C.title}</h1>
+  <h1 class="q">${C.title}</h1><div class="cprow">${copyBtn(E)}</div>
   <div class="cells">${C.cells.map(x=>`<div class="cell"><div class="ch">${x[0]}</div><div class="cap"><b>${x[1]}</b><br>${x[2]}</div></div>`).join("")}</div>
   <div class="story"><h3>${C.storyTitle||"三个论点"}</h3><ol>${C.story.map(s=>`<li>${s}</li>`).join("")}</ol></div>
   <div class="panel" style="max-width:46rem;margin:1.2rem auto 0;text-align:left"><h3>九段地图（点击跳转）　全文约 ${total} 字</h3><div class="nine">
@@ -2350,10 +2356,16 @@ function mapHTML(E,c){
   </div></div>
   <p class="meta">${C.meta}</p></div></div>`;
 }
+function essayText(E){const clean=t=>t.replace(/\{\{|\}\}|\(\(|\)\)/g,"");const out=[E.COVER.title,"","摘要"];
+  E.P.forEach(p=>{if(p.n<=2)out.push(clean(p.text));else out.push("",p.title,clean(p.text));});
+  return out.join("\n").replace(/\n{3,}/g,"\n\n");}
+function copyBtn(E){return `<button class="btn cpall" data-act="copyall" data-key="${E.KEY}">复制全文</button>`;}
+async function copyText(t){try{await navigator.clipboard.writeText(t);return true}catch(e){const ta=document.createElement("textarea");ta.value=t;ta.setAttribute("readonly","");ta.style.cssText="position:fixed;top:0;left:0;opacity:0;font-size:16px";document.body.appendChild(ta);ta.select();try{ta.setSelectionRange(0,t.length)}catch(_){}let ok=false;try{ok=document.execCommand("copy")}catch(_){}ta.remove();return ok}}
+function toastB(msg){let t=document.getElementById("toast");if(!t){t=document.createElement("div");t.id="toast";t.setAttribute("role","status");document.body.appendChild(t)}t.textContent=msg;t.classList.add("on");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("on"),2400)}
 function paraHTML(E,p){
   const fig=p.figure&&E.svg?`<figure class="fig">${E.svg}<figcaption>${E.FIGCAP||""}</figcaption></figure>`:"";
   return `<div class="slide"><div>
-    <div class="head"><span class="pos">第 ${p.n} 段｜${p.q}</span><h2>${p.title}</h2><span class="wc">${p.words} 字（建议约 ${p.target}）</span></div>
+    <div class="head"><span class="pos">第 ${p.n} 段｜${p.q}</span><h2>${p.title}</h2><span class="wc">${p.words} 字（建议约 ${p.target}）</span>${copyBtn(E)}</div>
     ${fig}
     <article class="sheet"><div class="essay">${mk(p.text)}</div><ol class="outline">${p.outline.map(x=>`<li>${x}</li>`).join("")}</ol></article>
     <p class="legend2"><span class="sw r">下划线</span>关键词　<span class="sw y">黄底</span>示例数据，背之前换成真实数据</p>
@@ -2825,6 +2837,7 @@ stageB.addEventListener("click",async e=>{
   if(act==="reset"){stageB.querySelectorAll(".essay .k").forEach(x=>x.classList.remove("shown"));updProg()}
   if(act==="openall")stageB.querySelectorAll("details").forEach(d=>d.open=true);
   if(act==="closeall")stageB.querySelectorAll("details").forEach(d=>d.open=false);
+  if(act==="copyall"){const E=ESSAYS.find(x=>x.KEY===a.dataset.key);if(E){const t=essayText(E);const ok=await copyText(t);toastB(ok?`已复制全文，约 ${(t.match(/\S/g)||[]).length} 字`:"复制失败，请长按选择文字复制");}return}
   if(act==="copy"){const t=document.getElementById("prompt"),msg=document.getElementById("copied");
     try{await navigator.clipboard.writeText(t.value);msg.textContent="已复制";}catch(err){t.focus();t.select();msg.textContent="已选中全文，按 Ctrl+C 或 ⌘+C 复制";}}
 });
