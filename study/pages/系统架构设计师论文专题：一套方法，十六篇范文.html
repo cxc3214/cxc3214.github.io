@@ -276,6 +276,9 @@ button{font:inherit;color:inherit}
 .judge{margin:0;padding:0;list-style:none}
 .judge li{display:grid;grid-template-columns:2.4rem 1fr;gap:.5rem;padding:.45rem 0;border-top:1px solid var(--rule);font-size:.92rem}
 .judge li:first-child{border-top:0}
+.judge.timeline li{grid-template-columns:6.2rem minmax(0,1fr);gap:.8rem;align-items:baseline}
+.judge.timeline li b{font-size:1rem;text-align:left;white-space:nowrap;font-variant-numeric:tabular-nums}
+@media (max-width:599px){.judge.timeline li{grid-template-columns:minmax(0,1fr);gap:.1rem}}
 .judge li b{font-family:var(--serif);font-size:1.25rem;color:var(--grid);text-align:center}
 .risk{margin-top:1rem;border-left:3px solid var(--red);background:var(--redsoft);padding:.7rem 1rem;border-radius:0 4px 4px 0;font-size:.92rem}
 .risk b{color:var(--red)}
@@ -410,16 +413,161 @@ html,body{height:100%;overflow:hidden}
 .bmain .stage{overflow-x:hidden}
 .fig{width:auto;margin:0 0 1rem;box-sizing:border-box}
 @media (max-width:767px){.fig::after{content:"图示可左右滑动查看";display:block;font-size:.75rem;color:var(--ink2);text-align:right;padding:.3rem .3rem 0}}
+.dos h2.sec{font-family:var(--serif);font-weight:900;font-size:clamp(1.35rem,3vw,1.8rem);margin:.2rem 0 .3rem}
+.dos p.lead{color:var(--ink2);margin:0 0 1.2rem;max-width:46em}
+.dos .panel{background:var(--paper);border:1.5px solid var(--grid);border-radius:4px;padding:1rem 1.15rem}
+.dos .panel h3{font-family:var(--serif);margin:0 0 .6rem;font-size:1.05rem}
+.dos .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,22rem),1fr));gap:1rem}
+.dos .scroller{overflow-x:auto;border:1.5px solid var(--grid);border-radius:4px;background:var(--paper)}
+.dos table{border-collapse:collapse;width:100%;font-size:.92rem}
+.dos th,.dos td{border-bottom:1px solid var(--rule);padding:.5rem .65rem;text-align:left;vertical-align:top}
+.dos th{background:var(--gridsoft);font-weight:700;white-space:nowrap}
+.dos tr:last-child td{border-bottom:0}
+.dos .chip{display:inline-flex;max-width:100%;align-items:center;gap:.25rem;border:1px solid var(--grid);border-radius:999px;padding:.05rem .55rem;font-size:.8rem;background:var(--paper);cursor:pointer;margin:.15rem .2rem .15rem 0;white-space:nowrap}
+.dos .chip b{font-family:var(--serif);color:var(--red)}
+.dos .chip.k-新增{border-color:var(--grid)}
+.dos .chip.k-替换,.dos .chip.k-升级{border-color:var(--gold);color:var(--gold)}
+.dos .chip.k-预研{border-style:dashed}
+.dos /* timeline */
+.tl{position:relative;margin-top:1.4rem;padding-left:1.6rem}
+.dos .tl::before{content:"";position:absolute;left:.45rem;top:.3rem;bottom:.3rem;border-left:3px solid var(--grid)}
+.dos .ph{position:relative;margin-bottom:1.6rem}
+.dos .ph::before{content:"";position:absolute;left:-1.55rem;top:.35rem;width:1rem;height:1rem;border-radius:50%;background:var(--paper);border:3px solid var(--red)}
+.dos .ph .when{font-family:var(--serif);font-weight:900;color:var(--red);font-size:1.05rem}
+.dos .ph h3{font-family:var(--serif);font-size:1.2rem;margin:.1rem 0 .4rem}
+.dos .ph .meta{font-size:.88rem;color:var(--ink2);margin-bottom:.5rem}
+.dos .ph .goal{margin:.2rem 0 .5rem}
+.dos .ph .pnote{font-size:.85rem;color:var(--ink2);border-left:3px solid var(--gold);padding-left:.6rem;margin:.6rem 0}
+.dos .events{list-style:none;margin:.6rem 0 0;padding:0;border-top:1px dashed var(--rule)}
+.dos .events li{display:grid;grid-template-columns:5.6rem 2.2rem 1fr;gap:.5rem;align-items:baseline;padding:.45rem 0;border-bottom:1px dashed var(--rule);cursor:pointer}
+.dos .events li:hover{background:var(--gridsoft)}
+.dos .events .d{font-size:.82rem;color:var(--ink2);font-variant-numeric:tabular-nums}
+.dos .events .c{font-family:var(--serif);font-weight:900;font-size:1.2rem;color:var(--red);text-align:center}
+.dos .events .tt{font-size:.94rem}
+.dos .events .tt small{display:block;color:var(--ink2);font-size:.8rem}
+.dos /* scene cards */
+.filters{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin:0 0 1rem}
+.dos .filters select,.dos .filters input{border:1.5px solid var(--grid);border-radius:5px;background:var(--paper);padding:.35rem .6rem;min-width:0}
+.dos .filters input{flex:1;min-width:10rem}
+.dos .dseg{display:inline-flex;border:1.5px solid var(--grid);border-radius:5px;overflow:hidden}
+.dos .dseg button{border:0;background:var(--paper);padding:.35rem .7rem;cursor:pointer}
+.dos .dseg button+button{border-left:1.5px solid var(--grid)}
+.dos .dseg button[aria-pressed="true"]{background:var(--grid);color:var(--paper)}
+.dos .scards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,19rem),1fr));gap:.9rem}
+.dos .scard{background:var(--paper);border:1.5px solid var(--grid);border-radius:4px;padding:.85rem 1rem;display:flex;flex-direction:column;gap:.4rem}
+.dos .scard .hd{display:flex;gap:.7rem;align-items:flex-start;cursor:pointer}
+.dos .scard .code{font-family:var(--serif);font-weight:900;font-size:2rem;line-height:1;color:var(--red);min-width:2.2rem;text-align:center;border:1.5px solid var(--red);border-radius:4px;padding:.15rem 0}
+.dos .scard .ti{font-weight:700;line-height:1.45}
+.dos .scard .ti small{display:block;font-weight:400;color:var(--ink2);font-size:.8rem}
+.dos .sbeats{margin:.2rem 0 0;padding:0;list-style:none;font-size:.9rem}
+.dos .sbeats li{display:grid;grid-template-columns:1.6rem 1fr;gap:.4rem;padding:.2rem 0;border-top:1px dashed var(--rule)}
+.dos .sbeats li b{font-family:var(--serif);color:var(--grid)}
+.dos .hide .sbeats li span{color:transparent;background:var(--gridsoft);border-radius:2px;cursor:pointer}
+.dos .hide .sbeats li.shown span{color:inherit;background:none}
+.dos .uses{font-size:.85rem}
+.dos .uses .u{display:block;padding:.1rem 0}
+.dos .uses .u b{color:var(--grid)}
+.dos .hook{font-size:.82rem;color:var(--gold)}
+.dos /* topics */
+.topic{background:var(--paper);border:1.5px solid var(--grid);border-radius:4px;padding:.85rem 1rem}
+.dos .topic h3{font-family:var(--serif);font-size:1.02rem;margin:0 0 .3rem}
+.dos .ttag{display:inline-block;font-size:.72rem;padding:0 .4rem;border-radius:3px;background:var(--grid);color:var(--paper);margin-right:.35rem;vertical-align:2px}
+.dos .ttag.new{background:var(--gold)}
+.dos .topic .q{font-size:.88rem;color:var(--ink2);margin:.2rem 0 .5rem}
+.dos .targs{display:grid;gap:.3rem}
+.dos .targs div{display:grid;grid-template-columns:3.4rem 1fr auto;gap:.5rem;align-items:center;font-size:.9rem;border-top:1px dashed var(--rule);padding-top:.3rem}
+.dos .targs div em{font-style:normal;color:var(--ink2);font-size:.8rem}
+.dos /* training */
+.drill{background:var(--paper);border:1.5px solid var(--grid);border-radius:4px;padding:1rem 1.15rem;margin-bottom:1.2rem}
+.dos .drill h3{font-family:var(--serif);margin:0 0 .2rem;font-size:1.15rem}
+.dos .drill .sub{color:var(--ink2);font-size:.88rem;margin:0 0 .8rem}
+.dos .btn{border:1.5px solid var(--grid);background:var(--paper);border-radius:5px;padding:.4rem .9rem;cursor:pointer}
+.dos .btn.pri{background:var(--grid);color:var(--paper)}
+.dos .btn.warn{border-color:var(--red);color:var(--red)}
+.dos .row{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+.dos .flash{border:2px dashed var(--grid);border-radius:6px;padding:1.2rem;text-align:center;margin:.6rem 0}
+.dos .flash .big{font-family:var(--serif);font-weight:900;font-size:3rem;color:var(--red);line-height:1.1}
+.dos .flash .ft{font-weight:700;font-size:1.1rem;margin:.3rem 0}
+.dos .flash .ask{color:var(--ink2);font-size:.9rem}
+.dos .back{text-align:left;margin-top:.8rem}
+.dos .stats{font-size:.85rem;color:var(--ink2);font-variant-numeric:tabular-nums}
+.dos .timer{font-family:var(--serif);font-weight:900;font-size:1.4rem;font-variant-numeric:tabular-nums;color:var(--grid)}
+.dos .timer.low{color:var(--red)}
+.dos .qbox{background:var(--goldsoft);border-left:4px solid var(--gold);padding:.7rem .9rem;border-radius:0 4px 4px 0;margin:.6rem 0}
+.dos .qbox b{font-family:var(--serif);font-size:1.05rem}
+.dos .form{display:grid;gap:.6rem;margin:.6rem 0}
+.dos .form label{font-size:.88rem;color:var(--ink2);display:block;margin-bottom:.2rem}
+.dos .form input,.dos .form select,.dos .form textarea{width:100%;border:1.5px solid var(--rule);border-radius:5px;background:var(--paper);padding:.45rem .6rem;font-size:16px}
+.dos .form textarea{min-height:14rem;line-height:1.8;font-family:var(--serif)}
+.dos .argrow{display:grid;grid-template-columns:minmax(0,1fr) 9.5rem;gap:.5rem}
+.dos .ref{border-top:2px solid var(--red);margin-top:.8rem;padding-top:.7rem}
+.dos .ref h4{margin:0 0 .3rem;color:var(--red);font-size:.95rem}
+.dos .checks label{display:flex;gap:.5rem;align-items:flex-start;padding:.2rem 0;font-size:.92rem;color:var(--ink)}
+.dos .tpl{font-size:.88rem;display:grid;gap:.25rem;margin:.5rem 0}
+.dos .tpl div{display:grid;grid-template-columns:1.6rem 1fr;gap:.4rem}
+.dos .tpl b{font-family:var(--serif);color:var(--grid)}
+.dos .plan{list-style:none;margin:0;padding:0}
+.dos .plan li{display:grid;grid-template-columns:6.5rem 1fr;gap:.6rem;padding:.45rem 0;border-top:1px dashed var(--rule)}
+.dos .plan li b{font-variant-numeric:tabular-nums;color:var(--red)}
+.dos .fixed p{font-family:var(--serif);font-size:.95rem;line-height:1.9;margin:.3rem 0 1rem;background:var(--gridsoft);padding:.6rem .8rem;border-radius:4px}
+.dos .method ol{padding-left:1.3em}
+.dos .method li{margin:.45rem 0}
+.dos .callout{border-left:4px solid var(--red);background:var(--redsoft);padding:.8rem 1rem;border-radius:0 4px 4px 0;margin:1rem 0}
+.dos /* modal */
+dialog{border:0;border-radius:8px;padding:0;max-width:min(36rem,94vw);width:100%;background:var(--paper);color:var(--ink);box-shadow:0 12px 40px rgba(0,0,0,.3)}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+dialog .scard{border:0}
+dialog .x{position:absolute;right:.6rem;top:.5rem;border:0;background:none;font-size:1.4rem;cursor:pointer;color:var(--ink2)}
+@media (max-width:600px){.dos .events li{grid-template-columns:4.6rem 1.8rem 1fr}
+.dos .argrow{grid-template-columns:minmax(0,1fr) 7.5rem}
+.dos .targs div{grid-template-columns:2.8rem 1fr}
+.dos .targs div .chip{grid-column:2}
+.dos .plan li{grid-template-columns:5rem 1fr}}
+
+from{opacity:0;transform:translateY(4px)}
+to{opacity:1;transform:none}
+.dos .ph .chip{white-space:normal;border-radius:6px;text-align:left}
+.dos h3.part{font-family:var(--serif);font-weight:900;font-size:1.25rem;margin:1.8rem 0 .8rem;padding-bottom:.3rem;border-bottom:2px solid var(--red)}
+.dos h3.sec2{font-family:var(--serif);font-size:1.1rem;margin:.6rem 0 .6rem}
+.dos .slinks{display:flex;flex-wrap:wrap;gap:.2rem;border-top:1px dashed var(--rule);padding-top:.4rem}
+.dos .chip.lnk{border-color:var(--red);color:var(--red)}
+.dos .tl.solo{margin-top:.4rem}
+dialog .dos .scard{border:0}
+
+dialog .dos{padding:2.4rem .2rem .2rem}
+dialog .x{z-index:2}
+
+#backbtn{position:fixed;z-index:12;left:50%;transform:translateX(-50%);bottom:calc(var(--footh,4rem) + .8rem + env(safe-area-inset-bottom,0px));display:inline-flex;align-items:center;gap:.4rem;border:0;border-radius:999px;background:var(--red);color:#fff;padding:.55rem 1.1rem;font-size:.92rem;box-shadow:0 6px 18px rgba(0,0,0,.25);cursor:pointer;max-width:calc(100vw - 2rem);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#backbtn[hidden]{display:none}
+@media (min-width:1024px){#backbtn{left:calc(17.5rem + (100vw - 17.5rem)/2)}}
+dialog{max-height:calc(100dvh - 2rem);overflow:auto;overscroll-behavior:contain}
+.dos .scard,.dos .scards>*,.dos .topic,.dos .drill{min-width:0}
+.dos .filters input{min-width:8rem}
+.dos .ti{min-width:0;overflow-wrap:anywhere}
+.has-back .bmain .stage{padding-bottom:5.5rem}
+@media (max-width:360px){.cells .cell{width:17.6vw}.cells .cell .ch{font-size:1.8rem}.cells .cell .cap{font-size:.62rem}}
+.fsw{position:relative;flex:none}
+#fsbtn{border:1.5px solid var(--grid);background:var(--paper);border-radius:5px;padding:.25rem .6rem;cursor:pointer;font-family:var(--serif);font-weight:700;line-height:1.3}
+.fspop{position:absolute;right:0;top:calc(100% + .45rem);z-index:30;background:var(--paper);border:1.5px solid var(--grid);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.18);padding:.55rem .6rem;display:flex;gap:.3rem;align-items:center;white-space:nowrap}
+.fspop[hidden]{display:none}
+.fspop span{font-size:.8rem;color:var(--ink2);margin-right:.2rem}
+.fspop button{border:1.5px solid var(--rule);background:var(--paper);border-radius:4px;padding:.3rem .6rem;cursor:pointer;font-size:.88rem}
+.fspop button[aria-pressed="true"]{background:var(--grid);color:var(--paper);border-color:var(--grid)}
+#stage>*,dialog .dos{zoom:var(--fz,1)}
+.cells{max-width:100%}.cells .cell{flex:1 1 0;min-width:0;max-width:7.5rem}.cells .cell .ch{font-size:min(clamp(2.2rem,7vw,4.2rem),calc((100vw - 3rem) / 5 / var(--fz,1) * .6))}
+@media (max-width:599px){.fspop{position:fixed;left:.6rem;right:.6rem;top:calc(env(safe-area-inset-top,0px) + 3.4rem);justify-content:center;flex-wrap:wrap}#fsbtn{padding:.3rem .5rem}}
 </style>
 </head>
 <body data-mode="explain">
 <div class="book">
   <nav class="toc" aria-label="目录"><div class="brand">系统架构设计师论文专题<small>一套方法，十六篇范文</small></div><div id="toc"></div></nav>
   <div id="scrim"></div>
+  <dialog id="dlg"><button class="x" id="dlgx" aria-label="关闭">×</button><div id="dlgbody"></div></dialog>
   <div class="bmain">
     <header class="bar">
       <button id="tocbtn">目录</button>
       <div class="t" id="ctitle"></div>
+      <div class="fsw"><button id="fsbtn" aria-label="调整字号" aria-haspopup="true" aria-expanded="false" title="调整字号（快捷键 + 和 -）">Aa</button><div class="fspop" id="fspop" hidden><span>字号</span><button data-fz="0.9">小</button><button data-fz="1">标准</button><button data-fz="1.15">大</button><button data-fz="1.3">较大</button><button data-fz="1.45">特大</button></div></div>
       <div class="modes" role="group" aria-label="学习模式">
         <button data-m="explain" aria-pressed="true" title="快捷键 1">讲解</button>
         <button data-m="recite" aria-pressed="false" title="快捷键 2">背诵</button>
@@ -428,6 +576,7 @@ html,body{height:100%;overflow:hidden}
       <div class="count" id="count"></div>
     </header>
     <main class="stage" id="stage"></main>
+    <button id="backbtn" hidden><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>返回</span></button>
     <footer class="foot">
       <button class="nav" id="prev">上一页</button>
       <div class="segs" id="segs"></div>
@@ -713,10 +862,11 @@ const DECK=[
 
 const PARTS=[
  {id:"guide",title:"第一编　总纲：论点怎么找"},
- {id:"past",title:"第二编　真题与上轮预测"},
- {id:"pred",title:"第三编　2026 年 11 月预测"},
- {id:"drill",title:"第四编　专题练习"},
- {id:"trend",title:"第五编　趋势预测"},
+ {id:"proj",title:"第二编　项目档案与临场训练"},
+ {id:"past",title:"第三编　真题与上轮预测"},
+ {id:"pred",title:"第四编　2026 年 11 月预测"},
+ {id:"drill",title:"第五编　专题练习"},
+ {id:"trend",title:"第六编　趋势预测"},
  {id:"appx",title:"附录"}];
 const ESSAY_META=[
  {key:"cnd3",part:"past"},{key:"hc",part:"past"},{key:"aigc",part:"past"},
@@ -809,28 +959,28 @@ sec:{src:"专题练习题（用户指定）",project:"政务服务一网通办�
  bury:"第 5 段讲设计原则，以“纵深防御”引出三层结构。",
  args:[["认人","接入层：认证（威胁：撞库）","9 月 1 小时 20 万次登录尝试"],["控权","应用层：权限与接口（威胁：越权）","渗透测试改编号可看他人办件"],["护数","数据层：隐私保护（威胁：内部滥用）","10 月账号借用批量查询"]],
  check:"每个论点必须出现一个具体威胁及其解决，否则第三问后半句漏答。押题课另一种问法是“鉴别框架与访问控制框架及其威胁”：第 5 段已补入两个框架，论点一、二分别对应鉴别和访问控制，可直接改用。"},
-vibe:{src:"趋势预测：Vibe Coding（2025 年热词；AI 题连续出现）",project:"平台四期（2025 年）",
+vibe:{src:"趋势预测：Vibe Coding（2025 年热词；AI 题连续出现）",project:"平台二期（2025 年）",
  stem:[Q1,"请简要说明 Vibe Coding 的概念、特点及其与传统开发方式的区别。","结合你参与管理和开发的项目，论述在应用 Vibe Coding 的过程中，如何保证生成代码符合架构约束、如何保障代码质量与安全，以及它给开发流程带来了哪些变化。（自拟题）"],
  type:"A",look:"第三问点名{{架构约束}}、{{质量与安全}}、{{开发流程变化}}。",
  how:"照着拆。三个论点按“写在哪里 → 写得对不对 → 流程怎么变”递进。",
  bury:"第 5 段写三个区别，其中“风险转向偏离架构、安全漏洞、虚构依赖”直接引出论点一、二。",
  args:[["规在前","架构约束","生成代码直读办件中心数据库"],["验在后","质量与安全","会签被错转为顺序审批"],["流程变","开发流程变化","演示时才发现需求偏差"]],
  check:"政务代码不出内网，私有化部署是前提；效果要有工作量和配置时间的对比。"},
-agent:{src:"趋势预测：大模型智能体（2025 年起快速落地）",project:"平台四期（2025 年）",
+agent:{src:"趋势预测：大模型智能体（2025 年起快速落地）",project:"平台二期（2025 年）",
  stem:[Q1,"请简要说明大模型智能体的基本组成，及其与传统问答式大模型应用的区别。","结合你参与的项目，论述智能体的架构设计，包括任务规划与工具调用、记忆与知识管理、安全可控与人工协同等方面，并说明实施效果。（自拟题）"],
  type:"A",look:"第三问点名{{任务规划与工具调用}}、{{记忆与知识管理}}、{{安全可控与人工协同}}。",
  how:"照着拆，对应智能体的规划、记忆、安全控制三部分。",
  bury:"第 5 段从“问答只生成文本、智能体直接作用于外部系统”推出三项架构要求，即三个论点。",
  args:[["会规划","任务规划与工具调用","“我要开饭店”多步办事"],["记得住","记忆与知识管理","长对话遗忘、成本上升"],["管得住","安全可控与人工协同","材料图片中的间接提示词注入"]],
  check:"与一期导办、数据中台篇衔接：预填调用数据共享中心服务。"},
-xc:{src:"趋势预测：信创国产化迁移（政务与国企全面推进）",project:"平台四期（2025 年）",
+xc:{src:"趋势预测：信创国产化迁移（政务与国企全面推进）",project:"平台二期（2025 年）",
  stem:[Q1,"请简要说明信息技术应用创新（信创）的背景，以及系统国产化迁移涉及的主要层次和风险。","结合你参与的项目，论述国产化迁移的架构设计与实施过程，包括技术栈选型与适配、数据库迁移、平稳切换与验证等方面，并说明实施效果。（自拟题）"],
  type:"A",look:"第三问点名{{选型与适配}}、{{数据库迁移}}、{{平稳切换与验证}}。",
  how:"按{{实施阶段}}（生命周期）提取：选 → 迁 → 切。",
  bury:"第 5 段列出五个层次和四类风险，兼容与性能对应论点一，数据对应论点二，切换对应论点三。",
  args:[["选得准","技术栈选型与适配","x86 本地库组件在 ARM 上无法加载"],["迁得全","数据库迁移","大小写与尾部空格导致索引冲突"],["切得稳","平稳切换与验证","除法精度差异致统计结果不一致"]],
  check:"切换必须写回滚方案；数据校验必须写两级校验。"},
-mesh:{src:"2026 年 11 月预测 6：服务网格（Service Mesh）",project:"平台四期（2025 年）",
+mesh:{src:"2026 年 11 月预测 6：服务网格（Service Mesh）",project:"平台二期（2025 年）",
  stem:[Q1,"详细论述服务网格架构下的服务治理机制、全链路可观测性构建方法，以及基于零信任的安全防护策略。","结合你具体参与的项目，说明引入服务网格的具体实施路径，遇到的挑战及解决方案，并分析其对系统可维护性与稳定性的提升作用。"],
  type:"B",look:"第二问点名三项能力：{{服务治理}}、{{全链路可观测性}}、{{零信任安全}}，且要求“详细论述”。第三问给出三个过程词：{{实施路径}}、{{挑战及解决}}、{{可维护性与稳定性的提升}}。",
  how:"按{{实施阶段}}（生命周期）提取：试点、推广、收口三个阶段，正好回答“实施路径”；三个阶段依次落实第二问的三项能力，每个阶段的“坑”回答挑战及解决，“证”与结尾回答可维护性与稳定性。",
@@ -1816,19 +1966,19 @@ return {P,COVER,LINKS:(typeof LINKS!=='undefined'?LINKS:[]),QUIZ,ARCH:(typeof AR
 ESSAYS.push((function(){
 const P = [
 {n:1, short:"段1 摘要·项目", role:"交代项目与本人职责", q:"摘要", target:"160", title:"摘要（一）：项目与职责",
- text:"{{2025 年 5 月}}，我参与了某市{{政务服务一网通办与基层治理协同平台四期}}的建设，担任{{系统架构师}}。四期的核心任务是将原先硬编码在办件中心中的审批流程，改造为业务人员可配置的{{自定义流程平台}}，包括流程设计器、表单设计器和流程引擎。项目建设周期((7 个月))，团队共((15 人))。我负责四期的总体架构设计，并牵头在开发过程中引入 {{Vibe Coding}} 方式，制定其使用规范和质量保障机制。",
- outline:["<b>时间与项目</b>：2025 年 5 月，平台四期","<b>任务</b>：硬编码流程改造为自定义流程平台（流程设计器、表单设计器、流程引擎）","<b>角色与规模</b>：系统架构师；7 个月，15 人","<b>职责</b>：总体架构；牵头引入 Vibe Coding 并制定规范"],
- memo:"四期、流程平台、15 人、牵头 Vibe Coding", tip:"四期与一期是同一平台，时间、角色要与其他论文衔接。", explain:["四期的改造对象是“硬编码流程”，这与一期架构评估中识别的“新事项接入需修改多个服务代码”风险一脉相承。"]},
+ text:"{{2025 年 5 月}}，我参与了某市{{政务服务一网通办与基层治理协同平台二期}}的建设，担任{{系统架构师}}。二期的核心任务是将原先硬编码在办件中心中的审批流程，改造为业务人员可配置的{{自定义流程平台}}，包括流程设计器、表单设计器和流程引擎。项目建设周期((7 个月))，团队共((15 人))。我负责二期的总体架构设计，并牵头在开发过程中引入 {{Vibe Coding}} 方式，制定其使用规范和质量保障机制。",
+ outline:["<b>时间与项目</b>：2025 年 5 月，平台二期","<b>任务</b>：硬编码流程改造为自定义流程平台（流程设计器、表单设计器、流程引擎）","<b>角色与规模</b>：系统架构师；7 个月，15 人","<b>职责</b>：总体架构；牵头引入 Vibe Coding 并制定规范"],
+ memo:"二期、流程平台、15 人、牵头 Vibe Coding", tip:"二期与一期是同一平台，时间、角色要与其他论文衔接。", explain:["二期的改造对象是“硬编码流程”，这与一期架构评估中识别的“新事项接入需修改多个服务代码”风险一脉相承。"]},
 {n:2, short:"段2 摘要·主旨", role:"概括问题、做法与效果", q:"摘要", target:"220", title:"摘要（二）：问题、做法与效果",
- text:"本文结合该项目，论述 Vibe Coding 在软件开发中的应用。四期需要在有限工期内完成流程平台建设，并将((300 余个))硬编码流程迁移到新平台，工作量大且时间紧。我们在政务内网{{私有化部署代码大模型}}，引入以自然语言驱动、由 AI 生成代码的 Vibe Coding 方式。针对生成代码{{偏离架构约束}}、{{质量和安全难以保证}}以及{{开发流程不适应}}三方面问题，我们分别通过{{项目规则文件与架构守护测试}}、{{测试先行与分级审查}}、{{原型确认与角色调整}}加以解决。四期按期交付，开发工作量较原估算减少((约 30%))，新事项流程的配置上线时间由((2 周))缩短至((2 天))。",
+ text:"本文结合该项目，论述 Vibe Coding 在软件开发中的应用。二期需要在有限工期内完成流程平台建设，并将((300 余个))硬编码流程迁移到新平台，工作量大且时间紧。我们在政务内网{{私有化部署代码大模型}}，引入以自然语言驱动、由 AI 生成代码的 Vibe Coding 方式。针对生成代码{{偏离架构约束}}、{{质量和安全难以保证}}以及{{开发流程不适应}}三方面问题，我们分别通过{{项目规则文件与架构守护测试}}、{{测试先行与分级审查}}、{{原型确认与角色调整}}加以解决。二期按期交付，开发工作量较原估算减少((约 30%))，新事项流程的配置上线时间由((2 周))缩短至((2 天))。",
  outline:["<b>点题</b>：论述 Vibe Coding 在软件开发中的应用","<b>压力</b>：工期紧；300 余个流程迁移","<b>前提</b>：政务内网私有化部署代码大模型","<b>三个问题与做法</b>：架构约束 → 规则文件与守护测试；质量安全 → 测试先行与分级审查；流程 → 原型确认与角色调整","<b>效果</b>：工作量减少约 30%；配置上线 2 周缩至 2 天"],
  memo:"规在前，验在后，流程跟着变", tip:"政务代码不出内网，私有化部署是前提，必须写。", explain:["三个问题对应第三问点名的三项：架构约束、质量与安全、开发流程。"]},
 {n:3, short:"段3 背景痛点", role:"建设背景与改造动因", q:"第一问", target:"330", title:"一、项目背景",
- text:"平台一期上线后，可办理事项已超过((1800 项))，但每个事项的审批流程都{{硬编码在办件中心}}中。新增一个事项或调整一个审批环节，都需要开发人员修改代码、测试并发布，平均需要((2 周))左右；政策调整频繁时，开发团队疲于应付，业务部门也抱怨响应太慢。一期的架构评估已将这一问题列为可修改性方面的风险。四期的目标是建设{{自定义流程平台}}：业务人员通过可视化的流程设计器和表单设计器配置流程，由流程引擎统一执行，并把现有的((300 余个))硬编码流程迁移过来。这项工作涉及前端设计器、流程引擎改造、大量适配接口和迁移脚本，而工期只有((7 个月))，团队仅((15 人))，按传统方式估算存在明显缺口。与此同时，基于大模型的编程工具在 2025 年快速成熟，以自然语言描述需求、由 AI 生成和修改代码的 Vibe Coding 方式受到广泛关注。经过小范围试用，我提出在四期中引入这种方式，但必须在{{可控的前提下}}使用。",
- outline:["<b>现状</b>：1800 余项事项，流程硬编码，调整一次约 2 周","<b>来源</b>：一期架构评估识别的可修改性风险","<b>四期目标</b>：流程设计器、表单设计器、流程引擎；迁移 300 余个流程","<b>缺口</b>：7 个月、15 人，传统方式工作量不足","<b>机会</b>：2025 年 AI 编程工具成熟","<b>态度</b>：可控前提下引入"],
- memo:"硬编码 2 周 → 四期做流程平台 → 人少活多 → 可控引入 Vibe Coding", tip:"引入新方法要有动因：工作量缺口，而不是追新。", explain:["与架构评估篇呼应：评估识别的风险在四期得到解决，体现项目的连续性。"]},
+ text:"平台一期上线后，可办理事项已超过((1800 项))，但每个事项的审批流程都{{硬编码在办件中心}}中。新增一个事项或调整一个审批环节，都需要开发人员修改代码、测试并发布，平均需要((2 周))左右；政策调整频繁时，开发团队疲于应付，业务部门也抱怨响应太慢。一期的架构评估已将这一问题列为可修改性方面的风险。二期的目标是建设{{自定义流程平台}}：业务人员通过可视化的流程设计器和表单设计器配置流程，由流程引擎统一执行，并把现有的((300 余个))硬编码流程迁移过来。这项工作涉及前端设计器、流程引擎改造、大量适配接口和迁移脚本，而工期只有((7 个月))，团队仅((15 人))，按传统方式估算存在明显缺口。与此同时，基于大模型的编程工具在 2025 年快速成熟，以自然语言描述需求、由 AI 生成和修改代码的 Vibe Coding 方式受到广泛关注。经过小范围试用，我提出在二期中引入这种方式，但必须在{{可控的前提下}}使用。",
+ outline:["<b>现状</b>：1800 余项事项，流程硬编码，调整一次约 2 周","<b>来源</b>：一期架构评估识别的可修改性风险","<b>二期目标</b>：流程设计器、表单设计器、流程引擎；迁移 300 余个流程","<b>缺口</b>：7 个月、15 人，传统方式工作量不足","<b>机会</b>：2025 年 AI 编程工具成熟","<b>态度</b>：可控前提下引入"],
+ memo:"硬编码 2 周 → 二期做流程平台 → 人少活多 → 可控引入 Vibe Coding", tip:"引入新方法要有动因：工作量缺口，而不是追新。", explain:["与架构评估篇呼应：评估识别的风险在二期得到解决，体现项目的连续性。"]},
 {n:4, short:"段4 本人工作", role:"本人工作", q:"第一问", target:"240", title:"二、本人主要工作",
- text:"四期团队包括前端、后端、测试和业务分析人员，技术栈在原有 {{Spring Cloud}}、{{Kafka}}、{{MySQL}}、{{Kubernetes}} 的基础上引入了 {{BPMN 流程引擎}}。我负责四期的总体架构设计，确定流程设计器、表单设计器、流程引擎与办件中心之间的边界和接口。在 Vibe Coding 方面，我与运维人员共同完成了{{代码大模型的内网部署}}，规定源代码不得流出政务内网；编写并维护{{项目规则文件}}，把分层规范、接口约定和安全要求写成 AI 可以遵循的约束；制定{{生成代码的审查分级和测试要求}}；并调整团队的{{开发流程和分工}}。开发过程中，我每周检查架构守护测试的结果，对反复出现的问题及时修订规则文件。",
+ text:"二期团队包括前端、后端、测试和业务分析人员，技术栈在原有 {{Spring Cloud}}、{{Kafka}}、{{MySQL}}、{{Kubernetes}} 的基础上引入了 {{BPMN 流程引擎}}。我负责二期的总体架构设计，确定流程设计器、表单设计器、流程引擎与办件中心之间的边界和接口。在 Vibe Coding 方面，我与运维人员共同完成了{{代码大模型的内网部署}}，规定源代码不得流出政务内网；编写并维护{{项目规则文件}}，把分层规范、接口约定和安全要求写成 AI 可以遵循的约束；制定{{生成代码的审查分级和测试要求}}；并调整团队的{{开发流程和分工}}。开发过程中，我每周检查架构守护测试的结果，对反复出现的问题及时修订规则文件。",
  outline:["<b>技术</b>：原有技术栈 + BPMN 流程引擎","<b>架构</b>：设计器、引擎与办件中心的边界和接口","<b>Vibe Coding</b>：内网部署；规则文件；审查分级与测试要求；流程与分工调整","<b>持续</b>：每周检查守护测试，修订规则"],
  memo:"边界、部署、规则、审查、流程", tip:"“规则文件由架构师维护”是 AI 时代架构师职责变化的体现。", explain:["四项 Vibe Coding 工作分别对应三个论点。"]},
 {n:5, short:"段5 概念与区别", role:"第二问：概念、特点与区别", q:"第二问", target:"420", figure:true, title:"三、Vibe Coding 的概念、特点及与传统开发的区别",
@@ -1840,23 +1990,23 @@ const P = [
  outline:["<b>景</b>：生成代码直读办件中心数据库；风格各异","<b>比</b>：事后评审纠正 vs 生成前约束","<b>选</b>：避免反复返工，选事前约束","<b>做</b>：项目规则文件；参考实现；架构守护测试进流水线","<b>坑</b>：规则文件过长后半部分被忽略 → 按模块拆分，可自动检查的交给测试","<b>证</b>：跨层违规每周 20 余处降至个位数"],
  memo:"直读别人库 → 事后 vs 事前 → 规则文件、参考实现、守护测试 → 规则太长就拆", tip:"“规则文件 + 守护测试”是本文最核心的架构治理手段，要写清两者分工。", explain:["规则文件负责“告诉 AI 怎么写”，守护测试负责“检查写得对不对”，两者配合才可靠。","规则文件过长导致遵循变差，是使用大模型时的真实现象。"]},
 {n:7, short:"段7 论点二·验", role:"论点二：保障代码质量与安全", q:"第三问", target:"480", arg:true, title:"（二）以测试先行和分级审查保障质量与安全",
- text:"架构约束解决了“写在哪里”，质量与安全要解决的是“写得对不对”。生成代码往往看起来能运行，但边界条件、并发和异常处理容易出问题。迁移工作中，AI 生成的转换脚本把一类会签节点错误地转换成了顺序审批，若未发现，将导致审批规则被改变。质量保障有两种思路：对所有生成代码{{人工逐行审查}}，或{{测试先行加分级审查}}。全部逐行审查会抵消 Vibe Coding 带来的效率，因此我选择了后者。测试先行是指先用自然语言描述功能的行为，生成测试用例并由人审定，再生成实现代码，以审定后的测试作为验收标准。分级审查是把代码分为两级：流程引擎、权限和数据访问等{{核心代码}}必须双人逐行审查；页面、样板代码等{{外围代码}}以测试和抽查为主。对于 ((300 余个))流程的迁移，我们用历史办件数据进行{{回放比对}}，新旧流程走向不一致的逐个人工核查。安全方面，流水线中加入静态代码扫描和依赖扫描。实施中还出现了一个意外：AI 建议引入的一个依赖包版本并不存在，另一个存在已知漏洞。此后我们规定依赖只能从内部制品库的{{白名单}}中选择，新增依赖须经评审。最终，迁移流程的回放一致率达到((99.6%))，其余差异均经业务确认后修正；四期上线后的缺陷密度未高于以往版本。",
+ text:"架构约束解决了“写在哪里”，质量与安全要解决的是“写得对不对”。生成代码往往看起来能运行，但边界条件、并发和异常处理容易出问题。迁移工作中，AI 生成的转换脚本把一类会签节点错误地转换成了顺序审批，若未发现，将导致审批规则被改变。质量保障有两种思路：对所有生成代码{{人工逐行审查}}，或{{测试先行加分级审查}}。全部逐行审查会抵消 Vibe Coding 带来的效率，因此我选择了后者。测试先行是指先用自然语言描述功能的行为，生成测试用例并由人审定，再生成实现代码，以审定后的测试作为验收标准。分级审查是把代码分为两级：流程引擎、权限和数据访问等{{核心代码}}必须双人逐行审查；页面、样板代码等{{外围代码}}以测试和抽查为主。对于 ((300 余个))流程的迁移，我们用历史办件数据进行{{回放比对}}，新旧流程走向不一致的逐个人工核查。安全方面，流水线中加入静态代码扫描和依赖扫描。实施中还出现了一个意外：AI 建议引入的一个依赖包版本并不存在，另一个存在已知漏洞。此后我们规定依赖只能从内部制品库的{{白名单}}中选择，新增依赖须经评审。最终，迁移流程的回放一致率达到((99.6%))，其余差异均经业务确认后修正；二期上线后的缺陷密度未高于以往版本。",
  outline:["<b>景</b>：生成代码看似能跑；迁移脚本把会签错转为顺序审批","<b>比</b>：全部逐行审查 vs 测试先行 + 分级审查","<b>选</b>：逐行审查抵消效率，选后者","<b>做</b>：先审测试再生成实现；核心双人逐行、外围抽查；历史办件回放比对；静态与依赖扫描","<b>坑</b>：AI 推荐不存在的版本和有漏洞的依赖 → 内部白名单","<b>证</b>：回放一致率 99.6%；缺陷密度未高于以往"],
  memo:"会签变顺序 → 逐行 vs 测试先行 → 核心双人、外围抽查 → 回放比对 → 依赖白名单", tip:"“先审测试，再生成实现”是 AI 编程质量保障的关键做法。", explain:["会签被错转为顺序审批，是业务后果明确的真实问题，比泛泛说“生成代码有缺陷”更具体。","AI 推荐不存在或有漏洞的依赖，是 AI 编程特有的安全风险。"]},
 {n:8, short:"段8 论点三·流", role:"论点三：开发流程的变化", q:"第三问", target:"440", arg:true, title:"（三）开发流程与团队分工的调整",
- text:"前两项措施落实后，Vibe Coding 对{{开发流程}}的影响逐渐显现。以往的流程是业务分析人员编写需求文档，开发完成后再演示给业务部门，往往到演示时才发现理解有偏差。对此有两种做法：维持原流程，只把 AI 当作代码补全工具；或{{调整流程}}，发挥其快速生成的优势。我选择了后者。在需求阶段，业务分析人员和开发人员在需求评审会上用 AI 当场生成{{可交互的原型}}，例如流程设计器的节点配置页面，业务人员直接操作并提出修改，确认后再进入开发。团队分工也随之调整：开发人员的工作重心转向{{编写规格、审查代码和设计测试}}；架构师负责维护规则文件和参考实现；测试人员提前参与，与开发人员共同审定测试用例。迭代周期由((两周))缩短为((一周))。调整过程中也出现了问题：原型生成太快，业务部门在开发阶段仍不断提出新的修改，需求反复变化。我们因此规定原型只用于确认需求，确认后设定{{需求冻结点}}，冻结后的变更进入下一迭代。四期最终按期交付，开发工作量较原估算减少((约 30%))，因理解偏差导致的返工明显减少；流程平台上线后，新事项流程的配置上线时间由((2 周))缩短至((2 天))。",
+ text:"前两项措施落实后，Vibe Coding 对{{开发流程}}的影响逐渐显现。以往的流程是业务分析人员编写需求文档，开发完成后再演示给业务部门，往往到演示时才发现理解有偏差。对此有两种做法：维持原流程，只把 AI 当作代码补全工具；或{{调整流程}}，发挥其快速生成的优势。我选择了后者。在需求阶段，业务分析人员和开发人员在需求评审会上用 AI 当场生成{{可交互的原型}}，例如流程设计器的节点配置页面，业务人员直接操作并提出修改，确认后再进入开发。团队分工也随之调整：开发人员的工作重心转向{{编写规格、审查代码和设计测试}}；架构师负责维护规则文件和参考实现；测试人员提前参与，与开发人员共同审定测试用例。迭代周期由((两周))缩短为((一周))。调整过程中也出现了问题：原型生成太快，业务部门在开发阶段仍不断提出新的修改，需求反复变化。我们因此规定原型只用于确认需求，确认后设定{{需求冻结点}}，冻结后的变更进入下一迭代。二期最终按期交付，开发工作量较原估算减少((约 30%))，因理解偏差导致的返工明显减少；流程平台上线后，新事项流程的配置上线时间由((2 周))缩短至((2 天))。",
  outline:["<b>景</b>：需求文档到演示才发现偏差","<b>比</b>：只当补全工具 vs 调整流程","<b>选</b>：发挥快速生成优势，调整流程","<b>做</b>：评审会当场生成可交互原型；开发转向规格、审查、测试；架构师维护规则；测试前移；迭代一周","<b>坑</b>：原型太快导致需求反复 → 需求冻结点","<b>证</b>：按期交付；工作量减少约 30%；配置上线 2 周缩至 2 天"],
  memo:"演示才发现偏差 → 当场出原型 → 人转向规格、审查、测试 → 冻结点防反复", tip:"写出角色变化，回答“对开发流程的影响”。", explain:["首句承接前两项措施，说明流程变化建立在约束与质量机制之上。","“原型太快导致需求反复”是真实的副作用，写出来更可信。"]},
 {n:9, short:"段9 总结", role:"效果、评价、体会、不足与改进", q:"结尾", target:"290", title:"四、总结",
- text:"平台四期按期交付，自定义流程平台上线后，业务人员已自行配置和调整了((百余个))事项流程，开发团队不再疲于应付流程变更，得到了建设单位的认可。通过本项目我体会到，Vibe Coding 提高了编码速度，但{{架构约束、质量标准和安全要求}}不会因此降低，反而需要以规则文件、守护测试和分级审查等更明确的形式表达出来；架构师的工作也从“写代码、审代码”更多转向“定规则、守边界”。项目也存在不足：规则文件的维护{{依赖少数人}}，人员变动时存在风险；生成代码的{{可理解性}}仍不如人工代码，后期维护成本有待观察；对 AI 使用效果的度量{{较为粗略}}。后续计划将规则文件纳入版本管理并建立评审机制，要求核心代码补充设计说明，并建立 AI 生成代码占比、缺陷率等度量指标。",
+ text:"平台二期按期交付，自定义流程平台上线后，业务人员已自行配置和调整了((百余个))事项流程，开发团队不再疲于应付流程变更，得到了建设单位的认可。通过本项目我体会到，Vibe Coding 提高了编码速度，但{{架构约束、质量标准和安全要求}}不会因此降低，反而需要以规则文件、守护测试和分级审查等更明确的形式表达出来；架构师的工作也从“写代码、审代码”更多转向“定规则、守边界”。项目也存在不足：规则文件的维护{{依赖少数人}}，人员变动时存在风险；生成代码的{{可理解性}}仍不如人工代码，后期维护成本有待观察；对 AI 使用效果的度量{{较为粗略}}。后续计划将规则文件纳入版本管理并建立评审机制，要求核心代码补充设计说明，并建立 AI 生成代码占比、缺陷率等度量指标。",
  outline:["<b>效果与评价</b>：按期交付；业务人员自配百余个流程；建设单位认可","<b>体会</b>：约束不降低，形式更明确；架构师转向定规则、守边界","<b>不足</b>：规则维护依赖少数人；可理解性；度量粗略","<b>改进</b>：规则版本管理与评审；核心代码设计说明；建立度量指标"],
  memo:"效果、体会、三不足对三改进", tip:"“架构师从写代码转向定规则、守边界”是本文的立意。", explain:["不足中的“可理解性”与第二问中 Vibe Coding 的局限相呼应。"]}
 ];
 const COVER={kicker:"趋势预测题｜九段法",title:"论 Vibe Coding 在软件开发中的应用",
  cells:[["规","规在前","规则文件与守护测试"],["验","验在后","测试先行与分级审查"],["流","流程变","原型确认与角色调整"]],
- storyTitle:"四期流程平台改造中的三件事",
+ storyTitle:"二期流程平台改造中的三件事",
  story:["<b>规</b>：生成代码直读办件中心数据库；规则文件、参考实现、守护测试；规则过长就按模块拆分。","<b>验</b>：会签被错转为顺序审批；先审测试再生成；核心双人审查；回放比对；依赖白名单。","<b>流</b>：评审会当场生成原型；开发转向规格与审查；迭代一周；需求冻结点。"],
- meta:"项目：政务服务一网通办与基层治理协同平台四期（2025 年）"};
+ meta:"项目：政务服务一网通办与基层治理协同平台二期（2025 年）"};
 const LINKS=["论点一 → 论点二：“架构约束解决了‘写在哪里’，质量与安全要解决的是‘写得对不对’。”","论点二 → 论点三：“前两项措施落实后，Vibe Coding 对开发流程的影响逐渐显现。”"];
 const QUIZ=[["三个论点的口诀？","规在前，验在后，流程跟着变。"],["Vibe Coding 的概念？","用自然语言描述意图，由大模型生成代码，主要依据运行结果判断并用自然语言迭代修改。"],["与传统开发的三个区别？","编码主体转向 AI；速度提高但可理解性和一致性下降；风险转向偏离架构、安全漏洞、虚构依赖。"],["约束生成代码的三项措施？","项目规则文件；参考实现；架构守护测试进入流水线。"],["规则文件过长怎么办？","按模块拆分、按任务加载；可自动检查的规则交给守护测试。"],["质量保障的做法？","测试先行（先审测试再生成实现）；核心代码双人逐行、外围抽查；历史办件回放比对；静态与依赖扫描。"],["AI 推荐依赖的问题如何处理？","依赖只能从内部制品库白名单选择，新增须评审。"],["流程与分工的变化？","评审会当场生成原型；开发转向规格、审查、测试；架构师维护规则；测试前移；迭代一周；设需求冻结点。"]];
 const ARCH_LAYERS=[
@@ -1873,19 +2023,19 @@ return {P,COVER,LINKS:(typeof LINKS!=='undefined'?LINKS:[]),QUIZ,ARCH:(typeof AR
 ESSAYS.push((function(){
 const P = [
 {n:1, short:"段1 摘要·项目", role:"交代项目与本人职责", q:"摘要", target:"160", title:"摘要（一）：项目与职责",
- text:"{{2025 年 5 月}}，我参与了某市{{政务服务一网通办与基层治理协同平台四期}}的建设，担任{{系统架构师}}。四期除建设自定义流程平台外，还将一期的智能导办升级为{{智能办事助手}}，使其不仅能回答问题，还能帮助群众完成查询进度、预填表单、材料预审和预约窗口等操作。项目建设周期((7 个月))，团队共((15 人))。我负责四期的总体架构设计，并主持了智能办事助手的{{智能体架构}}设计。",
- outline:["<b>时间与项目</b>：2025 年 5 月，平台四期","<b>任务</b>：智能导办升级为智能办事助手：查询、预填、预审、预约","<b>角色与规模</b>：系统架构师；7 个月，15 人","<b>职责</b>：总体架构；主持智能体架构设计"],
- memo:"四期、从问答到办事、15 人、智能体架构", tip:"写清“从回答问题到帮助办事”的转变，这正是智能体与问答的区别。", explain:["与 AIGC 融合篇衔接：一期建成智能导办，四期升级为智能体。"]},
+ text:"{{2025 年 5 月}}，我参与了某市{{政务服务一网通办与基层治理协同平台二期}}的建设，担任{{系统架构师}}。二期除建设自定义流程平台外，还将一期的智能导办升级为{{智能办事助手}}，使其不仅能回答问题，还能帮助群众完成查询进度、预填表单、材料预审和预约窗口等操作。项目建设周期((7 个月))，团队共((15 人))。我负责二期的总体架构设计，并主持了智能办事助手的{{智能体架构}}设计。",
+ outline:["<b>时间与项目</b>：2025 年 5 月，平台二期","<b>任务</b>：智能导办升级为智能办事助手：查询、预填、预审、预约","<b>角色与规模</b>：系统架构师；7 个月，15 人","<b>职责</b>：总体架构；主持智能体架构设计"],
+ memo:"二期、从问答到办事、15 人、智能体架构", tip:"写清“从回答问题到帮助办事”的转变，这正是智能体与问答的区别。", explain:["与 AIGC 融合篇衔接：一期建成智能导办，二期升级为智能体。"]},
 {n:2, short:"段2 摘要·主旨", role:"概括问题、做法与效果", q:"摘要", target:"220", title:"摘要（二）：问题、做法与效果",
- text:"本文结合该项目，论述基于大模型智能体的系统架构设计。一期的智能导办只能回答问题，群众仍需自己在多个页面之间操作。四期引入{{智能体}}后，面临三个问题：如何让模型{{可靠地规划任务和调用业务系统}}；如何在多轮对话中{{管理上下文和用户信息}}；如何保证智能体的操作{{安全可控}}。我们分别采用{{预定义工作流与模型规划相结合}}、通过{{统一工具网关}}封装业务能力，建立{{分层记忆}}，并设置{{写操作确认、身份传递和人工接管}}机制。智能办事助手上线后，常见办事任务的完成率约为((82%))，约((12%))的会话转由人工接管，未发生越权操作。",
+ text:"本文结合该项目，论述基于大模型智能体的系统架构设计。一期的智能导办只能回答问题，群众仍需自己在多个页面之间操作。二期引入{{智能体}}后，面临三个问题：如何让模型{{可靠地规划任务和调用业务系统}}；如何在多轮对话中{{管理上下文和用户信息}}；如何保证智能体的操作{{安全可控}}。我们分别采用{{预定义工作流与模型规划相结合}}、通过{{统一工具网关}}封装业务能力，建立{{分层记忆}}，并设置{{写操作确认、身份传递和人工接管}}机制。智能办事助手上线后，常见办事任务的完成率约为((82%))，约((12%))的会话转由人工接管，未发生越权操作。",
  outline:["<b>点题</b>：论述基于大模型智能体的系统架构设计","<b>转变</b>：只能回答 → 帮助办事","<b>三个问题</b>：规划与调用；上下文与记忆；安全可控","<b>做法</b>：工作流 + 规划；工具网关；分层记忆；确认、身份传递、人工接管","<b>效果</b>：完成率约 82%；约 12% 人工接管；无越权"],
- memo:"会规划、记得住、管得住", tip:"三个问题与题目第三问点名的三个方面一一对应。", explain:["数据与 AIGC 系列其他篇不冲突：一期导办准确率约 90%，四期智能体任务完成率约 82%，二者口径不同。"]},
+ memo:"会规划、记得住、管得住", tip:"三个问题与题目第三问点名的三个方面一一对应。", explain:["数据与 AIGC 系列其他篇不冲突：一期导办准确率约 90%，二期智能体任务完成率约 82%，二者口径不同。"]},
 {n:3, short:"段3 背景痛点", role:"建设背景与升级动因", q:"第一问", target:"330", title:"一、项目背景",
- text:"一期上线的智能导办通过检索增强生成回答群众的办事咨询，推荐准确率约为((90%))，但它{{只能回答，不能办理}}。例如群众问“开饭店要办什么”，导办可以列出营业执照、食品经营许可等事项和材料，但接下来群众仍要自己逐个查找事项、填写表单、上传材料，遇到材料不合格还要往返修改。业务部门统计发现，申请被退回的原因中，((四成以上))是材料不全或表单填写错误。与此同时，2025 年大模型的{{工具调用}}能力明显增强，{{智能体}}应用逐渐成熟，模型可以根据目标规划步骤、调用外部工具并根据结果调整。建设单位希望借此把导办升级为能够“帮着办”的智能办事助手。但智能体要直接操作业务系统，风险与只读问答完全不同：模型可能调错工具、填错参数，可能在多轮对话中丢失关键信息，还可能被诱导执行不该执行的操作。因此，四期需要在架构上解决{{任务规划、记忆管理和安全可控}}三方面问题。",
+ text:"一期上线的智能导办通过检索增强生成回答群众的办事咨询，推荐准确率约为((90%))，但它{{只能回答，不能办理}}。例如群众问“开饭店要办什么”，导办可以列出营业执照、食品经营许可等事项和材料，但接下来群众仍要自己逐个查找事项、填写表单、上传材料，遇到材料不合格还要往返修改。业务部门统计发现，申请被退回的原因中，((四成以上))是材料不全或表单填写错误。与此同时，2025 年大模型的{{工具调用}}能力明显增强，{{智能体}}应用逐渐成熟，模型可以根据目标规划步骤、调用外部工具并根据结果调整。建设单位希望借此把导办升级为能够“帮着办”的智能办事助手。但智能体要直接操作业务系统，风险与只读问答完全不同：模型可能调错工具、填错参数，可能在多轮对话中丢失关键信息，还可能被诱导执行不该执行的操作。因此，二期需要在架构上解决{{任务规划、记忆管理和安全可控}}三方面问题。",
  outline:["<b>一期</b>：导办准确率约 90%，但只能回答","<b>痛点</b>：群众仍需自己查、填、传；四成以上退件因材料或表单错误","<b>机会</b>：2025 年工具调用增强，智能体成熟","<b>目标</b>：升级为“帮着办”的助手","<b>风险</b>：调错工具、丢失信息、被诱导（伏笔：三个论点）"],
  memo:"能答不能办 → 四成退件 → 智能体成熟 → 三类风险", tip:"“四成以上退件因材料不全或填写错误”是升级的业务依据。", explain:["三类风险依次对应规划调用、记忆管理、安全可控三个论点。"]},
 {n:4, short:"段4 本人工作", role:"本人工作", q:"第一问", target:"230", title:"二、本人主要工作",
- text:"四期团队中，智能办事助手由((5 名))开发人员负责，技术栈在原有 {{Spring Cloud}}、{{Kafka}}、{{Redis}} 和政务云私有化大模型的基础上，引入了{{模型上下文协议}}用于工具接入。我负责四期的总体架构设计，在智能办事助手方面主要做了以下工作：确定智能体的{{总体架构}}，划分规划、工具、记忆和安全控制四个部分；梳理可开放给智能体的{{业务能力清单}}，并为每项能力确定读写属性和权限要求；设计{{记忆分层}}和个人信息的存储边界；制定写操作确认、人工接管等{{安全控制规则}}；并组织业务部门对智能体的办事过程进行{{抽检评估}}。",
+ text:"二期团队中，智能办事助手由((5 名))开发人员负责，技术栈在原有 {{Spring Cloud}}、{{Kafka}}、{{Redis}} 和政务云私有化大模型的基础上，引入了{{模型上下文协议}}用于工具接入。我负责二期的总体架构设计，在智能办事助手方面主要做了以下工作：确定智能体的{{总体架构}}，划分规划、工具、记忆和安全控制四个部分；梳理可开放给智能体的{{业务能力清单}}，并为每项能力确定读写属性和权限要求；设计{{记忆分层}}和个人信息的存储边界；制定写操作确认、人工接管等{{安全控制规则}}；并组织业务部门对智能体的办事过程进行{{抽检评估}}。",
  outline:["<b>团队与技术</b>：5 人；原有技术栈 + 私有化大模型 + 模型上下文协议","<b>工作</b>：总体架构四部分；业务能力清单与读写属性；记忆分层；安全控制规则；抽检评估"],
  memo:"四部分架构、能力清单、记忆、安全、评估", tip:"“为每项能力确定读写属性”是智能体安全设计的起点。", explain:["工作内容与三个论点逐一对应。"]},
 {n:5, short:"段5 组成与区别", role:"第二问：智能体组成及与问答应用的区别", q:"第二问", target:"420", figure:true, title:"三、智能体的基本组成及其与问答式应用的区别",
@@ -1913,7 +2063,7 @@ const COVER={kicker:"趋势预测题｜九段法",title:"论基于大模型智�
  cells:[["划","会规划","工作流 + 受限规划"],["记","记得住","分层记忆"],["控","管得住","身份、确认、接管"]],
  storyTitle:"从“能回答”到“帮着办”",
  story:["<b>划</b>：20 余个高频场景走工作流，长尾受限规划；工具网关声明读写与权限；解决循环调用。","<b>记</b>：摘要、结构化任务状态、授权标签、知识检索；办事条件不靠摘要。","<b>控</b>：身份传递、写操作确认、人工接管；防范材料中的间接注入。"],
- meta:"项目：政务服务一网通办与基层治理协同平台四期（2025 年）"};
+ meta:"项目：政务服务一网通办与基层治理协同平台二期（2025 年）"};
 const LINKS=["论点一 → 论点二：“办事任务往往要多轮对话才能完成，智能体需要记得住前面说过的内容。”","论点二 → 论点三：“智能体能够操作业务系统，安全可控是上线的前提。”"];
 const QUIZ=[["三个论点的口诀？","会规划、记得住、管得住。"],["智能体的四个组成部分？","规划、工具、记忆、行动与反馈。"],["智能体与问答式应用的区别？","问答只生成文本，由人使用；智能体直接作用于外部系统，过程不完全可预知。"],["规划方式如何选择？","两者结合：高频场景预定义工作流；长尾在受限工具范围内自主规划并限步数。"],["工具网关如何约束工具？","按模型上下文协议封装；声明参数格式、读写属性、所需权限；参数校验；连续调用上限。"],["记忆如何分层？","短期记忆与摘要；结构化任务状态；长期记忆只存授权标签、可查可删；知识通过检索获取。"],["三道安全控制？","身份传递（不持特权账号）；写操作用户确认；人工接管并可见执行步骤。"],["间接提示词注入如何处理？","工具返回与上传内容只作数据，与系统指令隔离；增加异常操作告警。"]];
 const ARCH_LAYERS=[
@@ -1930,19 +2080,19 @@ return {P,COVER,LINKS:(typeof LINKS!=='undefined'?LINKS:[]),QUIZ,ARCH:(typeof AR
 ESSAYS.push((function(){
 const P = [
 {n:1, short:"段1 摘要·项目", role:"交代项目与本人职责", q:"摘要", target:"160", title:"摘要（一）：项目与职责",
- text:"{{2025 年 5 月}}，我参与了某市{{政务服务一网通办与基层治理协同平台四期}}的建设，担任{{系统架构师}}。按照政务信息系统信息技术应用创新的要求，四期需要将平台从原有的 x86 服务器和国外商业软件环境，迁移到政务云提供的{{信创资源池}}上。项目建设周期((7 个月))，团队共((15 人))。我负责四期的总体架构设计，并主持了平台的{{国产化迁移}}方案设计与实施。",
- outline:["<b>时间与项目</b>：2025 年 5 月，平台四期","<b>任务</b>：迁移至政务云信创资源池","<b>角色与规模</b>：系统架构师；7 个月，15 人","<b>职责</b>：总体架构；主持国产化迁移"],
- memo:"四期、信创资源池、15 人、主持迁移", tip:"写明迁移的驱动是政务信创要求。", explain:["四期同时包含流程平台、智能体和信创迁移，三篇论文的时间与团队一致。"]},
+ text:"{{2025 年 5 月}}，我参与了某市{{政务服务一网通办与基层治理协同平台二期}}的建设，担任{{系统架构师}}。按照政务信息系统信息技术应用创新的要求，二期需要将平台从原有的 x86 服务器和国外商业软件环境，迁移到政务云提供的{{信创资源池}}上。项目建设周期((7 个月))，团队共((15 人))。我负责二期的总体架构设计，并主持了平台的{{国产化迁移}}方案设计与实施。",
+ outline:["<b>时间与项目</b>：2025 年 5 月，平台二期","<b>任务</b>：迁移至政务云信创资源池","<b>角色与规模</b>：系统架构师；7 个月，15 人","<b>职责</b>：总体架构；主持国产化迁移"],
+ memo:"二期、信创资源池、15 人、主持迁移", tip:"写明迁移的驱动是政务信创要求。", explain:["二期同时包含流程平台、智能体和信创迁移，三篇论文的时间与团队一致。"]},
 {n:2, short:"段2 摘要·主旨", role:"概括问题、做法与效果", q:"摘要", target:"220", title:"摘要（二）：问题、做法与效果",
  text:"本文结合该项目，论述信创背景下的系统国产化迁移架构设计。平台已有((20 余个))服务和((600 余张))数据表，在不中断全市政务服务的前提下完成迁移，面临{{组件兼容、数据库差异和切换风险}}三方面挑战。我们按层梳理技术栈，对可保留的开源组件进行{{适配验证}}，对数据库等组件进行{{替换}}；数据库迁移采用{{扫描改写、全量加增量同步和逐表校验}}；切换阶段采用{{双轨并行、流量回放和分批切换}}，并准备了回滚方案。最终平台全部迁移至信创环境，最后一次写入切换的停机时间控制在((15 分钟))以内，未发生数据丢失，核心接口性能达到原环境的((95% 以上))。",
  outline:["<b>点题</b>：论述信创背景下的国产化迁移架构设计","<b>规模</b>：20 余个服务、600 余张表；不能中断服务","<b>三项挑战</b>：组件兼容、数据库差异、切换风险","<b>做法</b>：按层适配或替换；扫描改写、同步、校验；双轨、回放、分批、回滚","<b>效果</b>：停机 15 分钟内；无丢失；性能 95% 以上"],
  memo:"选得准、迁得全、切得稳", tip:"三项挑战对应题目第三问点名的三个方面。", explain:["“不能中断全市政务服务”是迁移的核心约束，后面所有方案都围绕它。"]},
 {n:3, short:"段3 背景痛点", role:"建设背景与迁移约束", q:"第一问", target:"330", title:"一、项目背景",
- text:"平台一期建设于 2024 年，运行在 x86 服务器上，操作系统、数据库和部分中间件采用国外产品或其社区版本。2025 年，按照本省政务信息系统信创改造的统一部署，平台需要在年内迁移到政务云的{{信创资源池}}，该资源池采用{{国产 ARM 架构服务器和国产操作系统}}，并要求数据库使用国产产品。迁移面临几方面约束：平台是全市政务服务的统一入口，{{不能长时间停机}}，切换必须安排在低峰时段并控制在分钟级；平台已有((20 余个))服务和((600 余张))数据表，部分服务依赖了只提供 x86 版本的第三方组件，{{兼容性情况不明}}；数据库从 MySQL 迁移到国产数据库，{{语法和行为存在差异}}，一旦出错影响的是办件数据；同时四期还在并行建设流程平台和智能办事助手，{{迁移不能拖慢新功能的进度}}。因此，迁移不能简单地“装一遍、拷一遍”，需要从选型、数据和切换三个层面进行系统设计。",
- outline:["<b>原环境</b>：x86 服务器、国外操作系统与数据库","<b>要求</b>：年内迁至信创资源池：国产 ARM、国产 OS、国产数据库","<b>约束一</b>：统一入口，切换须分钟级（伏笔：切换）","<b>约束二</b>：部分组件仅有 x86 版本（伏笔：选型适配）","<b>约束三</b>：数据库语法行为差异（伏笔：数据库迁移）","<b>约束四</b>：不能拖慢四期新功能"],
+ text:"平台一期建设于 2024 年，运行在 x86 服务器上，操作系统、数据库和部分中间件采用国外产品或其社区版本。2025 年，按照本省政务信息系统信创改造的统一部署，平台需要在年内迁移到政务云的{{信创资源池}}，该资源池采用{{国产 ARM 架构服务器和国产操作系统}}，并要求数据库使用国产产品。迁移面临几方面约束：平台是全市政务服务的统一入口，{{不能长时间停机}}，切换必须安排在低峰时段并控制在分钟级；平台已有((20 余个))服务和((600 余张))数据表，部分服务依赖了只提供 x86 版本的第三方组件，{{兼容性情况不明}}；数据库从 MySQL 迁移到国产数据库，{{语法和行为存在差异}}，一旦出错影响的是办件数据；同时二期还在并行建设流程平台和智能办事助手，{{迁移不能拖慢新功能的进度}}。因此，迁移不能简单地“装一遍、拷一遍”，需要从选型、数据和切换三个层面进行系统设计。",
+ outline:["<b>原环境</b>：x86 服务器、国外操作系统与数据库","<b>要求</b>：年内迁至信创资源池：国产 ARM、国产 OS、国产数据库","<b>约束一</b>：统一入口，切换须分钟级（伏笔：切换）","<b>约束二</b>：部分组件仅有 x86 版本（伏笔：选型适配）","<b>约束三</b>：数据库语法行为差异（伏笔：数据库迁移）","<b>约束四</b>：不能拖慢二期新功能"],
  memo:"原环境 → 信创要求 → 不停机、兼容不明、数据库差异、并行建设", tip:"迁移题的背景要写清约束，约束决定后面的方案选择。", explain:["四个约束中三个对应三个论点，第四个解释了为何采用分批和自动化手段。"]},
 {n:4, short:"段4 本人工作", role:"本人工作", q:"第一问", target:"230", title:"二、本人主要工作",
- text:"四期团队共((15 人))，迁移工作由我牵头，抽调((4 名))后端和运维人员组成迁移小组，平台原有技术栈包括 {{Spring Cloud}}、{{Nacos}}、{{Redis}}、{{Kafka}}、{{MySQL}}、{{Doris}} 和 {{Kubernetes}}。我主要负责：按层梳理平台的{{技术栈清单}}，确定每个组件是保留适配还是替换；组织{{国产数据库选型}}测试；设计{{数据迁移和校验}}方案；制定{{切换方案和回滚预案}}，并组织多轮演练；协调政务云运维方和数据库厂商解决适配中的问题。",
+ text:"二期团队共((15 人))，迁移工作由我牵头，抽调((4 名))后端和运维人员组成迁移小组，平台原有技术栈包括 {{Spring Cloud}}、{{Nacos}}、{{Redis}}、{{Kafka}}、{{MySQL}}、{{Doris}} 和 {{Kubernetes}}。我主要负责：按层梳理平台的{{技术栈清单}}，确定每个组件是保留适配还是替换；组织{{国产数据库选型}}测试；设计{{数据迁移和校验}}方案；制定{{切换方案和回滚预案}}，并组织多轮演练；协调政务云运维方和数据库厂商解决适配中的问题。",
  outline:["<b>组织</b>：牵头迁移小组 4 人","<b>原技术栈</b>：Spring Cloud、Nacos、Redis、Kafka、MySQL、Doris、K8s","<b>工作</b>：技术栈清单与去留；数据库选型；迁移与校验；切换与回滚；协调厂商"],
  memo:"清单、选型、迁移、切换、协调", tip:"“协调厂商”是信创项目的真实工作内容。", explain:["五项工作分别对应选型适配、数据库迁移、平稳切换三个论点。"]},
 {n:5, short:"段5 背景与风险", role:"第二问：信创背景、迁移层次与风险", q:"第二问", target:"420", figure:true, title:"三、信创背景及国产化迁移的层次与风险",
@@ -1952,7 +2102,7 @@ const P = [
 {n:6, short:"段6 论点一·选", role:"论点一：技术栈选型与适配", q:"第三问", target:"470", arg:true, title:"（一）技术栈选型与适配",
  text:"迁移的第一步是确定每个组件“留还是换”。一种做法是把所有组件一次性替换为国产商业产品，另一种是{{按层评估}}：能在信创环境运行的开源组件{{保留适配}}，确实不符合要求或无法运行的才替换。一次性替换改动面大、风险集中，因此我选择了按层评估。我们梳理出((40 余项))组件，逐项在信创资源池上验证：Spring Cloud、Kafka、Redis、Doris 等开源组件在国产 ARM 服务器和操作系统上运行正常，予以保留；JDK 更换为支持 ARM 架构的国产发行版；数据库按要求替换为国产数据库。数据库选型时，我们对两款国产数据库进行了对比测试，重点考察 {{MySQL 兼容程度}}、核心 SQL 的性能、厂商在本地的技术支持能力，以及政务云是否已提供成熟服务，最终选择了提供 MySQL 兼容模式、政务云已有托管服务的一款产品。适配中最棘手的问题来自应用依赖：材料中心使用的一个文档转换组件内含 {{x86 本地库}}，在 ARM 服务器上无法加载，厂商也没有 ARM 版本。我们比较了模拟运行和替换两种办法后，将其替换为纯 Java 实现的开源组件，并对转换效果进行了全量比对。此外，部分服务在新环境下出现 CPU 使用率偏高，经分析是 JVM 参数沿用了 x86 环境的配置，调整后恢复正常。最终((20 余个))服务全部完成适配，兼容性测试用例全部通过。",
  outline:["<b>释</b>：确定每个组件留还是换","<b>比</b>：一次性替换 vs 按层评估","<b>选</b>：避免风险集中，按层评估、能留则留","<b>做</b>：40 余项组件逐项验证；开源组件保留；国产 JDK；数据库按兼容、性能、支持、托管四项对比","<b>坑</b>：文档转换组件含 x86 本地库 → 换纯 Java 实现并全量比对；JVM 参数沿用 x86 → 调整","<b>证</b>：20 余个服务完成适配，兼容测试全部通过"],
- memo:"全换 vs 按层 → 能留则留 → 数据库四项对比 → x86 本地库与 JVM 参数", tip:"数据库选型的四个维度要写全：兼容、性能、支持、托管。", explain:["“能留则留”降低了迁移风险，也减少了对四期新功能的影响。","x86 本地库是信创迁移中最常见的兼容问题，写出来体现真实经验。"]},
+ memo:"全换 vs 按层 → 能留则留 → 数据库四项对比 → x86 本地库与 JVM 参数", tip:"数据库选型的四个维度要写全：兼容、性能、支持、托管。", explain:["“能留则留”降低了迁移风险，也减少了对二期新功能的影响。","x86 本地库是信创迁移中最常见的兼容问题，写出来体现真实经验。"]},
 {n:7, short:"段7 论点二·迁", role:"论点二：数据库迁移", q:"第三问", target:"480", arg:true, title:"（二）数据库迁移：改写、同步与校验",
  text:"组件确定之后，风险最大的是{{数据库迁移}}。平台共有((600 余张))表，代码中的 SQL 分散在各个服务里。改写方式有两种：开发人员人工逐个检查，或借助{{工具扫描}}找出不兼容语句后集中处理。人工检查容易遗漏，因此我选择工具扫描：用 SQL 扫描工具分析代码和映射文件，共识别出((400 余处))可能不兼容的语句，其中大部分在兼容模式下可以直接运行，其余如插入或更新合并写法、部分日期函数和分组拼接函数等，由开发人员统一改写，并补充了针对这些语句的回归测试。数据迁移采用{{全量加增量}}的方式：先做一次全量迁移，再利用平台已有的 CDC 能力持续同步增量变更，使新库与旧库保持准实时一致。校验分两级：每张表比对{{行数}}，关键表再按主键分段计算{{字段哈希}}进行比对。校验中发现了问题：部分表在新库中出现唯一索引冲突，原因是两种数据库对字符串比较是否区分大小写和尾部空格的处理不同；另有个别统计查询的结果顺序与原环境不一致。我们统一了排序规则和字符串比较方式，对依赖默认顺序的查询补充了明确的排序条件。此外，有((十余条))核心 SQL 在新库中执行计划发生变化，性能下降，我们与厂商一起调整了索引和统计信息。经过三轮全量校验，新旧库数据完全一致。",
  outline:["<b>释</b>：风险最大的是数据库迁移","<b>比</b>：人工逐个检查 vs 工具扫描集中处理","<b>选</b>：人工易遗漏，选工具扫描","<b>做</b>：识别 400 余处，兼容模式覆盖大部分，其余改写并回归；全量 + CDC 增量；行数与字段哈希两级校验","<b>坑</b>：大小写与尾部空格导致唯一索引冲突；结果顺序不同；执行计划变化 → 统一排序规则、补排序、调索引","<b>证</b>：三轮全量校验完全一致"],
@@ -1970,7 +2120,7 @@ const COVER={kicker:"趋势预测题｜九段法",title:"论信创背景下的�
  cells:[["选","选得准","按层评估与适配"],["迁","迁得全","改写、同步、校验"],["切","切得稳","双轨、回放、分批"]],
  storyTitle:"迁移的三个阶段",
  story:["<b>选</b>：40 余项组件按层评估、能留则留；数据库四项对比；x86 本地库组件替换。","<b>迁</b>：扫描出 400 余处不兼容语句；全量 + CDC 增量；行数与哈希两级校验。","<b>切</b>：只读流量回放；先只读后写入；反向同步可回退；停机 12 分钟。"],
- meta:"项目：政务服务一网通办与基层治理协同平台四期（2025 年）"};
+ meta:"项目：政务服务一网通办与基层治理协同平台二期（2025 年）"};
 const LINKS=["论点一 → 论点二：“组件确定之后，风险最大的是数据库迁移。”","论点二 → 论点三：“数据准备就绪后，最后一步是把业务从旧环境切换到新环境。”"];
 const QUIZ=[["三个论点的口诀？","选得准、迁得全、切得稳。"],["国产化迁移的五个层次？","基础硬件、基础软件、支撑环境、应用系统、数据。"],["迁移的四类风险？","兼容性、数据、性能、切换。"],["组件去留原则与数据库选型维度？","按层评估、能留则留；数据库看 MySQL 兼容程度、核心 SQL 性能、本地支持能力、政务云托管情况。"],["x86 本地库问题如何解决？","替换为纯 Java 实现的开源组件，并全量比对转换效果。"],["数据库迁移的校验方式？","每表行数比对；关键表按主键分段计算字段哈希比对。"],["数据库迁移遇到的三个问题？","大小写与尾部空格处理不同致唯一索引冲突；结果顺序不同；执行计划变化导致性能下降。"],["切换方案要点？","双轨并行；只读流量回放比对；先只读后写入分批切换；凌晨五步切换；反向同步可回退。"]];
 const ARCH_LAYERS=[
@@ -1987,19 +2137,19 @@ return {P,COVER,LINKS:(typeof LINKS!=='undefined'?LINKS:[]),QUIZ,ARCH:(typeof AR
 ESSAYS.push((function(){
 const P = [
 {n:1, short:"段1 摘要·项目", role:"交代项目与本人职责", q:"摘要", target:"160", title:"摘要（一）：项目与职责",
- text:"{{2025 年 5 月}}，我参与了某市{{政务服务一网通办与基层治理协同平台四期}}的建设，担任{{系统架构师}}。平台已有((30 余个))服务，四期新增的智能办事助手和模型相关服务采用 Python 开发，与原有的 Java 服务形成了{{多语言技术栈}}。项目建设周期((7 个月))，团队共((15 人))。我负责四期的总体架构设计，并主持了平台{{服务网格}}的选型、分阶段实施和治理规范的制定。",
- outline:["<b>时间与项目</b>：2025 年 5 月，平台四期","<b>现状</b>：30 余个服务；新增 Python 服务，形成多语言栈","<b>角色与规模</b>：系统架构师；7 个月，15 人","<b>职责</b>：主持服务网格选型、分阶段实施、治理规范"],
- memo:"四期、多语言、15 人、主持服务网格", tip:"摘要第一段就点出“多语言技术栈”，这是引入服务网格最直接的理由。", explain:["题干背景强调“多语言栈难以统一”，摘要中直接给出项目里的对应事实。"]},
+ text:"{{2025 年 5 月}}，我参与了某市{{政务服务一网通办与基层治理协同平台二期}}的建设，担任{{系统架构师}}。平台已有((30 余个))服务，二期新增的智能办事助手和模型相关服务采用 Python 开发，与原有的 Java 服务形成了{{多语言技术栈}}。项目建设周期((7 个月))，团队共((15 人))。我负责二期的总体架构设计，并主持了平台{{服务网格}}的选型、分阶段实施和治理规范的制定。",
+ outline:["<b>时间与项目</b>：2025 年 5 月，平台二期","<b>现状</b>：30 余个服务；新增 Python 服务，形成多语言栈","<b>角色与规模</b>：系统架构师；7 个月，15 人","<b>职责</b>：主持服务网格选型、分阶段实施、治理规范"],
+ memo:"二期、多语言、15 人、主持服务网格", tip:"摘要第一段就点出“多语言技术栈”，这是引入服务网格最直接的理由。", explain:["题干背景强调“多语言栈难以统一”，摘要中直接给出项目里的对应事实。"]},
 {n:2, short:"段2 摘要·主旨", role:"概括问题、路径与效果", q:"摘要", target:"230", title:"摘要（二）：问题、路径与效果",
  text:"本文结合该项目，论述服务网格的应用。平台原先基于 Spring Cloud 进行服务治理，治理逻辑以 SDK 形式嵌入业务代码，新增的 Python 服务无法复用。为此，我们引入以 {{Istio}} 为控制面、{{Envoy}} 为数据面的服务网格，按{{试点、推广、收口}}三个阶段实施：先在试点服务中将超时、重试、熔断和灰度发布{{下沉到边车}}；再将 Java 服务分批纳入网格，基于边车统一构建{{全链路可观测性}}；最后启用{{双向 TLS 和基于服务身份的授权策略}}，落实零信任。实施后，治理策略调整由改代码发布变为修改配置，生效时间由((1 至 2 天))缩短到((分钟级))，服务间流量全部加密，线上故障的平均恢复时间缩短了((约一半))。",
  outline:["<b>点题</b>：论述服务网格的应用","<b>问题</b>：治理逻辑嵌入代码，Python 服务无法复用，升级需全量改代码","<b>方案</b>：Istio 控制面 + Envoy 数据面","<b>三阶段</b>：试点（治理下沉）；推广（可观测）；收口（零信任）","<b>效果</b>：调整由天级到分钟级；流量全加密；恢复时间缩短约一半"],
  memo:"试点下沉治理，推广统一观测，收口零信任", tip:"三个阶段分别落实第二问的三项能力，这是本文的结构主线。", explain:["第三问要求“实施路径”，摘要直接给出三阶段路径。","效果对应第三问的“可维护性”（调整时间）与“稳定性”（恢复时间）。"]},
 {n:3, short:"段3 背景痛点", role:"建设背景与治理痛点", q:"第一问", target:"330", title:"一、项目背景",
- text:"平台一期于 2024 年建成，采用 {{Spring Cloud}} 构建微服务，注册发现、配置、熔断限流和链路追踪都以 {{SDK}} 的形式集成在各服务中。随着服务数量增加，这种{{侵入式治理}}的问题逐渐显现。一是{{多语言难以统一}}：四期新增的智能办事助手、推理调度等服务采用 Python 开发，无法使用 Java 生态的治理组件，只能各自实现超时和重试，策略不一致，链路追踪也在这些服务处中断。二是{{升级成本高}}：一期为部门系统调用统一熔断时，需要修改并重新发布((20 余个))服务，耗时近两周；三是{{发布风险大}}：缺少按比例灰度的能力，新版本只能整体替换，出了问题回退较慢。四是{{服务间通信缺少保护}}：集群内服务之间默认互相信任、明文通信，一旦某个服务被攻破，攻击者可以横向访问其他服务，这与等级保护和零信任的要求不符。四期平台已运行在 Kubernetes 上，具备了引入服务网格的条件。",
- outline:["<b>一期</b>：Spring Cloud，治理以 SDK 嵌入","<b>痛点一</b>：多语言难统一，Python 服务链路中断（伏笔：治理、可观测）","<b>痛点二</b>：升级需改 20 余个服务，近两周（伏笔：可维护性）","<b>痛点三</b>：无按比例灰度，回退慢（伏笔：稳定性）","<b>痛点四</b>：服务间默认互信、明文（伏笔：零信任）","<b>基础</b>：四期已迁移到 Kubernetes 信创资源池"],
+ text:"平台一期于 2024 年建成，采用 {{Spring Cloud}} 构建微服务，注册发现、配置、熔断限流和链路追踪都以 {{SDK}} 的形式集成在各服务中。随着服务数量增加，这种{{侵入式治理}}的问题逐渐显现。一是{{多语言难以统一}}：二期新增的智能办事助手、推理调度等服务采用 Python 开发，无法使用 Java 生态的治理组件，只能各自实现超时和重试，策略不一致，链路追踪也在这些服务处中断。二是{{升级成本高}}：一期为部门系统调用统一熔断时，需要修改并重新发布((20 余个))服务，耗时近两周；三是{{发布风险大}}：缺少按比例灰度的能力，新版本只能整体替换，出了问题回退较慢。四是{{服务间通信缺少保护}}：集群内服务之间默认互相信任、明文通信，一旦某个服务被攻破，攻击者可以横向访问其他服务，这与等级保护和零信任的要求不符。二期平台已运行在 Kubernetes 上，具备了引入服务网格的条件。",
+ outline:["<b>一期</b>：Spring Cloud，治理以 SDK 嵌入","<b>痛点一</b>：多语言难统一，Python 服务链路中断（伏笔：治理、可观测）","<b>痛点二</b>：升级需改 20 余个服务，近两周（伏笔：可维护性）","<b>痛点三</b>：无按比例灰度，回退慢（伏笔：稳定性）","<b>痛点四</b>：服务间默认互信、明文（伏笔：零信任）","<b>基础</b>：二期已迁移到 Kubernetes 信创资源池"],
  memo:"侵入式治理 → 多语言、难升级、难灰度、无防护", tip:"四个痛点分别对应治理、可维护、稳定、安全，覆盖题目全部关键词。", explain:["“为部门系统调用统一熔断需修改 20 余个服务”与架构评估篇的适配层改造相呼应，事实可信。","最后一句交代 Kubernetes 基础，说明引入服务网格的条件已经具备。"]},
 {n:4, short:"段4 本人工作", role:"本人工作", q:"第一问", target:"230", title:"二、本人主要工作",
- text:"四期团队中，服务网格由我牵头，与((3 名))运维和后端人员组成实施小组。我主要负责：完成服务网格的{{技术选型}}，确定控制面和数据面方案；制定{{分阶段实施路径}}，确定每个阶段的服务范围、准入条件和回退方案；编写{{流量治理、可观测性和安全策略}}的配置规范，明确哪些治理逻辑从代码中移除、由网格统一承担；组织{{性能测试和故障演练}}，评估边车带来的资源和延迟开销；并在推广过程中协调各服务负责人完成改造和验证。",
+ text:"二期团队中，服务网格由我牵头，与((3 名))运维和后端人员组成实施小组。我主要负责：完成服务网格的{{技术选型}}，确定控制面和数据面方案；制定{{分阶段实施路径}}，确定每个阶段的服务范围、准入条件和回退方案；编写{{流量治理、可观测性和安全策略}}的配置规范，明确哪些治理逻辑从代码中移除、由网格统一承担；组织{{性能测试和故障演练}}，评估边车带来的资源和延迟开销；并在推广过程中协调各服务负责人完成改造和验证。",
  outline:["<b>组织</b>：牵头实施小组 3 人","<b>工作</b>：选型；分阶段路径与准入、回退；三类配置规范；性能测试与故障演练；协调改造"],
  memo:"选型、路径、规范、测试、协调", tip:"“准入条件和回退方案”体现了渐进式实施的严谨性。", explain:["五项工作覆盖了第三问的实施路径、挑战与效果。"]},
 {n:5, short:"段5 三项能力", role:"第二问：治理机制、可观测性、零信任", q:"第二问", target:"600", figure:true, title:"三、服务网格的治理机制、可观测性与零信任安全",
@@ -2027,7 +2177,7 @@ const COVER={kicker:"2026 年 11 月预测 6｜九段法",title:"论服务网格
  cells:[["试","试点下沉","治理机制"],["推","推广观测","全链路可观测"],["收","收口零信任","双向 TLS 与授权"]],
  storyTitle:"三阶段实施路径",
  story:["<b>试点</b>：6 个智能助手服务；超时、重试、摘除、灰度下沉到边车；解决启动顺序与重试叠加。","<b>推广</b>：Java 服务先注入后移除旧组件；边车统一采集，调用链统一 OpenTelemetry；解决透传与内存开销。","<b>收口</b>：宽容模式过渡到严格双向 TLS；默认拒绝的授权策略；处理未注入边车的旧服务。"],
- meta:"项目：政务服务一网通办与基层治理协同平台四期（2025 年）"};
+ meta:"项目：政务服务一网通办与基层治理协同平台二期（2025 年）"};
 const LINKS=["论点一 → 论点二：“试点验证后，第二阶段将 Java 服务分批纳入网格，并借此统一可观测性。”","论点二 → 论点三：“全部服务纳入网格后，第三阶段落实零信任安全。”","三个阶段依次落实第二问的三项能力：治理机制、可观测性、零信任。"];
 const QUIZ=[["三个论点的口诀？","试点下沉治理，推广统一观测，收口零信任。"],["服务网格的组成？","数据面（与服务实例部署在一起的边车代理）和控制面（下发路由、治理、安全策略）。"],["网格的服务治理机制有哪些？","服务发现与负载均衡、超时与重试、熔断与异常实例摘除、限流、按权重或请求特征路由；灰度发布与快速回退。"],["网格可观测性的三类数据与限制？","访问日志、服务级指标、调用链跨度；链路串联仍需应用传递追踪标识。"],["零信任在网格中的两个机制？","基于服务身份的双向 TLS（证书自动签发轮换）；默认拒绝的授权策略，按服务与接口最小授权。"],["为何选 Istio 而非自建 SDK 或 Linkerd？","自建 SDK 只解决一种语言且仍是侵入式；Istio 功能完整、社区成熟、支持 ARM，利于后续零信任。"],["试点中的两个问题？","应用先于边车就绪 → 等待边车就绪再启动；代码重试与网格重试叠加放大近十倍 → 治理只在网格中配置。"],["推广阶段的两个问题？","Python 服务未透传追踪标识 → 公共库补充请求头透传；边车内存开销 → 限定配置可见范围、设置资源上限。"],["零信任如何平稳切换？","先宽容模式确认全部加密，再逐命名空间切换严格模式；未注入边车的旧服务设例外并加强网络隔离。"]];
 const ARCH_LAYERS=[
@@ -2046,12 +2196,12 @@ const BOOK_SCENES=[
 ["2024 一网通办平台","慢、刷、涌、卡、断、停、丢、误、晚、混、编、注","申报首日超时；反复刷新；截止日提交；部门阻塞；可用区故障；部门系统中断；短信死信；误操作；T+1 滞后；术语混用；模型虚构；提示词注入"],
 ["2024 一网通办平台（续）","撞、越、借、汇、重名","撞库攻击；水平越权；账号借用批量查询；部门擅改字段；同一企业多个名称"],
 ["2024 一网通办平台（补）","析、容、假、全、实、稳","6 月 FMEA；7 月证照接口超时；8 月实例假死；4 月营业执照三种定义；5 月即办件两种口径；8 月惠企政策调整"],
-["2025 平台四期","规、验、流、划、记、控、选、迁、切、叠、透、漏","生成代码越层；会签错转；需求偏差；多步办事；长对话遗忘；间接注入；x86 本地库；索引冲突；精度差异；重试叠加；追踪未透传；未注入边车的旧服务"]];
+["2025 平台二期","规、验、流、划、记、控、选、迁、切、叠、透、漏","生成代码越层；会签错转；需求偏差；多步办事；长对话遗忘；间接注入；x86 本地库；索引冲突；精度差异；重试叠加；追踪未透传；未注入边车的旧服务"]];
 const BOOK_LIB=[
 ["云原生数据库","2022 疫情","峰来扩、断了切、错了回"],["高并发性能优化","2024 平台","慢了先查、刷了上缓存、涌了削峰"],["AIGC 对架构的影响","2024 平台","理需求、审变更、建导办"],
 ["可观测性","2024 平台","链找位置、指来报警、日查原因"],["架构评估 ATAM","2024 平台","树定场景、点找风险、改排先后"],["实时数据处理","2024 平台","采变更、算窗口、存聚合"],
 ["高可用与业务连续性","2024 平台","切得快、保得住、降得稳"],["AIGC 融合架构","2024 平台","接得稳、管得住、扛得住"],["数据中台","2024 平台","汇得齐、治得清、用得上"],
-["安全性设计与隐私保护","2024 平台","认人、控权、护数"],["Vibe Coding","2025 四期","规在前、验在后、流程变"],["大模型智能体","2025 四期","会规划、记得住、管得住"],["信创国产化迁移","2025 四期","选得准、迁得全、切得稳"],["服务网格","2025 四期","试点下沉、推广观测、收口零信任"],
+["安全性设计与隐私保护","2024 平台","认人、控权、护数"],["Vibe Coding","2025 二期","规在前、验在后、流程变"],["大模型智能体","2025 二期","会规划、记得住、管得住"],["信创国产化迁移","2025 二期","选得准、迁得全、切得稳"],["服务网格","2025 二期","试点下沉、推广观测、收口零信任"],
 ["软件可靠性设计","2024 平台","析得早、容得下、愈得快"],["需求工程","2024 平台","听得全、验得实、改得稳"]];
 const BOOK_PROMPT=`我在准备系统架构设计师论文，请按“九段法”写一篇范文。
 
@@ -2061,7 +2211,7 @@ const BOOK_PROMPT=`我在准备系统架构设计师论文，请按“九段法�
 【项目事实卡】
 项目 A：疫情防控落实管控系统；2022.3–2022.9；技术负责人兼架构设计；18 人；Spring Cloud Alibaba、Nacos、Redis、消息队列、华为云 RDS for MySQL
 项目 B：某市政务服务一网通办与基层治理协同平台；2024.4–2024.11；系统架构师；22 人；20 余个服务；1800 余项事项；Spring Cloud、Gateway、Nacos、Redis、Kafka、MySQL、Doris、Kubernetes、SkyWalking；政务云私有化大模型
-项目 C：平台四期；2025.5 起 7 个月；系统架构师；15 人；自定义流程平台、智能办事助手、信创迁移
+项目 C：平台二期；2025.5 起 7 个月；系统架构师；15 人；自定义流程平台、智能办事助手、信创迁移
 场景库：（从本书场景库页摘取与题目相关的场景）
 
 【要求】
@@ -2096,7 +2246,7 @@ const GUIDE_PAGES=[
   <div class="cells">${[["看","看第三问"],["定","定提取方式"],["埋","第二问埋线"],["落","落到场景"],["查","四项自查"]].map(x=>`<div class="cell"><div class="ch">${x[0]}</div><div class="cap"><b>${x[1]}</b></div></div>`).join("")}</div>
   <div class="story"><h3>本书结构</h3><ol>
    <li><b>第一编 总纲</b>：找论点的五步法、七拍写法、结构与字数、文风要求。</li>
-   <li><b>第二至五编</b>：十六篇范文。每篇依次为：题目与论点推导、全文地图、九段正文、自测。</li>
+   <li><b>第二编 项目档案与临场训练</b>：项目时间线、46 张场景卡、题目与场景对照、每日训练，场景可直接跳到对应范文。</li><li><b>第三至六编</b>：十六篇范文。每篇依次为：题目与论点推导、全文地图、九段正文、自测。</li>
    <li><b>附录</b>：项目事实卡、场景库与口诀总表、练习题、协作提示词。</li></ol></div>
   <p class="how"><span class="key-only">左侧目录选择章节；<kbd>←</kbd> <kbd>→</kbd> 翻页（跨章节连续）；<kbd>1</kbd> 讲解 <kbd>2</kbd> 背诵 <kbd>3</kbd> 提纲；背诵模式按 <kbd>空格</kbd> 揭示下一个空。</span><span class="touch-only">点左上角“目录”选择章节；左右滑动或点底部按钮翻页（跨章节连续）；顶部切换讲解、背诵、提纲；背诵模式下点空格处揭示答案。</span></p>
  </div></div>`},
@@ -2110,15 +2260,15 @@ const APPX_PAGES=[
   <div class="types">
    <div class="card"><h3><span class="tag">A</span>疫情防控落实管控系统</h3><ul><li>2022 年 3 月至 9 月，周期 6 个月</li><li>团队 18 人；技术负责人兼架构设计</li><li>Spring Cloud Alibaba、Nacos、Redis、消息队列、华为云 RDS for MySQL</li><li>用于：云原生数据库</li></ul></div>
    <div class="card"><h3><span class="tag">B</span>一网通办平台（一期）</h3><ul><li>2024 年 4 月启动，8 月底试运行，11 月验收；周期 8 个月</li><li>团队 22 人；系统架构师</li><li>十余个部门系统；20 余个服务；1800 余项事项</li><li>Spring Cloud、Gateway、Nacos、Redis、Kafka、MySQL、Doris、Kubernetes、SkyWalking；私有化大模型</li><li>用于：高并发、AIGC 影响、可观测性、架构评估、实时数据、高可用、AIGC 融合、数据中台、安全</li></ul></div>
-   <div class="card"><h3><span class="tag">C</span>平台四期</h3><ul><li>2025 年 5 月起，周期 7 个月</li><li>团队 15 人；系统架构师</li><li>自定义流程平台、智能办事助手、信创迁移、服务网格</li><li>用于：Vibe Coding、智能体、信创迁移、服务网格</li></ul></div>
+   <div class="card"><h3><span class="tag">C</span>平台二期</h3><ul><li>2025 年 5 月起，周期 7 个月</li><li>团队 15 人；系统架构师</li><li>自定义流程平台、智能办事助手、信创迁移、服务网格</li><li>用于：Vibe Coding、智能体、信创迁移、服务网格</li></ul></div>
   </div>
-  <div class="panel" style="margin-top:1rem"><h3>项目 B 与 C 的事件时间线</h3><ul class="judge">
+  <div class="panel" style="margin-top:1rem"><h3>项目 B 与 C 的事件时间线</h3><ul class="judge timeline">
    <li><b>2024.5</b><span>工单中心 AIGC 试点（AIGC 影响）</span></li>
    <li><b>联调</b><span>跨服务问题排查近一天，提出可观测性体系；上线前渗透测试发现越权（安全）</span></li>
    <li><b>2024.9</b><span>惠企补贴集中申报：首日超时、反复刷新、提交集中（高并发）；实时监管上线（实时数据）；导办咨询 5 倍（融合）；撞库攻击（安全）</span></li>
    <li><b>9 月下旬</b><span>ATAM 评估，识别 4 个风险点（评估）</span></li>
    <li><b>2024.10</b><span>可用区网络故障（高可用）；中旬完成适配层与权限收口（评估、安全）；账号借用批量查询（安全）；下旬市场监管系统中断（高可用）</span></li>
-   <li><b>2025.5 起</b><span>四期：流程平台与 Vibe Coding、智能办事助手、信创迁移；8 月起服务网格分阶段实施</span></li>
+   <li><b>2025.5 起</b><span>二期：流程平台与 Vibe Coding、智能办事助手、信创迁移；8 月起服务网格分阶段实施</span></li>
   </ul></div>`)},
  {short:"场景库与口诀",html:()=>W(`${head("附录","场景库与十六篇口诀总表")}
   <div class="scroller"><table class="lib"><thead><tr><th>项目</th><th>场景代号</th><th>对应事件</th></tr></thead><tbody>${BOOK_SCENES.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
@@ -2184,7 +2334,7 @@ function deriveHTML(E,D){
     <li><b>查</b><span>${D.check}</span></li></ul></div>
   </div>
   <div class="scroller" style="margin-top:1rem"><table class="lib"><thead><tr><th>论点（落）</th><th>来自题目的哪个词</th><th>绑定的项目场景</th></tr></thead><tbody>
-  ${D.args.map((a,i)=>`<tr><td>论点${"一二三"[i]}：{{${a[0]}}}</td><td>${a[1]}</td><td>${a[2]}</td></tr>`).join("")}</tbody></table></div>
+  ${D.args.map((a,i)=>`<tr><td>论点${"一二三"[i]}：{{${a[0]}}}</td><td>${a[1]}</td><td>${a[2]}${DOS.scLink(E.KEY,i)}</td></tr>`).join("")}</tbody></table></div>
   ${E.LINKS&&E.LINKS.length?`<section class="explain"><h3>论点之间的衔接句</h3><ul>${E.LINKS.map(l=>`<li>${l}</li>`).join("")}</ul></section>`:""}
   </div></div>`;
 }
@@ -2223,9 +2373,377 @@ function quizHTML(E){
   <div class="quiz">${E.QUIZ.map(q=>`<details><summary>${q[0]}</summary><div class="a">${q[1]}</div></details>`).join("")}</div></div></div>`;
 }
 
+const PHASES=[
+{id:"P0",name:"早期项目：疫情防控落实管控系统",time:"2022.03 – 2022.09",team:"18 人，6 个月",role:"技术负责人兼架构设计",
+ goal:"支撑数据采集、重点人员管控、指令下发、状态回传和统计分析。",
+ stack:[["新增","Spring Cloud Alibaba、Nacos、Redis、消息队列"],["新增","政务私有云华为云 RDS for MySQL（主备 + 只读实例）"]],
+ note:"与政务平台无关的独立项目，只用于云原生数据库一类题目，人数、时间、角色不要与平台混用。",scenes:["S01","S02","S03"]},
+{id:"P1",name:"一期：统一入口建设与上线",time:"2024.04 – 2024.11",team:"22 人，8 个月",role:"系统架构师",
+ goal:"整合十余个部门系统，建设统一认证、事项、办件、材料、工单、数据共享中心、运行监管、智能导办；8 月底试运行，11 月验收。",
+ stack:[["新增","Spring Cloud、Gateway、Nacos、Redis、Kafka、MySQL、Kubernetes"],["新增","SkyWalking、Prometheus + Grafana、ELK、Sentinel"],["新增","Doris、Flink CDC、Flink、Iceberg（运行监管与数据共享）"],["新增","政务云私有化部署开源大模型 + 向量库（智能导办）"],["新增","国密算法（SM3、SM4）"]],
+ note:"绝大多数场景发生在这一期。规模口径：20 余个服务、1800 余项事项、14 个部门接入数据中台。",
+ scenes:["S04","S05","S06","S07","S08","S09","S10","S11","S12","S13","S14","S15","S16","S17","S18","S19","S20","S21","S22","S23","S24","S25","S26","S27","S28","S29","S30","S31","S32","S33","S34"]},
+{id:"P4",name:"二期：流程平台、智能体、信创与服务网格",time:"2025.05 – 2025.12",team:"15 人，7 个月",role:"系统架构师",
+ goal:"硬编码流程改造为自定义流程平台；智能导办升级为智能办事助手；迁移至政务云信创资源池；分阶段引入服务网格。服务增至 30 余个。",
+ stack:[["新增","BPMN 流程引擎、流程与表单设计器；内网私有化代码大模型"],["新增","智能体：工具网关、模型上下文协议、分层记忆"],["替换","国产 ARM 服务器、国产操作系统、国产 JDK、国产数据库（MySQL 兼容）"],["新增","Istio + Envoy、OpenTelemetry"]],
+ note:"一期于 2024 年 11 月验收后转入运维，二期于 2025 年 5 月立项。一期架构评估中排在后面的改进（数据库拆分、事项配置化）也在二期完成。时间安排：5–8 月流程平台；6–10 月信创迁移（10 月写入切换）；7–10 月智能体；9–12 月服务网格。",
+ scenes:["S35","S36","S37","S38","S39","S40","S41","S42","S43","S44","S45","S46"]}];
+
+const SC=[
+/* P0 */
+{id:"S01",code:"峰",t:"2022.04",ph:"P0",title:"全员核酸当晚，统计查询拖慢主库",
+ b:["晚八点集中登记，页面长时间无响应；主库 CPU 超 90%，大屏每 10 秒刷新","分库分表 vs 读写分离","日志显示写入未超单库能力，瓶颈是复杂查询；工期紧","只读实例 + 路由规则；状态表与流水表拆分；组合索引；大屏读汇总表","部分报表在只读实例上仍慢 → 补索引、重写 3 条 SQL","高峰前扩容、结束后缩回；P95 小于 600 毫秒"],
+ uses:[["云原生数据库","论点一：弹性伸缩"],["性能优化","读写分离"],["高可用","流量与降级（备选）"]],hook:"八点多，页面转圈"},
+{id:"S02",code:"断",t:"2022.05",ph:"P0",title:"状态刷新后回退，指挥部问故障多久恢复",
+ b:["刚提交的状态刷新后变回旧值，网格员重复上报；指挥部要求明确恢复时限","自建 MHA vs RDS 平台主备","政务云网络限制多，自维护兜不住","连接检测 + 有限重试；幂等键；提交后数秒回查走主库 + Redis 标记","切换期间连接中断，重试会重复写 → 幂等键","切换演练约 30 秒，无丢失无重复"],
+ uses:[["云原生数据库","论点二：高可用"],["分布式一致性","读己之写"],["高可用","故障转移"]],hook:"变回旧值"},
+{id:"S03",code:"错",t:"2022.07",ph:"P0",title:"批量更新条件写错，三千余人网格被改",
+ b:["政策调整批量更新，条件有误，两个社区约 3000 人被改错","全量备份恢复 + 人工补录 vs 按时间点恢复","全量会丢当日上午数据，补录易错","恢复到误操作前一分钟的临时实例，比对后只回写受影响记录","事后：收回直写权限、审批脚本、只读实例预览影响行数","约 40 分钟恢复；慢 SQL 由百余条降至十条内"],
+ uses:[["云原生数据库","论点三：自动化运维"],["高可用","数据保护"],["数据安全","误操作防护"]],hook:"三千人改错"},
+/* P1 2024 */
+{id:"S04",code:"全",t:"2024.04",ph:"P1",title:"书面需求口径不一",
+ b:["“营业执照”在三个部门有三种定义；窗口难点没体现","书面收集 + 面谈 vs 按干系人组合方法","面谈解决不了跨部门冲突","面谈、JRP、现场观察、问卷 1200 余份；用例图、活动图、统一数据字典","JRP 议题过多 → 会前清单，每次只定一件事","46 个用例；300 余个数据项统一"],
+ uses:[["需求工程","论点一：获取与分析"],["数据中台","数据标准（备选）"]],hook:"三种营业执照"},
+{id:"S05",code:"实",t:"2024.05",ph:"P1",title:"原型一演示就改，“即办件”两种口径",
+ b:["文字评审都认可，原型演示时大量修改；“即办件”当日 vs 1 个工作日","只做文档评审 vs 原型 + 可测试验收标准","文字描述容易各自理解","可交互原型；每条需求写验收标准；签字形成基线","原型太逼真，部门要求提前上线 → 标注演示版","纠正 80 余处偏差；需求类缺陷 30% 降至 10%"],
+ uses:[["需求工程","论点二：需求验证"],["Vibe Coding","原型确认（对照）"]],hook:"即办件"},
+{id:"S06",code:"混",t:"2024.05",ph:"P1",title:"工单中心 40 余份材料，AIGC 试点",
+ b:["需求来自热线、网格、部门派单，材料 40 余份，口径不一","人工归纳约两周 vs 模型提炼 + 人工裁定","工期紧；规定模型只提炼不划边界","输出对象清单、状态草图、术语对照表，均注明来源","模型合并“退回”“驳回”，虚构“二次派单” → 无出处不输出","6 个工作日；术语表全项目通用；派单与处置拆为两服务"],
+ uses:[["AIGC 影响","论点一：需求到设计"],["领域驱动设计","统一语言"],["需求工程","需求分析（备选）"]],hook:"退回与驳回"},
+{id:"S07",code:"析",t:"2024.06",ph:"P1",title:"设计评审中对办件主链路做 FMEA",
+ b:["主链路经过六个环节，十余个外部系统，测试难以模拟失效","测试阶段暴露再修 vs 设计阶段系统分析","失效发现越晚代价越高","分解 6 个环节，按严重度、发生度、可探测度算 RPN，排序","打分分歧大 → 参考历史故障记录，三方评议","识别 23 个失效模式，前 5 项定措施"],
+ uses:[["可靠性设计","论点一：FMEA"],["架构评估","风险识别（对照）"]],hook:"23 个失效模式"},
+{id:"S08",code:"汇",t:"2024.06",ph:"P1",title:"50 余个点对点接口，部门擅改字段",
+ b:["部门间点对点接口 50 余个；某部门升级改字段未通知，入库连续失败","点对点交换 vs 中台集中汇聚","接口成倍增长、口径难统一","CDC、接口拉取、前置机文件三类接入；300 余个数据元","字段变更未通知 → 接入契约 + 结构校验 + 隔离区","14 个部门、120 余张表；点对点接口大部分下线"],
+ uses:[["数据中台","论点一：汇聚与标准"],["系统集成","接入方式"]],hook:"擅改字段"},
+{id:"S09",code:"名",t:"2024.07",ph:"P1",title:"同一企业多个名称、缺信用代码",
+ b:["企业更名、历史数据缺失，各部门名称不一，部分无信用代码","使用方自行清洗 vs 中台统一治理","避免重复和不一致","四层建模；信用代码、身份证号为主键；权威来源优先；200 余条质量规则","缺码记录 → 名称、地址、法人匹配，人工确认","重复率 18% 降至 1% 以下"],
+ uses:[["数据中台","论点二：治理"],["数据质量","主数据管理"]],hook:"曾用名作别名"},
+{id:"S10",code:"额",t:"2024.10",ph:"P1",title:"批量比对任务高频调用拖慢数据服务",
+ b:["部门批量任务工作时间高频调用企业查询服务，其他服务变慢","开放库或导文件 vs API + 数据服务网关","前者不可控、不可追踪","核验、查询、订阅三类服务；字段级授权；申请审批授权调用审计","调用配额与限流；批量改夜间；热点加缓存","80 余个服务；日均 30 万次；200 余项材料免提交"],
+ uses:[["数据中台","论点三：统一数据服务"],["接口治理","配额限流"]],hook:"核验只返回是否一致"},
+{id:"S11",code:"容",t:"2024.07",ph:"P1",title:"省级证照接口超时约 20 分钟",
+ b:["联调中证照核验接口多次超时，最长约 20 分钟，申报全部中断","N 版本程序 vs 恢复块","外部接口只有一个，无法独立多版本","主版本实时核验，备选用本地证照库，接受测试；流水号幂等；三实例冗余","本地库同步延迟 1 天 → 增量同步","申报不再因证照接口中断"],
+ uses:[["可靠性设计","论点二：容错"],["高可用","依赖降级（备选）"]],hook:"恢复块"},
+{id:"S12",code:"订",t:"2024.07",ph:"P1",title:"证照字段 8 改 14，上次漏了调用方",
+ b:["材料中心接省级证照，字段 8 个改 14 个；上次凭记忆通知，漏一个接口返工 2 天","代码检索 vs 模型基于知识库做影响分析","检索只覆盖直接调用","模型生成影响清单，网关日志与代码检索核对","漏了经 Kafka 间接依赖的监管服务 → 补订阅关系","评审准备 3 天缩至 1 天；未再漏调用方"],
+ uses:[["AIGC 影响","论点二：评审与变更"],["需求变更","影响分析（备选）"]],hook:"漏了订阅方"},
+{id:"S13",code:"链",t:"2024.07",ph:"P1",title:"联调期跨服务问题排查近一天",
+ b:["登录容器看日志，跨服务数据不一致排查近一天","手动埋点 vs SkyWalking 探针","无侵入、组件支持全","启动挂载探针；网关生成 traceId；消息头透传","全量采集压力大 → 按比例采样，慢错全留","申报首日定位两个原因"],
+ uses:[["可观测性","论点一：链路追踪"],["服务网格","可观测（对照）"]],hook:"查了一天"},
+{id:"S14",code:"越",t:"2024.08",ph:"P1",title:"渗透测试：改办件编号可看他人办件",
+ b:["上线前渗透测试发现水平越权","逐个接口修补 vs 统一收口","易遗漏、易重犯","网关接口级权限；服务端资源归属校验组件；角色 + 数据范围；签名防重放","历史接口命名不一 → 注解 + 流水线规则","当即修复；10 月中旬收口完成；30 余个越权用例全拦截"],
+ uses:[["安全与隐私","论点二：应用层"],["架构评估","风险点（权限）"]],hook:"改编号"},
+{id:"S15",code:"稳",t:"2024.08",ph:"P1",title:"惠企补贴政策调整，距上线三周",
+ b:["申报条件和材料变化，距上线只有三周","开发直接改 vs 正式变更流程","直接改容易漏关联功能","跟踪矩阵定位 4 个用例、11 个接口；CCB 评审；配置化承接","审批太慢 → 紧急变更通道","3 天完成；37 项变更全部可追溯"],
+ uses:[["需求工程","论点三：变更管理"],["软件配置管理","变更控制"]],hook:"三周前改政策"},
+{id:"S16",code:"愈",t:"2024.08",ph:"P1",title:"办件中心实例假死约 40 分钟",
+ b:["内存泄漏，进程在、存活检查正常，请求全超时，群众投诉才发现","人工巡检 vs 自动检测与恢复","无法 7×24 人工","业务级就绪检查；错误率与内存告警；补偿任务","就绪超时过短，高峰多实例同时被摘 → 放宽并限制最多摘一半","不再依赖人工发现"],
+ uses:[["可靠性设计","论点三：检测与恢复"],["高可用","健康检查（备选）"]],hook:"假死"},
+{id:"S17",code:"慢",t:"2024.09",ph:"P1",title:"申报首日九点后查询 P99 约 8 秒",
+ b:["网关超时告警不断；Pod 6 扩到 12，响应不变、数据库更忙","加机器 vs 先定位","扩容无效说明瓶颈不在实例数","耗时拆四段：N+1、同步调认证、报表跑主库","先改当天能生效的（报表迁 Doris、认证隔离超时），代码连夜改","P99 降至约 2 秒；DB CPU 85% 降至 50%"],
+ uses:[["性能优化","论点一：瓶颈定位"],["可观测性","链路证据"],["架构评估","申报期数据"]],hook:"扩了一倍没用"},
+{id:"S18",code:"暴",t:"2024.09",ph:"P1",title:"申报首日告警风暴",
+ b:["数据库变慢，二十多个服务同时告警，几分钟上百条","扩展巡检脚本 vs 统一指标体系","K8s 下 Prometheus 自动发现","资源、服务、业务三层指标；三级告警","告警淹没根因 → 按服务聚合 + 依赖抑制","消费堆积 3 分钟内发现；告警量降约八成"],
+ uses:[["可观测性","论点二：指标告警"],["运维保障","告警治理"]],hook:"上百条告警"},
+{id:"S19",code:"刷",t:"2024.09",ph:"P1",title:"同一办件数分钟被查几十次",
+ b:["状态只变四五次，群众一天刷几十次","加只读库 vs 引入缓存","只读库每次仍查库","本地缓存放配置字典；Redis 放办件状态；60 秒过期 + 状态变更发消息删缓存","九点预热缓存同时失效 → 随机偏移 + 单请求回源","P99 1 秒内；命中率约 92%"],
+ uses:[["性能优化","论点二：缓存"],["缓存技术","一致性与雪崩"]],hook:"刷了几十次"},
+{id:"S20",code:"涌",t:"2024.09",ph:"P1",title:"截止前两天提交集中，短信拖住主流程",
+ b:["提交串行发短信、同步监管；短信网关一慢全卡，引发重复提交","超时后跳过 vs 移出主流程","监管数据纳入考核，丢不得","Kafka 异步；提交只校验写办件；幂等校验；死信专人核对；网关限流；自动扩容","防后台静默失败 → 堆积监控、有限重试、死信","12 倍提交量 P99 小于 800 毫秒；成功率 99.9%；短信最长晚 3 分钟"],
+ uses:[["性能优化","论点三：异步削峰与容量"],["事件驱动","异步解耦"],["高可用","限流（备选）"]],hook:"短信一慢全卡"},
+{id:"S21",code:"撞",t:"2024.09",ph:"P1",title:"撞库攻击：1 小时 20 万次登录尝试",
+ b:["来源 3000 多个 IP，账号多为常见手机号","按 IP 封禁 vs 风险分级认证","来源分散，封禁会误伤","按设备、地点、失败次数评估：低放、中验、高拒；弱口令检测","出差用户频繁验证 → 调权重、可信设备","拦截率 98% 以上；无账号被盗"],
+ uses:[["安全与隐私","论点一：接入层"],["身份认证","风险认证"]],hook:"20 万次"},
+{id:"S22",code:"晚",t:"2024.09",ph:"P1",title:"监管统计 T+1，超期才被发现",
+ b:["监管只能看前一天数据；申报期要求实时掌握与预警","业务发消息 vs CDC；微批 vs Flink；ClickHouse vs Doris","无侵入；需事件时间；协议兼容且已在用","CDC → Kafka → Flink（1 分钟窗口、超期预警）→ Doris；历史入 Iceberg","锁表、表结构变更、迟到数据、状态膨胀、小文件","延迟降至 1 分钟内；预警 300 余件；超期降约六成"],
+ uses:[["实时数据处理","三个论点均可"],["事件驱动","CDC 事件"],["数据中台","实时接入（备选）"]],hook:"超期才知道"},
+{id:"S23",code:"扛",t:"2024.09",ph:"P1",title:"导办咨询增至 5 倍，首字超 5 秒",
+ b:["4 张 GPU；申报期咨询 5 倍，部分请求超时","增加 GPU vs 调度与降级","采购周期长","连续批处理；队列与并发上限，排队超 10 秒降级；流式输出；按队列长度扩缩","CPU 指标不反映推理压力 → 改按队列长度","首字 2 秒内；GPU 利用率 40% 提至 75%"],
+ uses:[["AIGC 融合","论点三：弹性"],["性能优化","AI 服务容量"]],hook:"5 倍咨询"},
+{id:"S24",code:"注",t:"2024.09",ph:"P1",title:"导办注入样例绕过初版规则",
+ b:["测试人员构造注入，诱导模型输出无关内容","提示词约束 vs 分层防护","提示词无法保证遵守","输入脱敏与注入检测；只依据检索作答；关键字段取原文；输出审核；审计 180 天","绕过初版规则 → 补规则 + 输出相关性校验","50 余条注入样例全拦截"],
+ uses:[["AIGC 融合","论点二：安全合规"],["安全与隐私","AI 安全（备选）"]],hook:"相关性校验"},
+{id:"S25",code:"导",t:"2024.06",ph:"P1",title:"智能导办接入：网关与检索层",
+ b:["导办需调用模型，又不能让业务依赖模型；数据不能出外网","直连模型 vs 模型网关；公网服务 vs 私有化","避免逻辑分散；政务数据不出外网","模型网关；1800 余项指南入向量库，附出处；Kafka 事件增量更新","固定长度切分截断材料清单 → 按章节切分","命中率约 70% 提至 90% 以上；准确率约 90%"],
+ uses:[["AIGC 融合","论点一：接入"],["AIGC 影响","论点三：架构模式"]],hook:"按章节切"},
+{id:"S26",code:"评",t:"2024.09 下旬",ph:"P1",title:"申报期后开展 ATAM 评估",
+ b:["二期诉求冲突：业务要功能、运维要稳定、安全要保护","凭经验排序 vs ATAM","多质量属性需权衡","效用树 32 收 21 留 6 个 H/H；敏感点限流阈值；权衡点缓存过期；4 个风险点","对部门系统风险等级有分歧 → 调出线程池占满 10 分钟的数据","按收益成本分批改进"],
+ uses:[["架构评估","三个论点均可"],["质量属性","场景描述"]],hook:"调、库、权、改"},
+{id:"S27",code:"卡",t:"2024.09",ph:"P1",title:"部门接口超时，调用方线程池占满约 10 分钟",
+ b:["某部门系统接口超时，调用方线程池被占满","各服务自设超时 vs 部门系统适配层统一隔离","配置分散、易遗漏","适配层：协议转换、超时、熔断、独立线程池（Sentinel）","统一超时不适用 → 按部门分别设定并定期调整","10 月中旬完成；演练中熔断 10 秒内生效"],
+ uses:[["架构评估","风险点与改进"],["高可用","故障隔离"],["微服务治理","熔断隔离"]],hook:"占满 10 分钟"},
+{id:"S28",code:"区",t:"2024.10",ph:"P1",title:"可用区 A 网络故障",
+ b:["可用区 A 内实例失联","单可用区多副本 vs 跨可用区","全市唯一入口，需消除机房单点","应用 3 副本反亲和；Nacos 3 节点、Redis 哨兵、Kafka 3 副本；MySQL 跨区主备","演练发现 Redis 直连旧主、失效连接未剔除","约 2 分钟恢复，无数据丢失"],
+ uses:[["高可用","论点一：冗余与故障转移"],["云原生","多可用区部署"]],hook:"2 分钟"},
+{id:"S29",code:"延",t:"2024.10",ph:"P1",title:"恢复演练：按时间点恢复近 3 小时",
+ b:["全量还原再回放日志，办件库恢复近 3 小时，超出 RTO","缩短全量周期 vs 延迟从库","前者缩短不了回放","半同步复制；binlog 异地实时备份；延迟 1 小时从库","误操作处置流程：停延迟从库、比对、只回写","误删演练约 20 分钟恢复；每月演练"],
+ uses:[["高可用","论点二：数据保护"],["数据安全","备份恢复"]],hook:"3 小时太慢"},
+{id:"S30",code:"停",t:"2024.10 下旬",ph:"P1",title:"市场监管系统升级中断约 2 小时",
+ b:["部门系统中断，涉及企业事项 20 余项","各调用方设超时 vs Sentinel 统一熔断","集中配置与监控","熔断 + 独立线程池；三级降级；二级“先提交、后流转”；Nacos 开关一分钟生效","部门恢复状态无法实时感知 → 补发需人工确认（不足）","熔断 10 秒生效；400 余件自动补发"],
+ uses:[["高可用","论点三：流量与降级"],["业务连续性","降级预案"]],hook:"先提交后流转"},
+{id:"S31",code:"借",t:"2024.10",ph:"P1",title:"账号被借用，半小时查 500 余条",
+ b:["街道账号查询大量非辖区人员信息","加强事后审计 vs 实时行为监测","事后仍滞后","岗位行为基线，偏离告警，超阈值冻结；数字水印；分类分级、SM4 加密、脱敏留痕","月末核查误报 → 报备机制","2 起异常 10 分钟内冻结；无泄露"],
+ uses:[["安全与隐私","论点三：数据层"],["个人信息保护","内部威胁"]],hook:"借号批查"},
+{id:"S32",code:"丢",t:"2024.10",ph:"P1",title:"群众投诉提交成功却没收到短信",
+ b:["日志散落容器，重启即丢","ELK vs Loki","需按办件号全文检索，审计保存 180 天","Filebeat → Kafka → Logstash → ES；JSON 格式写 traceId；冷热分层","日志含身份证号 → 采集端脱敏","按办件号找 traceId，15 分钟内查到死信原因"],
+ uses:[["可观测性","论点三：日志"],["事件驱动","死信处理"]],hook:"模板参数缺失"},
+{id:"S33",code:"树",t:"2024.09 下旬",ph:"P1",title:"效用树：把“要快要安全”变成场景",
+ b:["各方要求笼统，无法分析","小组拟定 vs 相关方共同提出","避免遗漏真实关切","六要素场景：高峰期群众提交，P99 不超过 1 秒等","安全与性能优先级争执 → 两维评级 + 投票","6 个 H/H 级场景"],
+ uses:[["架构评估","论点一：效用树"],["质量属性","六要素"]],hook:"六要素"},
+{id:"S34",code:"收",t:"2024.10 中旬",ph:"P1",title:"首批改进：适配层与权限收口",
+ b:["4 个风险点资源有限，不能同时改","按出现先后 vs 按收益成本","借鉴 CBAM","第一批适配层、权限收口；第二批读写分离（二期拆库）；最后事项配置化","统一超时不适用 → 按部门设定","演练熔断 10 秒；越权用例全拒"],
+ uses:[["架构评估","论点三：改进"],["技术债务","优先级"]],hook:"先调后权"},
+/* P4 2025 */
+{id:"S35",code:"规",t:"2025.06",ph:"P4",title:"AI 生成代码直接读办件中心的库",
+ b:["流程引擎模块生成代码绕过接口直读别人库；风格各异","事后评审纠正 vs 生成前约束","避免反复返工","项目规则文件；参考实现；架构守护测试进流水线","规则文件太长后半部分被忽略 → 按模块拆分","跨层违规每周 20 余处降到个位数"],
+ uses:[["Vibe Coding","论点一：架构约束"],["AI 编程","代码治理"]],hook:"直读别人库"},
+{id:"S36",code:"验",t:"2025.07",ph:"P4",title:"迁移脚本把会签错转成顺序审批",
+ b:["300 余个流程迁移，生成代码看似能跑","全部逐行审查 vs 测试先行 + 分级审查","逐行审查抵消效率","先审测试再生成；核心双人审；历史办件回放比对；依赖扫描","AI 推荐不存在或有漏洞的依赖 → 内部白名单","回放一致率 99.6%"],
+ uses:[["Vibe Coding","论点二：质量安全"],["软件测试","回放测试"]],hook:"会签变顺序"},
+{id:"S37",code:"流",t:"2025.05",ph:"P4",title:"需求到演示才发现偏差",
+ b:["文档 → 开发 → 演示，偏差发现太晚","只当补全工具 vs 调整流程","发挥快速生成优势","评审会当场生成可交互原型；开发转向规格、审查、测试；迭代一周","原型太快导致需求反复 → 需求冻结点","工作量减约 30%；配置上线 2 周缩至 2 天"],
+ uses:[["Vibe Coding","论点三：流程变化"],["需求工程","原型（对照）"]],hook:"冻结点"},
+{id:"S38",code:"划",t:"2025.08",ph:"P4",title:"“我要开饭店”：多步办事",
+ b:["需识别多事项、查条件、预填、提示材料","预定义工作流 vs 模型自主规划","确定性与覆盖面兼顾","20 余个高频场景走工作流，长尾受限规划；工具按模型上下文协议注册到工具网关","循环调用、参数格式错 → 校验回传重规划、连续调用上限","任务完成率约 82%"],
+ uses:[["大模型智能体","论点一：规划与工具"],["AIGC 融合","架构演进"]],hook:"开饭店"},
+{id:"S39",code:"记",t:"2025.08",ph:"P4",title:"长对话遗忘，成本上升",
+ b:["全量历史塞上下文，前面确认的信息被忽略","扩大上下文 vs 分层记忆","成本高且仍会忽略","短期摘要；结构化任务状态存 Redis；长期只存授权标签；知识检索","摘要丢失限制条件 → 办事条件写入任务状态","调用成本降约 40%；可中断续办"],
+ uses:[["大模型智能体","论点二：记忆"]],hook:"只办个体户"},
+{id:"S40",code:"控",t:"2025.09",ph:"P4",title:"材料图片中藏指令：间接注入",
+ b:["测试人员在上传图片中嵌入隐藏文字，试图改他人办件","提示词约束 vs 架构硬性控制点","提示词不可靠","身份传递（不持特权账号）；写操作用户确认；人工接管可见步骤","工具返回被当成指令 → 外来内容只作数据","约 12% 人工接管；无越权；退件率降约三成"],
+ uses:[["大模型智能体","论点三：安全可控"],["安全与隐私","AI 安全"]],hook:"图片藏字"},
+{id:"S41",code:"本",t:"2025.06",ph:"P4",title:"文档转换组件含 x86 本地库",
+ b:["ARM 服务器上无法加载，厂商无 ARM 版","一次性全替换 vs 按层评估、能留则留","降低风险","40 余项组件逐项验证；开源保留；国产 JDK；数据库四项对比选型","本地库组件换纯 Java 实现；JVM 参数沿用 x86 → 调整","20 余个服务适配通过"],
+ uses:[["信创迁移","论点一：选型适配"],["遗留系统改造","兼容性"]],hook:"ARM 加载不了"},
+{id:"S42",code:"迁",t:"2025.08",ph:"P4",title:"迁库后唯一索引冲突",
+ b:["600 余张表；扫描出 400 余处不兼容语句","人工逐个检查 vs 工具扫描","人工易漏","兼容模式 + 集中改写；全量 + CDC 增量；行数 + 字段哈希两级校验","大小写与尾部空格处理不同、结果顺序不同、执行计划变化","三轮校验完全一致"],
+ uses:[["信创迁移","论点二：数据库迁移"],["数据迁移","一致性校验"]],hook:"尾部空格"},
+{id:"S43",code:"切",t:"2025.10",ph:"P4",title:"信创切换：停机 12 分钟",
+ b:["全市入口，不能长时间停机","一次性整体切换 vs 双轨分批","风险集中、难回退","只读流量回放比对；先只读后写入；凌晨五步切换；反向同步可半小时回退","回放发现除法精度差异 → SQL 明确精度","停机 12 分钟；性能达 95% 以上；11 月旧环境下线"],
+ uses:[["信创迁移","论点三：平稳切换"],["高可用","发布切换（备选）"]],hook:"反向同步"},
+{id:"S44",code:"叠",t:"2025.09",ph:"P4",title:"网格重试与代码重试叠加，请求放大十倍",
+ b:["Python 服务用不了 Spring Cloud 治理组件","自建 Python SDK vs 服务网格；Istio vs Linkerd","避免再次侵入；Istio 支持 ARM","6 个智能助手服务试点；超时、重试、摘除下沉边车；按比例灰度","应用先于边车就绪；重试叠加放大近十倍 → 治理只在网格配","灰度 5%、20%、100%，一分钟回退"],
+ uses:[["服务网格","论点一：试点与治理"],["微服务治理","重试风暴"]],hook:"放大十倍"},
+{id:"S45",code:"透",t:"2025.11",ph:"P4",title:"Python 服务没透传追踪标识",
+ b:["Java 分批纳管；调用链在 Python 处断开","整体切换 vs 先注入后移除旧组件","风险分散","边车统一采集；指标入 Prometheus；调用链统一 OpenTelemetry","未透传 → 公共库补请求头；边车每实例约 60 MB → 限定配置可见范围","30 余个服务纳管；延迟增加 2 毫秒内"],
+ uses:[["服务网格","论点二：推广与可观测"],["可观测性","改进落地"]],hook:"链路断在 Python"},
+{id:"S46",code:"漏",t:"2025.12",ph:"P4",title:"切严格双向 TLS，旧服务调用全失败",
+ b:["集群内默认互信、明文","应用自配 TLS vs 网格自动证书","证书分散、轮换难","宽容模式 → 确认全加密 → 逐命名空间严格；默认拒绝按接口放行","未注入边车的旧服务失败 → 回退、拓扑梳理、例外 + 隔离","流量全加密；横向访问用例全拒"],
+ uses:[["服务网格","论点三：零信任"],["安全与隐私","零信任（对照）"]],hook:"宽容再严格"}];
+
+const TOPICS=[
+{n:"论基于云原生数据库的企业信息系统架构设计",key:"cnd3",tag:"已写",t:"B",how:"技术特性 + 场景",q3:"选型依据、关键难点及应对措施、实施效果",a:[["弹性伸缩","S01"],["高可用","S02"],["自动化运维","S03"]]},
+{n:"论高并发系统的性能优化",key:"hc",tag:"已写",t:"A",how:"照着拆",q3:"瓶颈定位、缓存优化、异步削峰与容量保障",a:[["瓶颈定位","S17"],["缓存优化","S19"],["异步削峰与容量","S20"]]},
+{n:"论 AIGC 技术对软件架构设计的影响与应用",key:"aigc",tag:"已写",t:"A",how:"两维拆三",q3:"对开发流程和架构模式的影响",a:[["需求到设计","S06"],["评审与变更","S12"],["架构模式","S25"]]},
+{n:"论微服务架构下的可观测性设计",key:"obs",tag:"已写",t:"C",how:"技术特性（三支柱）",q3:"如何设计实施可观测性体系及效果",a:[["链路","S13"],["指标告警","S18"],["日志","S32"]]},
+{n:"论软件架构评估方法及其应用",key:"atam",tag:"已写",t:"A",how:"方法步骤",q3:"ATAM 评估过程、三类点、改进",a:[["效用树","S33"],["三类点","S26"],["改进","S34"]]},
+{n:"论实时数据处理架构的设计与应用",key:"rt",tag:"已写",t:"A",how:"分层（数据流向）",q3:"采集、流式计算、存储分析",a:[["采集","S22"],["计算","S22"],["存储","S22"]]},
+{n:"论高可用架构设计与业务连续性保障",key:"ha",tag:"已写",t:"A",how:"技术特性（RTO/RPO/SLA）",q3:"冗余与故障转移、数据保护、流量控制与降级",a:[["故障转移","S28"],["数据保护","S29"],["降级","S30"]]},
+{n:"论 AIGC 能力与现有系统的融合架构设计",key:"fuse",tag:"已写",t:"A",how:"分层（接入、治理、资源）",q3:"接入架构、安全合规、弹性伸缩",a:[["接入","S25"],["安全","S24"],["弹性","S23"]]},
+{n:"论服务网格（Service Mesh）的应用",key:"mesh",tag:"已写",t:"B",how:"实施阶段",q3:"实施路径、挑战及解决、可维护性与稳定性提升",a:[["试点","S44"],["推广","S45"],["收口","S46"]]},
+{n:"论软件可靠性设计技术及其应用",key:"rel",tag:"已写",t:"C",how:"技术类别（事前、事中、事后）",q3:"应用可靠性技术提升可靠性及效果",a:[["FMEA","S07"],["容错","S11"],["检测与恢复","S16"]]},
+{n:"论需求工程及其应用",key:"req",tag:"已写",t:"A",how:"照着拆（时间顺序）",q3:"获取与分析、需求验证、变更管理",a:[["获取","S04"],["验证","S05"],["变更","S15"]]},
+{n:"论数据中台技术及其应用",key:"dmp",tag:"已写",t:"B",how:"统一管理拆二 + 服务一",q3:"统一管理、统一数据服务、设计过程与效果",a:[["汇聚","S08"],["治理","S09"],["服务","S10"]]},
+{n:"论系统架构中的安全性设计与隐私保护",key:"sec",tag:"已写",t:"C",how:"分层（纵深防御）",q3:"安全设计与隐私保护、威胁与解决",a:[["接入层","S21"],["应用层","S14"],["数据层","S31"]]},
+{n:"论 Vibe Coding 在软件开发中的应用",key:"vibe",tag:"已写",t:"A",how:"照着拆",q3:"架构约束、质量安全、流程变化",a:[["约束","S35"],["质量","S36"],["流程","S37"]]},
+{n:"论基于大模型智能体的系统架构设计",key:"agent",tag:"已写",t:"A",how:"照着拆",q3:"规划与工具、记忆与知识、安全可控与人工协同",a:[["规划","S38"],["记忆","S39"],["安全","S40"]]},
+{n:"论信创背景下的系统国产化迁移架构设计",key:"xc",tag:"已写",t:"A",how:"实施阶段",q3:"选型适配、数据库迁移、平稳切换",a:[["选型","S41"],["迁库","S42"],["切换","S43"]]},
+{n:"论微服务架构及其应用（服务拆分与治理）",tag:"新题",t:"C",how:"分层：接入、服务、数据",q3:"结合项目论述微服务的拆分、通信与治理",a:[["接入层：网关鉴权与限流","S20"],["服务层：按领域拆分（派单与处置）","S06"],["治理：熔断隔离适配层","S27"]]},
+{n:"论事件驱动架构及其应用",tag:"新题",t:"C",how:"技术特性：解耦、异步、事件流",q3:"结合项目论述事件驱动的设计与问题处理",a:[["异步解耦与削峰","S20"],["变更事件流（CDC）","S22"],["可靠投递与死信","S32"]]},
+{n:"论缓存技术及其应用",tag:"新题",t:"A",how:"技术特性：分级、一致性、可用性",q3:"缓存架构设计、一致性保障、缓存问题处理",a:[["两级缓存","S19"],["读己之写标记","S02"],["热点与回源（雪崩、击穿）","S19"]]},
+{n:"论分布式系统的数据一致性设计",tag:"新题",t:"C",how:"场景：复制、消息、迁移",q3:"结合项目论述一致性问题与解决",a:[["主从复制延迟","S02"],["消息幂等与补偿","S20"],["迁移双轨校验","S42"]]},
+{n:"论领域驱动设计及其应用",tag:"新题",t:"A",how:"方法步骤：统一语言、限界上下文、聚合",q3:"战略设计、战术设计与效果",a:[["统一语言（术语表）","S06"],["限界上下文（派单与处置拆分）","S06"],["主数据与聚合边界","S09"]]},
+{n:"论软件测试技术及其应用（含 AI 辅助测试）",tag:"新题",t:"C",how:"生命周期：需求、开发、上线",q3:"结合项目论述测试策略与效果",a:[["验收标准前置","S05"],["测试先行与回放比对","S36"],["流量回放验证","S43"]]},
+{n:"论低代码平台的设计与应用",tag:"新题",t:"C",how:"分层：设计器、引擎、治理",q3:"平台架构、可扩展性、质量保障",a:[["流程配置化动因","S34"],["设计器与引擎","S37"],["迁移与回放验证","S36"]]},
+{n:"论云原生架构及其应用",tag:"新题",t:"C",how:"技术特性：容器编排、弹性、服务网格",q3:"结合项目论述云原生改造与效果",a:[["多可用区与自愈","S28"],["弹性扩缩","S20"],["服务网格治理","S44"]]},
+{n:"论系统可维护性设计（遗留系统演化）",tag:"新题",t:"C",how:"场景：配置化、解耦、替换",q3:"可维护性问题与改进",a:[["硬编码流程配置化","S37"],["治理逻辑下沉网格","S44"],["组件替换与适配","S41"]]},
+{n:"论 DevOps 与持续交付",tag:"新题",t:"C",how:"生命周期：构建、发布、运行",q3:"流水线、发布策略、运行反馈",a:[["流水线守护测试","S35"],["灰度发布与回退","S44"],["监控反馈","S18"]]}];
+
+const TEMPLATES={
+beats:[["释","……是指……，其核心在于……。"],["景","××年×月，……时，出现了……，影响了……。"],["比","对此有两种方案：一是……，二是……。"],["选","前者……，后者……；考虑到……，我选择了……。"],["做","具体做法是：……；……；……。"],["坑","实施中出现了新问题：……。我们随即……。"],["证","最终，……由……降至……，……。"]],
+fixed:[["段 1 摘要·项目（通用，背熟）","2024 年 4 月，我参与了某市政务服务一网通办与基层治理协同平台的建设，担任系统架构师。平台包括统一认证、事项、办件、材料、工单、数据共享和运行监管等模块，服务对象为市民、企业和政务工作人员。项目建设周期 8 个月，团队共 22 人。我负责总体架构设计和服务划分，并主持了【题目关键词】的设计与实施。"],
+["段 3 背景（通用骨架）","该平台将原先分散在十余个部门系统中的政务事项整合为统一入口，共拆分为 20 余个服务。【整合前怎么做】……。【整合后带来的新问题，三条，各对应一个论点】……。【落到题目】因此，……成为架构设计必须解决的问题。"],
+["段 4 本人工作（通用骨架）","项目团队包括后端、前端、测试、数据开发、运维和业务分析人员，技术栈包括 Spring Cloud、Gateway、Nacos、Redis、Kafka、MySQL 和 Kubernetes。我负责总体架构设计和服务划分，在【题目关键词】方面主要做了以下工作：【三到五项，与三个论点对应】。"],
+["段 9 结尾（通用骨架）","【上线情况与数据】，得到了建设单位的认可。通过本项目我体会到，……。项目也存在不足：【三条，来自三个论点】。后续计划【三条改进，一一对应】。"]]};
+
+const DOS=(function(){
+const $=s=>document.querySelector(s);
+const byId=Object.fromEntries(SC.map(s=>[s.id,s]));
+const BEAT=["景","比","选","做","坑","证"];
+const PHN={P0:"疫情项目",P1:"一期",P4:"二期"};
+const sto={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const esc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+/* scene -> essay paragraph links */
+const LINKS={};
+TOPICS.filter(t=>t.key).forEach(t=>t.a.forEach((a,i)=>{(LINKS[a[1]]=LINKS[a[1]]||[]).push({key:t.key,n:t.n,i,arg:a[0]})}));
+function chIndex(key){return CH.findIndex(c=>c.key===key)}
+function gotoEssay(key,page){const c=chIndex(key);if(c<0)return;const d=document.getElementById("dlg");if(d&&d.open)d.close();jumpB(c,page);}
+function chip(id){const s=byId[id];return `<button class="chip" data-sc="${id}"><b>${s.code}</b>${s.title.length>12?s.title.slice(0,12)+"…":s.title}</button>`;}
+function linksHTML(id){const L=LINKS[id]||[];if(!L.length)return "";
+  return `<div class="slinks">${L.map(l=>`<button class="chip lnk" data-ess="${l.key}" data-pg="${7+l.i}">原文：${l.n.replace(/^论\s*/,"")}·论点${"一二三"[l.i]}</button>`).join("")}</div>`;}
+function cardHTML(s,hide){
+  return `<div class="scard${hide?" hide":""}">
+   <div class="hd"><span class="code">${s.code}</span><span class="ti">${s.title}<small>${s.t}｜${PHN[s.ph]}｜记忆钩子：${s.hook}</small></span></div>
+   <ul class="sbeats">${s.b.map((x,i)=>`<li><b>${BEAT[i]}</b><span>${x}</span></li>`).join("")}</ul>
+   <div class="uses">${s.uses.map(u=>`<span class="u"><b>${u[0]}</b>　${u[1]}</span>`).join("")}</div>${linksHTML(s.id)}</div>`;
+}
+function wrap(x){return `<div class="slide wide"><div class="dos">${x}</div></div>`;}
+/* ---------- project ---------- */
+const STACK=[["接入层","Gateway；统一认证（国密）","网格入口；智能体工具网关"],["服务层","Spring Cloud，20 余个服务；Sentinel 部门适配层","30 余个服务；BPMN 流程引擎；Python 智能体服务；办件库与材料库拆分"],["治理与观测","Nacos；SkyWalking；Prometheus；ELK","Istio + Envoy；OpenTelemetry"],["数据","MySQL；Redis；Kafka；Doris；Flink CDC；Flink；Iceberg","国产数据库（MySQL 兼容）"],["AI","私有化大模型 + 向量库（导办）","智能办事助手；内网代码大模型"],["基础设施","政务云 x86；Kubernetes；跨可用区","信创资源池：国产 ARM、国产操作系统、国产 JDK"]];
+function phaseHTML(p){const ev=p.scenes.map(id=>byId[id]).sort((a,b)=>a.t.localeCompare(b.t,"zh"));
+  return `<section class="ph"><div class="when">${p.time}</div><h3>${p.name}</h3>
+   <div class="meta">${p.team}｜${p.role}</div><p class="goal">${p.goal}</p>
+   <div>${p.stack.map(s=>`<span class="chip k-${s[0]}" style="cursor:default">${s[0]}：${s[1]}</span>`).join("")}</div>
+   <p class="pnote">${p.note}</p>
+   <ul class="events">${ev.map(s=>`<li data-sc="${s.id}"><span class="d">${s.t}</span><span class="c">${s.code}</span><span class="tt">${s.title}<small>${s.uses.map(u=>u[0]).join("、")}</small></span></li>`).join("")}</ul></section>`;}
+function viewProject(){
+  const P0=PHASES.find(p=>p.id==="P0"),plat=PHASES.filter(p=>p.id!=="P0");
+  return wrap(`<h2 class="sec">项目档案</h2>
+  <p class="lead">两个项目：一个是 2022 年的疫情防控系统，独立使用；另一个是贯穿 2024 至 2025 年的政务平台，分一期、二期建设，大部分论文都写它。先记住时间线，再记住线上发生的事。点任一事件可打开场景卡，并跳转到对应范文。</p>
+  <h3 class="part">项目 A　政务服务一网通办与基层治理协同平台</h3>
+  <div class="grid2">
+   <div class="panel"><h3>平台一句话</h3><p style="margin:0">把十余个部门的办事系统整合为统一入口，同时承载热线工单、网格事件等基层治理业务。一期建成上线，二期在一期运行和架构评估的基础上做平台化与国产化升级。我在两期均担任系统架构师。</p></div>
+   <div class="panel"><h3>统一口径的关键数字</h3><table><tbody>
+    <tr><td>规模</td><td>十余个部门；事项 1800 余项；服务 20 余个（二期 30 余个）</td></tr>
+    <tr><td>团队</td><td>一期 22 人、8 个月；二期 15 人、7 个月</td></tr>
+    <tr><td>9 月申报</td><td>流量约为平时十几倍；首日 P99 约 8 秒，优化后 1 秒以内；截止日提交约 12 倍</td></tr>
+    <tr><td>可用性</td><td>核心服务 99.95%；可用区故障约 2 分钟恢复</td></tr>
+   </tbody></table></div>
+  </div>
+  <div class="tl">${plat.map(phaseHTML).join("")}</div>
+  <h3 class="sec2">技术栈演进</h3>
+  <div class="scroller"><table><thead><tr><th>层次</th><th>一期（2024.04–11）</th><th>二期（2025.05–12）</th></tr></thead><tbody>${STACK.map(r=>`<tr>${r.map((c,i)=>i?`<td>${c}</td>`:`<th>${c}</th>`).join("")}</tr>`).join("")}</tbody></table></div>
+  <h3 class="part">项目 B　疫情防控落实管控系统（独立项目）</h3>
+  <div class="tl solo">${phaseHTML(P0)}</div>`);
+}
+/* ---------- scenes ---------- */
+let F={ph:"all",topic:"all",q:"",hide:false};
+function viewScenes(){
+  const topics=[...new Set(SC.flatMap(s=>s.uses.map(u=>u[0])))];
+  return wrap(`<h2 class="sec">场景卡：46 件真实发生过的事</h2>
+  <p class="lead">每张卡按七拍记：景、比、选、做、坑、证（“释”在考场上按题目现写一句）。卡片下方是它能用在哪些题目，以及已写范文中对应论点的原文链接。打开“遮住七拍”后，点灰条逐条回忆。</p>
+  <div class="filters">
+   <div class="dseg" id="phseg">${[["all","全部"],["P0","疫情项目"],["P1","一期"],["P4","二期"]].map(x=>`<button data-fph="${x[0]}" aria-pressed="${F.ph===x[0]}">${x[1]}</button>`).join("")}</div>
+   <select id="tsel" aria-label="按题目筛选"><option value="all">按题目筛选：全部</option>${topics.map(t=>`<option ${F.topic===t?"selected":""}>${t}</option>`).join("")}</select>
+   <input id="dq" placeholder="搜索场景、技术、数字" value="${esc(F.q)}">
+   <div class="dseg"><button id="hidebtn" aria-pressed="${F.hide}">遮住七拍</button></div>
+  </div><div class="scards" id="scards"></div>`);
+}
+function renderCards(){const el=$("#scards");if(!el)return;const q=F.q.trim();
+  const list=SC.filter(s=>(F.ph==="all"||s.ph===F.ph)&&(F.topic==="all"||s.uses.some(u=>u[0]===F.topic))&&(!q||JSON.stringify(s).includes(q)));
+  el.innerHTML=list.length?list.map(s=>cardHTML(s,F.hide)).join(""):`<p class="lead">没有匹配的场景。</p>`;}
+/* ---------- topics ---------- */
+let TF="all";
+function viewTopics(){
+  return wrap(`<h2 class="sec">题目 × 场景：每道题取哪三件事</h2>
+  <p class="lead">“已写”可直接跳到范文的论点推导页；“新题”没有范文，练到能在 15 分钟内说出三个论点和对应场景即可。</p>
+  <div class="filters"><div class="dseg">${[["all","全部"],["已写","已写"],["新题","新题"]].map(x=>`<button data-ftp="${x[0]}" aria-pressed="${TF===x[0]}">${x[1]}</button>`).join("")}</div></div>
+  <div class="grid2">${TOPICS.filter(t=>TF==="all"||t.tag===TF).map(t=>`<div class="topic"><h3><span class="ttag${t.tag==="新题"?" new":""}">${t.tag}</span>${t.n}</h3>
+   <p class="q">第三问要点：${t.q3}<br>类型 ${t.t}｜提取方式：${t.how}</p>
+   <div class="targs">${t.a.map((a,i)=>`<div><em>论点${"一二三"[i]}</em><span>${a[0]}</span>${chip(a[1])}</div>`).join("")}</div>
+   ${t.key?`<div class="row" style="margin-top:.6rem"><button class="btn" data-ess="${t.key}" data-pg="0">查看范文的论点推导</button></div>`:""}</div>`).join("")}</div>`);
+}
+/* ---------- training ---------- */
+const INTV=[0,1,2,4,7,15];
+const srs=()=>sto.get("pd-srs",{});
+const dueList=()=>{const s=srs(),now=Date.now();return SC.filter(c=>{const r=s[c.id];return !r||r.due<=now})};
+let fc=null,flip=false;
+function nextFlash(){const d=dueList();fc=d.length?d[Math.floor(Math.random()*d.length)]:null;flip=false;renderFlash();}
+function rate(l){const s=srs(),r=s[fc.id]||{box:0};r.box=l===0?0:l===1?Math.max(1,r.box):Math.min(INTV.length-1,r.box+1);r.due=Date.now()+INTV[r.box]*864e5-(r.box?36e5:0);s[fc.id]=r;sto.set("pd-srs",s);nextFlash();}
+function renderFlash(){const el=$("#flash");if(!el)return;const s=srs();const bx=[0,0,0,0,0,0];SC.forEach(c=>{const r=s[c.id];bx[r?r.box:0]++});
+  $("#fstat").textContent=`今日待复习 ${dueList().length} 张；熟练度：${bx.map((n,i)=>`${i}级 ${n}`).join("　")}`;
+  if(!fc){el.innerHTML=`<div class="flash"><div class="ft">今天的卡片都复习完了</div><p class="ask">明天再来，或者去下面抽一道题。</p></div>`;return}
+  el.innerHTML=`<div class="flash"><div class="big">${fc.code}</div><div class="ft">${fc.title}</div><div class="ask">${fc.t}｜${PHN[fc.ph]}<br>先在心里或纸上说出：七拍各一句、能用在哪两道题</div>
+   ${flip?`<div class="back">${cardHTML(fc,false)}</div><div class="row" style="justify-content:center;margin-top:.8rem"><button class="btn warn" data-rate="0">忘了</button><button class="btn" data-rate="1">模糊</button><button class="btn pri" data-rate="2">记住了</button></div>`:`<div class="row" style="justify-content:center;margin-top:.8rem"><button class="btn pri" id="flip">翻面对照</button></div>`}</div>`;}
+const T={};
+function timer(id,min,sel){clearInterval(T[id]);let left=min*60;const t=$(sel);const tick=()=>{if(!t){clearInterval(T[id]);return}const m=Math.floor(left/60),s=left%60;t.textContent=`${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;t.classList.toggle("low",left<=120);if(left<=0){clearInterval(T[id]);t.textContent="时间到";}left--;};tick();T[id]=setInterval(tick,1000);}
+let ct=null;
+function drawTopic(){const pool=TOPICS.filter(t=>$("#onlynew").checked?t.tag==="新题":true);ct=pool[Math.floor(Math.random()*pool.length)];
+  $("#plan").innerHTML=`<div class="qbox"><b>${ct.n}</b><br>第三问要点：${ct.q3}</div>
+  <div class="row"><span>计时</span><span class="timer" id="t1">15:00</span></div>
+  <div class="form">
+   <div><label>看：第三问属于哪类？</label><select id="pt"><option value="">请选择</option><option value="A">A 已点名维度</option><option value="B">B 给出过程词</option><option value="C">C 未点名</option></select></div>
+   <div><label>定：用哪种提取方式？为什么？</label><input id="pm" placeholder="例：按实施阶段，因为第三问问实施路径"></div>
+   ${[0,1,2].map(i=>`<div><label>落：论点${"一二三"[i]}和绑定的场景</label><div class="argrow"><input id="pa${i}" placeholder="论点名称"><select id="ps${i}"><option value="">选场景</option>${SC.map(s=>`<option value="${s.id}">${s.code}｜${s.title.slice(0,8)}</option>`).join("")}</select></div></div>`).join("")}
+   <div><label>埋：第二问写哪几点来引出三个论点？</label><input id="pb" placeholder="一句话"></div></div>
+  <div class="row"><button class="btn pri" id="reveal1">写完了，对照参考</button><button class="btn" id="draw1">换一道</button></div><div id="ref1"></div>`;timer("t1",15,"#t1");}
+function reveal1(){const t=ct,mine=[0,1,2].map(i=>$("#ps"+i).value).filter(Boolean),hit=t.a.filter(a=>mine.includes(a[1])).length;clearInterval(T.t1);
+  $("#ref1").innerHTML=`<div class="ref"><h4>参考规划</h4><p>类型 ${t.t}（你选 ${$("#pt").value||"未选"}）；提取方式：${t.how}</p>
+  <div class="targs">${t.a.map((a,i)=>`<div><em>论点${"一二三"[i]}</em><span>${a[0]}</span>${chip(a[1])}</div>`).join("")}</div>
+  ${t.key?`<div class="row" style="margin-top:.6rem"><button class="btn" data-ess="${t.key}" data-pg="0">打开这篇范文的论点推导</button></div>`:""}
+  <p class="stats" style="margin-top:.6rem">场景命中 ${hit} / 3。没命中不等于错：只要你的场景能完整写出七拍，并回应第三问的每个关键词，就是可用的论点。</p></div>`;}
+let ca=null;
+function drawArg(){const pairs=[];TOPICS.forEach(t=>t.a.forEach((a,i)=>pairs.push([t,a,i])));ca=pairs[Math.floor(Math.random()*pairs.length)];const s=byId[ca[1][1]];
+  $("#write").innerHTML=`<div class="qbox"><b>${ca[0].n}</b><br>请写论点：<b>${ca[1][0]}</b>　使用场景：<span class="chip" style="cursor:default"><b>${s.code}</b>${s.title}</span></div>
+  <div class="row"><span>计时</span><span class="timer" id="t2">15:00</span><span class="stats" id="wc">0 字</span><button class="btn" id="tplbtn">显示句式模板</button></div>
+  <div class="tpl" id="tpl" hidden>${TEMPLATES.beats.map(b=>`<div><b>${b[0]}</b><span>${b[1]}</span></div>`).join("")}</div>
+  <div class="form"><textarea id="wt" placeholder="不看场景卡，直接写。目标 400 至 480 字。"></textarea></div>
+  <div class="row"><button class="btn pri" id="reveal2">写完了，对照</button><button class="btn" id="draw2">换一个</button></div><div id="ref2"></div>`;
+  $("#wt").value=sto.get("pd-draft-"+ca[0].n+ca[1][0],"");wc();timer("t2",15,"#t2");}
+function wc(){const v=$("#wt").value;$("#wc").textContent=`${(v.match(/[^\s]/g)||[]).length} 字`;if(ca)sto.set("pd-draft-"+ca[0].n+ca[1][0],v);}
+function reveal2(){const s=byId[ca[1][1]];clearInterval(T.t2);
+  $("#ref2").innerHTML=`<div class="ref"><h4>对照场景卡</h4>${cardHTML(s,false)}
+  ${ca[0].key?`<div class="row" style="margin:.6rem 0"><button class="btn" data-ess="${ca[0].key}" data-pg="${7+ca[2]}">对照范文中的这个论点</button></div>`:""}
+  <h4 style="margin-top:.8rem">自查</h4><div class="checks">${["开头有一句“释”，并点出与题目的关系","有具体时间和现象（景）","有两个方案的比较（比）","写出了“我选择……，因为……”（选）","做法有三项以上具体措施（做）","写了一个实施中的问题及解决（坑）","结果有数字，并回扣题目关键词（证）","字数在 400 字以上"].map(x=>`<label><input type="checkbox">${x}</label>`).join("")}</div></div>`;}
+function viewTrain(){
+  return wrap(`<h2 class="sec">临场训练</h2>
+  <p class="lead">每天约 40 分钟：复习场景卡 10 分钟，抽一道题做 15 分钟规划，选一个论点限时写 15 分钟。全部先做后看。</p>
+  <div class="drill"><h3>一、场景卡间隔复习（10 分钟）</h3><p class="sub">看代号和标题，先说出七拍和可用题目，再翻面评级。系统按 0、1、2、4、7、15 天安排下次复习，记录保存在本浏览器。</p>
+   <p class="stats" id="fstat"></p><div id="flash"></div><div class="row"><button class="btn" id="resetsrs">清空复习记录</button></div></div>
+  <div class="drill"><h3>二、抽题规划（15 分钟）</h3><p class="sub">模拟考场前 15 分钟：只做“看、定、埋、落”，不写正文。</p>
+   <div class="row"><button class="btn pri" id="draw1s">抽一道题</button><label class="row" style="gap:.3rem"><input type="checkbox" id="onlynew">只抽没写过范文的新题</label></div><div id="plan"></div></div>
+  <div class="drill"><h3>三、单论点限时扩写（15 分钟）</h3><p class="sub">随机给一个题目和场景，写约 450 字的论点，写完对照场景卡和范文原文。</p>
+   <div class="row"><button class="btn pri" id="draw2s">抽一个论点</button></div><div id="write"></div></div>
+  <div class="drill"><h3>四、两小时考场节奏</h3><ul class="plan">${[["0–5 分钟","选题。看三问，圈出第三问的全部关键词。"],["5–20 分钟","草稿纸规划：类型、提取方式、三个论点、三个场景代号、每个场景的七拍关键词、第二问要点。"],["20–30 分钟","摘要：项目段默写；主旨段用三个场景各一句写问题与措施，再写结果。"],["30–45 分钟","背景与本人工作：通用骨架 + 三条痛点。"],["45–60 分钟","第二问：理论三五句，落到项目，末句引出论点。"],["60–105 分钟","三个论点各 15 分钟，按七拍写，论点间用因果句衔接。"],["105–115 分钟","结尾：结果、评价、体会、三个不足对三个改进。"],["115–120 分钟","检查关键词与数字前后一致。"]].map(x=>`<li><b>${x[0]}</b><span>${x[1]}</span></li>`).join("")}</ul></div>
+  <div class="drill fixed"><h3>五、提前背熟的通用段落</h3><p class="sub">考场上只改方括号里的内容。</p>${TEMPLATES.fixed.map(f=>`<h4 style="margin:.6rem 0 0">${f[0]}</h4><p>${f[1]}</p>`).join("")}</div>`);
+}
+function viewMethod(){
+  return wrap(`<h2 class="sec">为什么看原文记不住，以及怎么练</h2>
+  <div class="callout">看原文、照着写，练的是“认出来”；考场需要“想出来”。“认出来”一天就淡，“想出来”要靠反复的主动回忆。所以这里的练习都是先做后看，范文只用来事后对照。</div>
+  <div class="grid2">
+   <div class="panel"><h3>记什么</h3><ol><li>一条时间线：平台一期（2024）、二期（2025），疫情项目单列。</li><li>46 张场景卡：代号、记忆钩子、七拍关键词。</li><li>4 段通用段落：项目段、背景骨架、本人工作骨架、结尾骨架。</li><li>5 种提取方式：问设计按分层、问阶段按周期、问优势按特性、问场景按流程、问方法按步骤。</li></ol></div>
+   <div class="panel"><h3>怎么练（每天 40 分钟）</h3><ol><li>10 分钟场景卡复习，先说再翻。</li><li>15 分钟抽题规划，只练“用哪三件事”。</li><li>15 分钟单论点限时写，写完对照。</li><li>每周一次两小时完整模考。</li></ol></div>
+   <div class="panel"><h3>想不出怎么接时</h3><ol><li>把第三问关键词抄下来，逐个问：项目里哪件事最像它？</li><li>沿时间线从一期往后过一遍，哪件事能让这个关键词“出问题、比方案、作选择”，就用哪件。</li><li>论点之间找因果：前一件事的结果，往往是后一件事的起因。</li><li>宁可用熟悉的事换角度写，也不要临时编一件不熟悉的事。</li></ol></div>
+   <div class="panel"><h3>不追求一字不差</h3><ol><li>阅卷看的是：论点扣题、事情真实、有比较和取舍、有结果数据。</li><li>数字前后一致、合乎常理即可，以项目档案中的口径为准。</li><li>练过三五道题后会发现，大部分题目都在用同样的二十来件事。</li></ol></div>
+  </div>`);
+}
+/* ---------- events ---------- */
+document.addEventListener("click",e=>{
+  const es=e.target.closest("[data-ess]");if(es){gotoEssay(es.dataset.ess,+es.dataset.pg);return}
+  const sc=e.target.closest("[data-sc]");if(sc){openScene(sc.dataset.sc);return}
+  const ph=e.target.closest("[data-fph]");if(ph){F.ph=ph.dataset.fph;document.querySelectorAll("#phseg button").forEach(b=>b.setAttribute("aria-pressed",String(b===ph)));renderCards();return}
+  const tp=e.target.closest("[data-ftp]");if(tp){TF=tp.dataset.ftp;renderB(false);return}
+  const id=e.target.id;
+  if(id==="hidebtn"){F.hide=!F.hide;e.target.setAttribute("aria-pressed",String(F.hide));renderCards();return}
+  const li=e.target.closest(".hide .sbeats li");if(li){li.classList.toggle("shown");return}
+  if(id==="flip"){flip=true;renderFlash();return}
+  const r=e.target.closest("[data-rate]");if(r){rate(+r.dataset.rate);return}
+  if(id==="resetsrs"){if(confirm("确定清空全部复习记录？")){sto.set("pd-srs",{});nextFlash();}return}
+  if(id==="draw1s"||id==="draw1"){drawTopic();return}
+  if(id==="reveal1"){reveal1();return}
+  if(id==="draw2s"||id==="draw2"){drawArg();return}
+  if(id==="reveal2"){reveal2();return}
+  if(id==="tplbtn"){const t=$("#tpl");t.hidden=!t.hidden;e.target.textContent=t.hidden?"显示句式模板":"隐藏句式模板";return}
+  if(id==="dlgx"){$("#dlg").close();return}
+  if(e.target===$("#dlg")){$("#dlg").close();}
+});
+document.addEventListener("input",e=>{if(e.target.id==="dq"){F.q=e.target.value;renderCards()}if(e.target.id==="wt")wc()});
+document.addEventListener("change",e=>{if(e.target.id==="tsel"){F.topic=e.target.value;renderCards()}});
+function openScene(id){const d=$("#dlg");$("#dlgbody").innerHTML=`<div class="dos">${cardHTML(byId[id],false)}</div>`;if(d.showModal)d.showModal();else d.setAttribute("open","");}
+function scLink(key,i){const t=TOPICS.find(x=>x.key===key);if(!t||!t.a[i])return "";const s=byId[t.a[i][1]];return ` <button class="chip" data-sc="${s.id}" style="font-size:.78rem"><b>${s.code}</b>场景卡</button>`;}
+return {scLink,pages:[
+ {short:"项目档案",kind:"g",html:viewProject},
+ {short:"场景卡",kind:"g",html:viewScenes,after:renderCards},
+ {short:"题目×场景",kind:"g",html:viewTopics},
+ {short:"临场训练",kind:"g",html:viewTrain,after:nextFlash},
+ {short:"训练方法",kind:"g",html:viewMethod}]};
+})();
+
 /* ---------- assemble chapters ---------- */
 const CH=[];
 CH.push({part:"guide",title:"找论点的方法",short:"总纲",pages:GUIDE_PAGES.map(g=>({short:g.short,kind:"g",html:g.html}))});
+CH.push({part:"proj",key:"dossier",title:"项目档案与临场训练",short:"档案",pages:DOS.pages});
 ESSAY_META.forEach(m=>{
   const E=ESSAYS.find(e=>e.KEY===m.key);if(!E)return;
   E.P.forEach(p=>p.words=wcB(p.text));
@@ -2234,7 +2752,7 @@ ESSAY_META.forEach(m=>{
   const pages=[{short:"题目与推导",kind:"g",html:()=>deriveHTML(E,D)},{short:"全文地图",kind:"g",html:()=>mapHTML(E)}];
   E.P.forEach(p=>pages.push({short:p.short,kind:"p",html:()=>paraHTML(E,p)}));
   pages.push({short:"自测",kind:"g",html:()=>quizHTML(E)});
-  CH.push({part:m.part,title:E.COVER.title,short:E.COVER.cells.map(c=>c[0]).join(""),pages});
+  CH.push({part:m.part,key:m.key,title:E.COVER.title,short:E.COVER.cells.map(c=>c[0]).join(""),pages});
 });
 CH.push({part:"appx",title:"事实卡、场景库与提示词",short:"附录",pages:APPX_PAGES.map(g=>({short:g.short,kind:"g",html:g.html}))});
 
@@ -2247,14 +2765,18 @@ const stageB=document.getElementById("stage"),segsB=document.getElementById("seg
 function buildTOC(){
   let n=0;
   tocB.innerHTML=PARTS.map(pt=>{const list=CH.map((c,i)=>({c,i})).filter(x=>x.c.part===pt.id);if(!list.length)return"";
-    return `<div class="tpart"><h3>${pt.title}</h3><ol>${list.map(x=>{const num=x.c.part==="guide"||x.c.part==="appx"?"":`<span class="tn">${++n}</span>`;return `<li><button data-ch="${x.i}">${num}<span class="tt">${x.c.title}</span></button></li>`}).join("")}</ol></div>`}).join("");
+    return `<div class="tpart"><h3>${pt.title}</h3><ol>${list.map(x=>{const num=x.c.part==="guide"||x.c.part==="appx"||x.c.part==="proj"?"":`<span class="tn">${++n}</span>`;return `<li><button data-ch="${x.i}">${num}<span class="tt">${x.c.title}</span></button></li>`}).join("")}</ol></div>`}).join("");
 }
 function updProg(){const p=document.getElementById("prog");if(!p)return;p.textContent=`已揭示 ${stageB.querySelectorAll(".essay .k.shown").length} / ${stageB.querySelectorAll(".essay .k").length}`;}
 function renderB(anim=true){
   const C=CH[ci],pg=C.pages[pi];
-  stageB.innerHTML=M(pg.html());
+  stageB.innerHTML=M(pg.html());if(pg.after)pg.after();
   if(anim&&stageB.firstElementChild)stageB.firstElementChild.classList.add("enter");
   stageB.scrollTop=0;
+  chromeB();
+}
+function chromeB(){
+  const C=CH[ci];
   document.getElementById("ctitle").textContent=C.title;
   document.getElementById("count").textContent=`${pi+1} / ${C.pages.length}`;document.getElementById("count2").textContent=`${pi+1} / ${C.pages.length}`;
   document.getElementById("prev").disabled=ci===0&&pi===0;
@@ -2263,11 +2785,30 @@ function renderB(anim=true){
   tocB.querySelectorAll("button[data-ch]").forEach(b=>b.classList.toggle("on",+b.dataset.ch===ci));
   updProg();st.set("book-c",String(ci));st.set("book-p",String(pi));
 }
+const navStack=[];let navPushed=0;
+function jumpB(c,p){navStack.push({c:ci,p:pi,top:stageB.scrollTop,node:stageB.firstElementChild});if(navStack.length>8)navStack.shift();
+  try{history.pushState({nb:navStack.length},"");navPushed++}catch(e){}goB(c,p);updBack();}
+function backB(){const e=navStack.pop();if(!e){updBack();return}ci=e.c;pi=e.p;if(e.node)stageB.replaceChildren(e.node);else renderB(false);chromeB();requestAnimationFrame(()=>{stageB.scrollTop=e.top});updBack();}
+function updBack(){const b=document.getElementById("backbtn");if(!b)return;const e=navStack[navStack.length-1];
+  document.body.classList.toggle("has-back",!!e);if(!e){b.hidden=true;return}b.hidden=false;const pg=CH[e.c].pages[e.p];b.querySelector("span").textContent=`返回：${CH[e.c].key==="dossier"?"":CH[e.c].title.replace(/^论\s*/,"").slice(0,10)+" · "}${pg.short}`;
+  const f=document.querySelector(".foot");if(f)document.documentElement.style.setProperty("--footh",f.offsetHeight+"px");}
+window.addEventListener("popstate",()=>{if(navStack.length){navPushed=Math.max(0,navPushed-1);backB();}});
+window.addEventListener("resize",updBack);
 function goB(c,p){if(c<0||c>=CH.length)return;ci=c;pi=Math.max(0,Math.min(p,CH[c].pages.length-1));renderB();}
 function nextB(){if(pi<CH[ci].pages.length-1)goB(ci,pi+1);else if(ci<CH.length-1)goB(ci+1,0);}
 function prevB(){if(pi>0)goB(ci,pi-1);else if(ci>0)goB(ci-1,CH[ci-1].pages.length-1);}
 function setModeB(m){bmode=m;document.body.dataset.mode=m;document.querySelectorAll(".modes button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.m===m)));st.set("book-mode",m);updProg();}
 buildTOC();
+(function(){const K="book-fz",L=["0.9","1","1.15","1.3","1.45"],root=document.documentElement,btn=document.getElementById("fsbtn"),pop=document.getElementById("fspop");let cur="1";
+  const set=v=>{if(!L.includes(v))v="1";cur=v;root.style.setProperty("--fz",v);pop.querySelectorAll("[data-fz]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.fz===v)));try{localStorage.setItem(K,v)}catch(e){}};
+  try{set(localStorage.getItem(K)||"1")}catch(e){set("1")}
+  const close=()=>{pop.hidden=true;btn.setAttribute("aria-expanded","false")};
+  btn.addEventListener("click",e=>{e.stopPropagation();pop.hidden=!pop.hidden;btn.setAttribute("aria-expanded",String(!pop.hidden))});
+  pop.addEventListener("click",e=>{e.stopPropagation();const b=e.target.closest("[data-fz]");if(b)set(b.dataset.fz)});
+  document.addEventListener("click",()=>{if(!pop.hidden)close()});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape")close();if(e.target.closest&&e.target.closest("input,textarea,select"))return;const i=L.indexOf(cur);if(e.key==="+"||e.key==="="){set(L[Math.min(L.length-1,i+1)])}else if(e.key==="-"||e.key==="_"){set(L[Math.max(0,i-1)])}});
+})();
+document.getElementById("backbtn").onclick=()=>{if(navPushed>0){navPushed--;try{history.back();return}catch(e){}}backB();};
 tocB.addEventListener("click",e=>{const b=e.target.closest("[data-ch]");if(b){goB(+b.dataset.ch,0);document.body.classList.remove("toc-open");}});
 segsB.addEventListener("click",e=>{const b=e.target.closest("[data-pg]");if(b)goB(ci,+b.dataset.pg);});
 document.getElementById("prev").onclick=prevB;document.getElementById("next").onclick=nextB;
@@ -2289,14 +2830,14 @@ stageB.addEventListener("click",async e=>{
 });
 stageB.addEventListener("keydown",e=>{const k=e.target.closest&&e.target.closest(".k");if(k&&bmode==="recite"&&e.key==="Enter"){k.classList.toggle("shown");updProg();e.preventDefault()}});
 document.addEventListener("keydown",e=>{
-  if(e.target.closest&&(e.target.closest("summary")||e.target.closest("textarea")))return;
+  if(e.target.closest&&(e.target.closest("summary")||e.target.closest("textarea")||e.target.closest("input")||e.target.closest("select")||e.target.closest("dialog")))return;
   if(e.key==="ArrowRight"||e.key==="PageDown"){nextB();e.preventDefault()}
   else if(e.key==="ArrowLeft"||e.key==="PageUp"){prevB();e.preventDefault()}
   else if(e.key==="1")setModeB("explain");else if(e.key==="2")setModeB("recite");else if(e.key==="3")setModeB("outline");
   else if(e.key===" "&&bmode==="recite"&&CH[ci].pages[pi].kind==="p"){revealB();e.preventDefault()}
 });
 (function(){let sx=0,sy=0,t0=0,ok=false;
-stageB.addEventListener("touchstart",e=>{if(e.touches.length!==1){ok=false;return}const el=e.target;ok=!(el.closest&&el.closest(".scroller,.fig,textarea,details[open] .a"));sx=e.touches[0].clientX;sy=e.touches[0].clientY;t0=Date.now();},{passive:true});
+stageB.addEventListener("touchstart",e=>{if(e.touches.length!==1){ok=false;return}const el=e.target;ok=!(el.closest&&el.closest(".scroller,.fig,textarea,input,select,.filters,details[open] .a"));sx=e.touches[0].clientX;sy=e.touches[0].clientY;t0=Date.now();},{passive:true});
 stageB.addEventListener("touchend",e=>{if(!ok)return;const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;if(Date.now()-t0<700&&Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.6){dx<0?nextB():prevB();}},{passive:true});
 window.addEventListener("resize",()=>{if(innerWidth>=1024)document.body.classList.remove("toc-open")});})();
 setModeB(bmode);renderB(false);
